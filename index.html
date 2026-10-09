@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ThreadFlow</title>
+<meta name="description" content="ThreadFlow: dịch vụ đăng bài và tương tác Threads cho thương hiệu, có kiểm duyệt và báo cáo theo kỳ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: RedTrack-style marketing page. White ground, rounded lavender panels inset 20px from the edge,
+   1280px content column, one coral-red accent for the emphasised line of each heading, black pill-less buttons. */
+:root{
+  --bg:#ffffff;
+  --panel:#f6f7ff;          /* lavender section panels */
+  --panel-2:#edeff7;
+  --card:#ffffff;
+  --fg:#121214;
+  --fg-2:#3c3d47;
+  --muted:#6b6e7c;
+  --line:#d3d4e1;
+  --line-soft:#e6e7f0;
+  --accent:#ff473d;
+  --accent-ink:#c72c24;
+  --accent-soft:#ffeded;
+  --accent-soft-2:#ffd0ce;
+  --btn:#121214;
+  --btn-fg:#ffffff;
+  --green:#38d178;  --green-soft:#d5f6e3;
+  --violet:#806cfe; --violet-soft:#e4e0ff;
+  --amber:#fca757;  --amber-soft:#ffead7;
+  --footer:#1b1c22; --footer-fg:#e9eaf2; --footer-muted:#9a9cab;
+  --cube-top:#ffffff; --cube-a:#ffe3e1; --cube-b:#ffd0ce; --cube-side:#fff2f1;
+
+  --display:"Be Vietnam Pro","Helvetica Neue",Arial,sans-serif;
+  --body:"Helvetica Neue",Helvetica,Arial,"Be Vietnam Pro",sans-serif;
+  --r-panel:20px; --r-card:16px; --r-btn:8px;
+  --max:1280px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e0f13; --panel:#15161d; --panel-2:#1c1e27; --card:#191b23;
+    --fg:#f2f3f7; --fg-2:#c9cbd6; --muted:#9a9db0; --line:#2e3040; --line-soft:#252735;
+    --accent:#ff5d52; --accent-ink:#ff8178; --accent-soft:#3a1b1a; --accent-soft-2:#5a2522;
+    --btn:#f2f3f7; --btn-fg:#121214;
+    --green:#4ade8a; --green-soft:#16301f; --violet:#9d8eff; --violet-soft:#25213f; --amber:#ffb36b; --amber-soft:#3a2a18;
+    --footer:#08090c; --footer-fg:#e9eaf2; --footer-muted:#8c8fa0;
+    --cube-top:#1d1f29; --cube-a:#3a1f22; --cube-b:#4a2427; --cube-side:#2a1b1e;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e0f13; --panel:#15161d; --panel-2:#1c1e27; --card:#191b23;
+  --fg:#f2f3f7; --fg-2:#c9cbd6; --muted:#9a9db0; --line:#2e3040; --line-soft:#252735;
+  --accent:#ff5d52; --accent-ink:#ff8178; --accent-soft:#3a1b1a; --accent-soft-2:#5a2522;
+  --btn:#f2f3f7; --btn-fg:#121214;
+  --green:#4ade8a; --green-soft:#16301f; --violet:#9d8eff; --violet-soft:#25213f; --amber:#ffb36b; --amber-soft:#3a2a18;
+  --footer:#08090c; --footer-fg:#e9eaf2; --footer-muted:#8c8fa0;
+  --cube-top:#1d1f29; --cube-a:#3a1f22; --cube-b:#4a2427; --cube-side:#2a1b1e;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-0.01em}
+p{margin:0}
+.red{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+.wrap{max-width:var(--max);margin-inline:auto;padding-inline:clamp(16px,4.5vw,60px)}
+.panel{background:var(--panel);border-radius:var(--r-panel);margin-inline:clamp(0px,1.4vw,20px)}
+section{padding-block:clamp(56px,7vw,96px)}
+
+/* Buttons + badge */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:500 17px/1 var(--body);padding:19px 40px;border-radius:var(--r-btn);text-decoration:none;border:2px solid transparent;transition:background .15s,color .15s,border-color .15s;cursor:pointer;white-space:nowrap}
+.btn-dark{background:var(--btn);color:var(--btn-fg)}
+.btn-dark:hover{background:var(--accent);color:#fff}
+.btn-outline{border-color:var(--fg);color:var(--fg);background:transparent}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:12px 22px;font-size:16px}
+.link-arrow{font:500 17px/1.3 var(--body);text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.link-arrow:hover{color:var(--accent)}
+.badge{display:inline-block;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 16px;font-size:15px;line-height:1.3}
+.center{text-align:center}
+.lead{color:var(--fg-2);font-size:17px;max-width:62ch}
+.center .lead{margin-inline:auto}
+
+/* Header */
+.util{background:var(--panel);font-size:13px;color:var(--fg-2)}
+.util .wrap{display:flex;justify-content:space-between;align-items:center;height:44px;gap:16px}
+.util nav{display:flex;gap:24px}
+.util a{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.util a:hover{color:var(--accent)}
+header.main{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);box-shadow:0 8px 24px -16px rgba(54,57,90,.25)}
+header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font:700 19px/1 var(--display);letter-spacing:-0.02em}
+.logo b{color:var(--accent);font-weight:700}
+.mainnav{display:flex;gap:26px;font-size:16px}
+.mainnav a{text-decoration:none}
+.mainnav a:hover{color:var(--accent)}
+.hdr-cta{margin-left:auto;display:flex;gap:12px}
+
+/* Hero */
+.hero{margin-top:28px;padding-block:clamp(36px,4vw,56px)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center}
+.hero h1{font-size:clamp(30px,3.3vw,46px);line-height:1.15;font-weight:700;margin-top:22px}
+.hero h1 span{display:block}
+.hero .lead{margin-top:26px}
+.hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:36px}
+.stack{width:100%;height:auto;max-width:100%}
+.stack text{font-family:var(--display)}
+.chip-r{fill:var(--card);stroke:var(--line-soft)}
+.chip-t{fill:var(--fg);font-size:13px;font-weight:500}
+.conn{fill:none;stroke:var(--accent-soft-2);stroke-width:2}
+.dot{fill:var(--accent)}
+
+/* Stats */
+.stats .wrap{display:grid;grid-template-columns:1.25fr repeat(3,1fr);align-items:stretch}
+.stats .intro h2{font-size:clamp(26px,2.6vw,34px);line-height:1.25;font-weight:700}
+.stats .intro p{margin-top:14px;color:var(--muted);font-size:15px}
+.stat{border-left:1px solid var(--line);padding:6px 0 6px 40px}
+.stat strong{display:block;font:600 clamp(36px,3.6vw,48px)/1.1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+.stat span{display:block;margin-top:14px;color:var(--fg-2);font-size:16px;max-width:24ch}
+.stats .intro{padding-right:24px}
+
+/* One day timeline: a time ruler across the width, events hang above/below at their real time */
+.day{padding-top:8px}
+.day-head{display:grid;gap:12px;max-width:62ch}
+.day-head h2{font:600 clamp(26px,2.6vw,34px)/1.25 var(--display)}
+.day-head p{color:var(--fg-2);font-size:16px}
+.day-head .key{color:var(--accent);font-weight:500}
+.tl{position:relative;height:400px;margin-top:28px;list-style:none;padding:0}
+.ruler{position:absolute;left:0;right:0;top:calc(50% - 15px);height:30px;background:var(--panel);border-radius:8px}
+.ruler span{position:absolute;top:0;line-height:30px;transform:translateX(-50%);font:500 11.5px/30px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);font-variant-numeric:tabular-nums}
+.evt{position:absolute;left:calc(var(--x) * 1%);width:clamp(150px,15.5%,210px);transform:translateX(-4px);display:grid;gap:6px;align-content:end}
+.evt.up{bottom:calc(50% + 15px);padding-bottom:30px}
+.evt.down{top:calc(50% + 15px);padding-top:30px;align-content:start}
+.evt::before{content:"";position:absolute;left:4px;width:1px;height:30px;background:var(--line)}
+.evt.up::before{bottom:0}.evt.down::before{top:0}
+.evt::after{content:"";position:absolute;left:0;width:9px;height:9px;border-radius:2px;background:var(--fg)}
+.evt.up::after{bottom:-4px}.evt.down::after{top:-5px}
+.evt.end{transform:translateX(calc(-100% + 5px));text-align:right}
+.evt.end::before{left:auto;right:4px}.evt.end::after{left:auto;right:0}
+.evt.p14::after{background:var(--accent)}
+.evt.p14::before{background:var(--accent-soft-2)}
+.evt time{font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;color:var(--fg)}
+.evt.p14 time{color:var(--accent)}
+.evt p{font-size:15.5px;line-height:1.4;color:var(--fg)}
+.evt small{font-size:13.5px;color:var(--muted);line-height:1.4}
+@media (max-width:1100px){
+  .tl{height:auto;margin-top:28px;display:grid;gap:22px;padding-left:28px}
+  .tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:1px;background:var(--line)}
+  .ruler{display:none}
+  .evt,.evt.up,.evt.down,.evt.end{position:relative;left:auto;top:auto;bottom:auto;width:auto;transform:none;padding:0;text-align:left}
+  .evt::before{display:none}
+  .evt::after,.evt.up::after,.evt.down::after,.evt.end::after{left:-28px;right:auto;top:2px;bottom:auto}
+}
+
+/* Industries (logo cards slot) */
+.ind .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:40px;align-items:center}
+.ind h2{font-size:clamp(28px,3vw,38px);line-height:1.25}
+.ind .lead{margin-top:16px;font-size:16px}
+.ind .link-arrow{margin-top:22px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r-btn);padding:22px 20px;min-height:108px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.tile b{font:700 24px/1.15 var(--display);letter-spacing:-0.02em}
+.tile code{font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+.tile.dash{grid-column:span 2;border-style:dashed;background:transparent}
+.tile.dash b{font-size:18px}
+.tile.dash span{color:var(--fg-2);font-size:14px}
+
+/* How it works */
+.how h2{font-size:clamp(30px,3.6vw,48px);line-height:1.2;margin-top:22px}
+.how .btn{margin-top:36px}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:56px;text-align:left}
+.step{position:relative;padding:0 48px 0 0}
+.step + .step{padding-left:52px}
+.step + .step::before{content:"";position:absolute;left:0;top:0;bottom:0;width:44px;
+  background:linear-gradient(to bottom right,transparent calc(50% - 1px),var(--line) 50%,transparent calc(50% + 1px)) top/100% 50% no-repeat,
+             linear-gradient(to top right,transparent calc(50% - 1px),var(--line) 50%,transparent calc(50% + 1px)) bottom/100% 50% no-repeat;transform:translateX(-36px)}
+.ic{width:48px;height:48px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.ic svg{width:24px;height:24px}
+.step h3,.fcard h3{font:500 22px/1.3 var(--body);margin-top:30px;letter-spacing:0}
+.step p,.fcard p{color:var(--fg-2);margin-top:14px;font-size:16px}
+
+/* Feature cards */
+.feat h2,.safe h2{font-size:clamp(30px,3.6vw,48px);line-height:1.2}
+.feat .lead{margin-top:22px}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:52px}
+.fcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px 24px 28px;min-width:0}
+.fcard h3{margin-top:24px}
+
+/* Tabs */
+.cases h2{font-size:clamp(30px,3.6vw,48px);line-height:1.2;margin-top:22px}
+.cases .lead{margin-top:22px}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:44px}
+.tab{font:400 18px/1.3 var(--body);padding:18px 16px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--card);color:var(--fg);cursor:pointer}
+.tab:hover{border-color:var(--accent)}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.case{margin-top:32px;border:1px solid var(--line);border-radius:var(--r-panel);padding:24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;background:var(--card)}
+.case-q{display:flex;gap:12px;font-style:italic;font-size:18px;line-height:1.5;padding:4px 0 0 0}
+.case-q svg{flex:none;width:16px;height:14px;margin-top:6px;color:var(--accent)}
+.case-who{margin-top:20px;font-size:17px}
+.case-who small{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+.case-nums{display:grid;grid-template-columns:1fr 1fr;margin-top:40px}
+.case-nums div{padding-right:24px}
+.case-nums div+div{border-left:1px solid var(--line);padding-left:24px}
+.case-nums strong{font:600 clamp(28px,3vw,38px)/1.1 var(--display);display:block;letter-spacing:-0.02em}
+.case-nums span{display:block;margin-top:14px;color:var(--fg-2);font-size:16px}
+.report{background:var(--violet-soft);border-radius:var(--r-card);padding:clamp(18px,3vw,36px);display:flex;align-items:center}
+.rcard{background:var(--card);border-radius:14px;padding:22px;width:100%;box-shadow:0 18px 40px -24px rgba(54,57,90,.45)}
+.rcard-h{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:13px;color:var(--muted)}
+.rcard-h b{color:var(--fg);font:600 15px/1.3 var(--display)}
+.bar-row{margin-top:18px;font-size:14px}
+.bar-row .lbl{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.bar-row .lbl span:last-child{color:var(--muted)}
+.bar{height:6px;border-radius:99px;background:transparent;margin-top:8px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.mix-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--fg-2)}
+.mix-legend span{display:inline-flex;gap:6px;align-items:center}
+.mix-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.proof{margin-top:18px;border-top:1px solid var(--line-soft);padding-top:14px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow-wrap:anywhere}
+.example-note{font-size:12px;color:var(--muted);margin-top:12px}
+
+/* Safety */
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:48px}
+.scard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px}
+.scard h3{font:400 21px/1.3 var(--body);margin-top:30px;letter-spacing:0}
+.scard p{margin-top:12px;color:var(--fg-2);font-size:15px}
+.nots{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:28px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,2fr);gap:32px}
+.nots h3{font:600 22px/1.3 var(--display)}
+.nots > div > p{margin-top:10px;color:var(--fg-2);font-size:15px}
+.nots ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
+.nots li{display:flex;gap:12px;font-size:15.5px;color:var(--fg-2)}
+.nots li svg{flex:none;width:20px;height:20px;color:var(--accent);margin-top:2px}
+
+/* FAQ */
+.faq h2{font-size:clamp(28px,3vw,40px)}
+.qa{max-width:880px;margin:40px auto 0;border-top:1px solid var(--line)}
+.qa details{border-bottom:1px solid var(--line)}
+.qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:16px;padding:22px 0;font:500 18px/1.4 var(--body)}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"+";font:400 26px/1 var(--display);color:var(--accent);transition:transform .2s}
+.qa details[open] summary::after{transform:rotate(45deg)}
+.qa details p{padding:0 0 22px;color:var(--fg-2);max-width:72ch}
+
+/* CTA */
+.cta{position:relative;overflow:hidden;padding-bottom:0}
+.cta h2{font-size:clamp(32px,4.6vw,64px);line-height:1.15;font-weight:700}
+.cta .row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:44px;position:relative;z-index:1}
+.waves{display:block;width:100%;height:auto;margin-top:-20px}
+.waves text{font-family:var(--display);font-size:15px;font-weight:500;fill:var(--fg)}
+
+/* Footer */
+footer{background:var(--footer);color:var(--footer-fg);margin-top:20px;padding-block:64px 36px}
+footer .logo{color:#fff}
+.fcols{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:32px}
+.fcols h4{font:600 15px/1.3 var(--display);margin:0 0 16px}
+.fcols ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:14px;color:var(--footer-muted)}
+.fcols a{text-decoration:none}.fcols a:hover{color:#fff}
+.fcols p{color:var(--footer-muted);font-size:14px;margin-top:16px;max-width:30ch}
+.legal{margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--footer-muted)}
+
+/* Responsive */
+@media (max-width:1100px){
+  .mainnav{display:none}
+  .stats .wrap{grid-template-columns:repeat(3,1fr);row-gap:36px}
+  .stats .intro{grid-column:1/-1}
+  .stat:nth-child(2){border-left:0;padding-left:0}
+  .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:48px}
+  .step:nth-child(3){padding-left:0}.step:nth-child(3)::before{display:none}
+  .fcols{grid-template-columns:repeat(3,1fr)}
+  .fcols > div:first-child{grid-column:1/-1}
+}
+@media (max-width:860px){
+  .hero .wrap,.ind .wrap,.case,.nots{grid-template-columns:minmax(0,1fr)}
+  .sgrid{grid-template-columns:minmax(0,1fr)}
+  .nots ul{grid-template-columns:1fr}
+  .util nav:first-child{display:none}
+}
+@media (max-width:640px){
+  .hdr-cta .btn-outline{display:none}
+  header.main .wrap{gap:12px;height:64px}
+  .stats .wrap{grid-template-columns:1fr}
+  .stat,.stat:nth-child(2){border-left:0;border-top:1px solid var(--line);padding:22px 0 0}
+  .steps,.fgrid{grid-template-columns:minmax(0,1fr)}
+  .step,.step + .step{padding:0}
+  .step::before{display:none}
+  .step + .step{border-top:1px solid var(--line);padding-top:36px}
+  .tabs{grid-template-columns:minmax(0,1fr);gap:10px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tile.dash{grid-column:1/-1}
+  .case-nums{grid-template-columns:1fr}
+  .case-nums div+div{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:20px;margin-top:20px}
+  .btn{padding:16px 26px}
+  .hdr-cta .btn{padding:11px 16px;font-size:15px}
+  .fcols{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 15v-3M12 15V9M15 15v-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9l1.5-5h13L20 9M4 9h16M4 9c0 1.7 1.3 3 3 3s2.7-1.3 2.7-3c0 1.7 1.2 3 2.3 3s2.3-1.3 2.3-3c0 1.7 1.3 3 2.7 3s3-1.3 3-3M5.5 12v8h13v-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5M15.5 5.2a3.2 3.2 0 010 5.8M17.5 14.3c1.6.7 2.7 2.4 3 4.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9.5" cy="10" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 17l4.5-4 3.5 3 2.5-2L20 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14 14h2v2h-2zM18 14h2v2h-2zM16 16h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="currentColor"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 16a8 8 0 1115 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 15l4-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7.5a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M8.5 3.5h7l5 5v7l-5 5h-7l-5-5v-7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5h14a1 1 0 011 1v9a1 1 0 01-1 1h-8l-4 3v-3H5a1 1 0 01-1-1V6a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="i-logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M16 4.5A11.5 11.5 0 0127.5 16" fill="none" stroke="#ff473d" stroke-width="5" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="util">
+  <div class="wrap">
+    <nav aria-label="Tiện ích"><a href="#cau-hoi">Câu hỏi thường gặp</a></nav>
+    <nav aria-label="Tài khoản"><a href="#dang-ky"><svg width="14" height="14"><use href="#i-users"/></svg>Đăng nhập</a><a href="#cach-hoat-dong">Về ThreadFlow</a></nav>
+  </div>
+</div>
+
+<header class="main">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="ThreadFlow, về đầu trang"><svg width="30" height="30"><use href="#i-logo"/></svg><span><b>THREAD</b>FLOW</span></a>
+    <nav class="mainnav" aria-label="Chính">
+      <a href="#nen-tang">Nền tảng</a>
+      <a href="#theo-nganh">Theo ngành</a>
+      <a href="#cach-hoat-dong">Cách hoạt động</a>
+      <a href="#quy-mo">Theo quy mô</a>
+      <a href="#an-toan">An toàn</a>
+    </nav>
+    <div class="hdr-cta">
+      <a class="btn btn-outline btn-sm" href="#dang-ky">Đặt lịch tư vấn</a>
+      <a class="btn btn-dark btn-sm" href="#dang-ky">Đăng ký ngay</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero panel">
+  <div class="wrap">
+    <div>
+      <span class="badge">Dịch vụ Threads cho thương hiệu</span>
+      <h1><span>Lên bài đều mỗi ngày.</span><span class="red">Tương tác đúng cam kết.</span><span>Bạn duyệt trước khi lên sóng.</span></h1>
+      <p class="lead">ThreadFlow viết trọn lô bài của kỳ theo playbook ngành bạn làm, cho AI và checklist kiểm từng bài, rồi chờ bạn duyệt. Bài được đăng và nhận bình luận theo lịch. Cuối kỳ bạn có báo cáo chốt số, kèm link minh chứng cho từng bài.</p>
+      <div class="hero-cta">
+        <a class="btn btn-dark" href="#dang-ky">Đăng ký và chọn gói</a>
+        <a class="link-arrow" href="#cach-hoat-dong">Xem ThreadFlow làm việc thế nào →</a>
+      </div>
+    </div>
+
+    <svg class="stack" viewBox="0 0 760 560" role="img" aria-label="Bốn tầng của ThreadFlow: nội dung, kiểm duyệt, vận hành, báo cáo">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="var(--accent-soft)"/><stop offset="1" stop-color="var(--panel)" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="380" cy="290" rx="270" ry="250" fill="url(#glow)"/>
+      <!-- connectors: left-top → Kiểm duyệt, left-bottom → Nội dung, right-top → Báo cáo, right-bottom → Vận hành -->
+      <path class="conn" d="M164 64H180M164 120H180M164 176H180M180 64V176M180 120H190Q196 120 196 126V294Q196 300 202 300H212"/>
+      <path class="conn" d="M164 382H180M164 438H180M164 494H180M180 382V494M180 438H190Q196 438 196 432V356Q196 350 202 350H212"/>
+      <path class="conn" d="M596 64H580M596 120H580M596 176H580M580 64V176M580 120H570Q564 120 564 126V206Q564 212 558 212H548"/>
+      <path class="conn" d="M596 382H580M596 438H580M596 494H580M580 382V494M580 438H570Q564 438 564 432V264Q564 258 558 258H548"/>
+
+      <!-- cube: 4 layers, h=46 -->
+      <g stroke="var(--line-soft)" stroke-width="1">
+        <polygon points="210,188 380,286 380,332 210,234" fill="var(--cube-side)"/>
+        <polygon points="380,286 550,188 550,234 380,332" fill="var(--cube-a)"/>
+        <polygon points="210,234 380,332 380,378 210,280" fill="var(--cube-a)"/>
+        <polygon points="380,332 550,234 550,280 380,378" fill="var(--cube-b)"/>
+        <polygon points="210,280 380,378 380,424 210,326" fill="var(--cube-b)"/>
+        <polygon points="380,378 550,280 550,326 380,424" fill="var(--cube-a)"/>
+        <polygon points="210,326 380,424 380,470 210,372" fill="var(--cube-side)"/>
+        <polygon points="380,424 550,326 550,372 380,470" fill="var(--cube-side)"/>
+        <polygon points="380,90 550,188 380,286 210,188" fill="var(--cube-top)"/>
+      </g>
+      <g font-size="15" font-weight="500" fill="var(--fg)">
+        <text transform="translate(224,214) skewY(30)">Báo cáo</text>
+        <text transform="translate(224,260) skewY(30)">Vận hành</text>
+        <text transform="translate(224,306) skewY(30)">Kiểm duyệt</text>
+        <text transform="translate(224,352) skewY(30)">Nội dung</text>
+      </g>
+      <circle class="dot" cx="212" cy="300" r="5"/><circle class="dot" cx="212" cy="350" r="5"/>
+      <circle class="dot" cx="548" cy="212" r="5"/><circle class="dot" cx="548" cy="258" r="5"/>
+      <!-- top face grid, mapped to the rhombus -->
+      <g transform="matrix(0.8673,0.5,-0.8673,0.5,380,90)">
+        <g stroke="var(--line-soft)" stroke-width="1.2" fill="none">
+          <path d="M65.3 0V196M130.7 0V196M0 65.3H196M0 130.7H196"/>
+        </g>
+        <rect x="69" y="69" width="58" height="58" rx="4" fill="var(--accent-soft-2)"/>
+        <circle cx="98" cy="98" r="15" fill="none" stroke="var(--fg)" stroke-width="7"/>
+        <path d="M98 83a15 15 0 0115 15" fill="none" stroke="#ff473d" stroke-width="7" stroke-linecap="round"/>
+        <g font-size="10.5" fill="var(--muted)" text-anchor="middle" font-family="Be Vietnam Pro, Arial, sans-serif">
+          <text x="32.6" y="36">Playbook</text>
+          <text x="98" y="36">Lô bài</text>
+          <text x="163.4" y="36">Lịch đăng</text>
+          <text x="32.6" y="101">Ảnh</text>
+          <text x="163.4" y="101">Tỉ lệ</text>
+          <text x="32.6" y="166">Duyệt</text>
+          <text x="98" y="166">AI gate</text>
+          <text x="163.4" y="166">Báo cáo</text>
+        </g>
+      </g>
+      <!-- chips -->
+      <g>
+        <rect class="chip-r" x="4" y="42" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="69" text-anchor="middle">AI gate</text>
+        <rect class="chip-r" x="4" y="98" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="125" text-anchor="middle">Checklist 9 mục</text>
+        <rect class="chip-r" x="4" y="154" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="181" text-anchor="middle">Bạn duyệt theo lô</text>
+        <rect class="chip-r" x="4" y="360" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="387" text-anchor="middle">Playbook theo ngành</text>
+        <rect class="chip-r" x="4" y="416" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="443" text-anchor="middle">Lô nội dung AI</text>
+        <rect class="chip-r" x="4" y="472" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="499" text-anchor="middle">Thư viện ảnh riêng</text>
+        <rect class="chip-r" x="596" y="42" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="69" text-anchor="middle">Báo cáo kỳ</text>
+        <rect class="chip-r" x="596" y="98" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="125" text-anchor="middle">Link minh chứng</text>
+        <rect class="chip-r" x="596" y="154" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="181" text-anchor="middle">Thanh toán VietQR</text>
+        <rect class="chip-r" x="596" y="360" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="387" text-anchor="middle">Lịch đăng</text>
+        <rect class="chip-r" x="596" y="416" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="443" text-anchor="middle">Tỉ lệ tương tác</text>
+        <rect class="chip-r" x="596" y="472" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="499" text-anchor="middle">Cổng an toàn</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section class="stats" aria-label="Con số của sản phẩm">
+  <div class="wrap">
+    <div class="intro">
+      <h2>Xây cho thương hiệu muốn có mặt <span class="red">mỗi ngày</span> trên Threads</h2>
+      <p>Các con số dưới đây là luật của sản phẩm, không phải kết quả quảng cáo.</p>
+    </div>
+    <div class="stat"><strong>9 mục</strong><span>kiểm tra trước khi bất kỳ bài nào được lên lịch</span></div>
+    <div class="stat"><strong>≥ 50%</strong><span>tương tác là bình luận. Like tối đa 40%, repost tối đa 10%</span></div>
+    <div class="stat"><strong>2.300+</strong><span>bài test tự động phải qua trước mỗi lần phát hành</span></div>
+  </div>
+</section>
+
+<section class="day" aria-labelledby="day-h">
+  <div class="wrap">
+    <div class="day-head">
+      <h2 id="day-h">Một ngày của lô bài tháng 10</h2>
+      <p>Ví dụ minh hoạ với một nhà sách cũ. <span class="key">Màu đỏ</span> là đường đi của bài #14, từ lúc bị trả về tới lúc lên Threads.</p>
+    </div>
+    <ol class="tl" aria-label="Các mốc trong ngày">
+      <li class="ruler" aria-hidden="true"><span style="left:2.0%">07:00</span><span style="left:15.7%">09:00</span><span style="left:29.4%">11:00</span><span style="left:43.1%">13:00</span><span style="left:56.9%">15:00</span><span style="left:70.6%">17:00</span><span style="left:84.3%">19:00</span><span style="left:98.0%">21:00</span></li>
+      <li class="evt up " style="--x:10.6"><time>08:15</time><p>Bài #8 lên Threads đúng lịch.</p><small>Link bài được lưu cho báo cáo kỳ.</small></li>
+      <li class="evt down p14" style="--x:17.1"><time>09:12</time><p>AI gate trả bài #14 về.</p><small>Giá sách trong bài không có nguồn.</small></li>
+      <li class="evt up p14" style="--x:27.1"><time>10:40</time><p>Bài #14 sửa xong, đạt 9/9 mục.</p><small>Được xếp lịch đăng lúc 19:30.</small></li>
+      <li class="evt down " style="--x:34.0"><time>11:40</time><p>Bạn duyệt 12/15 bài của lô tháng 10.</p><small>Ba bài còn lại chờ bạn, không tự đăng.</small></li>
+      <li class="evt up " style="--x:52.3"><time>14:20</time><p>Bình luận chiếm 58% tương tác của kỳ.</p><small>Like 34%, repost 8%, trong giới hạn.</small></li>
+      <li class="evt down end p14" style="--x:87.7"><time>19:30</time><p>Bài #14 lên Threads.</p><small>Bình luận bắt đầu theo lịch của bài.</small></li>
+    </ol>
+  </div>
+</section>
+
+<section class="ind panel" id="theo-nganh">
+  <div class="wrap">
+    <div>
+      <h2>Viết theo<br><span class="red">playbook của ngành</span><br>bạn đang làm</h2>
+      <p class="lead">Mỗi ngành có một playbook do đội vận hành soạn, có phiên bản, tách riêng cho bài đăng, bình luận và bài trụ cột. AI chỉ nạp đúng phần cần cho loại nội dung đang viết.</p>
+      <a class="link-arrow" href="#cach-hoat-dong">Xem quy trình viết và kiểm →</a>
+    </div>
+    <div class="tiles">
+      <div class="tile"><b>Sách cũ</b></div>
+      <div class="tile"><b>F&amp;B</b></div>
+      <div class="tile"><b>Concert &amp; sự kiện</b></div>
+      <div class="tile"><b>App &amp; SaaS</b></div>
+      <div class="tile dash"><b>Ngành của bạn chưa có?</b><span>Đội vận hành soạn playbook riêng trước khi lô bài đầu tiên chạy.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="how center" id="cach-hoat-dong">
+  <div class="wrap">
+    <span class="badge">ThreadFlow làm việc thế nào</span>
+    <h2>Mỗi bài đều được kiểm.<br>Mỗi tương tác đều được đếm.<br><span class="red">Mỗi kỳ đều có báo cáo.</span></h2>
+    <a class="btn btn-dark" href="#dang-ky">Đăng ký và chọn gói</a>
+    <div class="steps">
+      <div class="step">
+        <span class="ic"><svg><use href="#i-store"/></svg></span>
+        <h3>Hiểu thương hiệu</h3>
+        <p>Bạn điền hồ sơ thương hiệu, chọn ngành, gói và @tag. Mỗi thương hiệu là một hợp đồng riêng.</p>
+      </div>
+      <div class="step">
+        <span class="ic"><svg><use href="#i-pen"/></svg></span>
+        <h3>Viết và kiểm</h3>
+        <p>AI viết trọn lô bài của kỳ theo playbook. AI gate và checklist 9 mục chặn bài sai trước khi tới tay bạn.</p>
+      </div>
+      <div class="step">
+        <span class="ic"><svg><use href="#i-check"/></svg></span>
+        <h3>Bạn duyệt</h3>
+        <p>Duyệt, sửa hoặc từ chối theo lô. Bài sửa xong được kiểm lại. Bài chưa duyệt thì chờ, không tự đăng.</p>
+      </div>
+      <div class="step">
+        <span class="ic"><svg><use href="#i-chart"/></svg></span>
+        <h3>Đăng và báo cáo</h3>
+        <p>Bài lên theo lịch, tương tác đúng tỉ lệ. Cuối kỳ hệ thống chốt số đã giao kèm link minh chứng.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feat panel center" id="nen-tang">
+  <div class="wrap">
+    <h2>Mọi thứ còn lại là<br><span class="red">một lớp kiểm soát phía trên</span></h2>
+    <p class="lead">Lịch đăng, ảnh, thương hiệu và thanh toán cùng đọc từ một nguồn dữ liệu của gói bạn mua.</p>
+    <div class="fgrid" style="text-align:left">
+      <div class="fcard"><span class="ic"><svg><use href="#i-users"/></svg></span><h3>Nhiều thương hiệu</h3><p>Một đăng nhập quản lý nhiều brand. Mời đồng đội với vai trò chủ sở hữu, biên tập hoặc chỉ xem.</p></div>
+      <div class="fcard"><span class="ic"><svg><use href="#i-cal"/></svg></span><h3>Lịch và cam kết kỳ</h3><p>Xem trước lịch đăng và cam kết của kỳ. Cam kết chốt lúc kích hoạt gói, đổi bảng giá sau cũng không ảnh hưởng.</p></div>
+      <div class="fcard"><span class="ic"><svg><use href="#i-img"/></svg></span><h3>Thư viện ảnh riêng</h3><p>Bạn và đội vận hành cùng tải ảnh lên kho lưu trữ riêng tư. Bài cần ảnh lấy từ đúng thư viện của bạn.</p></div>
+      <div class="fcard"><span class="ic"><svg><use href="#i-qr"/></svg></span><h3>Thanh toán VietQR</h3><p>Chọn gói, quét mã, chuyển khoản đúng nội dung. Hệ thống nhận tiền rồi tự kích hoạt đúng gói bạn chọn.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cases center" id="quy-mo">
+  <div class="wrap">
+    <span class="badge">Theo quy mô</span>
+    <h2>Một quy trình cho mọi cỡ đội</h2>
+    <p class="lead">Gói khác nhau ở số bài và số tương tác mỗi kỳ. Cách làm thì giống nhau.</p>
+    <div class="tabs" role="tablist" aria-label="Quy mô">
+      <button class="tab" role="tab" id="tab-0" aria-controls="case" aria-selected="false" type="button">Shop một thương hiệu</button>
+      <button class="tab" role="tab" id="tab-1" aria-controls="case" aria-selected="true" type="button">Thương hiệu đang mở rộng</button>
+      <button class="tab" role="tab" id="tab-2" aria-controls="case" aria-selected="false" type="button">Agency nhiều khách</button>
+    </div>
+    <div class="case" id="case" role="tabpanel" aria-labelledby="tab-1" style="text-align:left">
+      <div>
+        <div class="case-q"><svg viewBox="0 0 16 14"><path d="M0 14L4 0h4L5 14zM8 14l4-14h4l-3 14z" fill="currentColor"/></svg><p id="c-quote">Bạn cần Threads chạy đều trong khi đội marketing lo kênh khác. Bình luận phải bám nội dung bài, và cuối tháng cần con số để báo cáo lên trên.</p></div>
+        <p class="case-who"><span id="c-who">Trưởng nhóm marketing</span><small id="c-sub">Kịch bản điển hình, không phải lời khách</small></p>
+        <div class="case-nums">
+          <div><strong id="c-n1">≥ 50%</strong><span id="c-t1">tương tác là bình luận viết theo ngữ cảnh của từng bài</span></div>
+          <div><strong id="c-n2">70%</strong><span id="c-t2">ngưỡng cảnh báo: giao dưới mức này, đội vận hành được báo ngay</span></div>
+        </div>
+      </div>
+      <div class="report">
+        <div class="rcard" aria-label="Xem trước báo cáo kỳ">
+          <div class="rcard-h"><b>Báo cáo kỳ</b><span id="r-period">01/09 - 30/09</span></div>
+          <div class="bar-row"><div class="lbl"><span>Bài đã đăng</span><span id="r-posts">28 / 30</span></div><div class="bar"><i id="r-posts-bar" style="width:93%;background:var(--accent)"></i></div></div>
+          <div class="bar-row"><div class="lbl"><span>Tương tác đã giao</span><span id="r-int">431 / 450</span></div><div class="bar"><i id="r-int-bar" style="width:96%;background:var(--fg)"></i></div></div>
+          <div class="bar-row"><div class="lbl"><span>Cơ cấu tương tác</span><span>giới hạn 50 / 40 / 10</span></div>
+            <div class="bar"><i style="width:58%;background:var(--accent)"></i><i style="width:34%;background:var(--violet)"></i><i style="width:8%;background:var(--amber)"></i></div>
+            <div class="mix-legend"><span><i style="background:var(--accent)"></i>Bình luận 58%</span><span><i style="background:var(--violet)"></i>Like 34%</span><span><i style="background:var(--amber)"></i>Repost 8%</span></div>
+          </div>
+          <div class="proof">threads.net/@…/post/C8x… · đã đăng 19:30<br>threads.net/@…/post/C8y… · đã đăng 08:15</div>
+          <p class="example-note">Số liệu minh hoạ</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="safe panel center" id="an-toan">
+  <div class="wrap">
+    <h2>An toàn, minh bạch và <span class="red">có giới hạn</span></h2>
+    <div class="sgrid" style="text-align:left">
+      <div class="scard"><span class="ic"><svg><use href="#i-gauge"/></svg></span><h3>Hạn mức trên từng tài khoản</h3><p>Mỗi tài khoản có giới hạn theo giờ và theo ngày, thời gian nghỉ và khung giờ hoạt động. Vượt giới hạn thì việc dừng lại.</p></div>
+      <div class="scard"><span class="ic"><svg><use href="#i-lock"/></svg></span><h3>Dữ liệu tách theo hợp đồng</h3><p>Khách không xem được dữ liệu của nhau và không vào được trang quản trị. Việc cách ly có test riêng chạy mỗi lần phát hành.</p></div>
+      <div class="scard"><span class="ic"><svg><use href="#i-stop"/></svg></span><h3>Lỗi thì dừng, không cho qua</h3><p>Nếu AI không kiểm được một bài, bài đó bị giữ lại để người xem. Kết quả lỗi không bao giờ được tính là đạt.</p></div>
+    </div>
+    <div class="nots" style="text-align:left">
+      <div><h3>Những việc ThreadFlow không làm</h3><p>Danh sách này nằm trong quyết định sản phẩm, không phải khẩu hiệu.</p></div>
+      <ul>
+        <li><svg><use href="#i-x"/></svg>Dựng kịch bản để nhiều tài khoản giả làm một cuộc thảo luận tự nhiên.</li>
+        <li><svg><use href="#i-x"/></svg>Nhắc thương hiệu của bạn như thể đó là lời của người dùng độc lập.</li>
+        <li><svg><use href="#i-x"/></svg>Chèn quảng cáo vào cuộc trò chuyện của người lạ.</li>
+        <li><svg><use href="#i-x"/></svg>Hứa con số tuyệt đối. Cam kết là xấp xỉ, và báo cáo cho bạn thấy số đã giao thật.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="faq center" id="cau-hoi">
+  <div class="wrap">
+    <h2>Câu hỏi thường gặp</h2>
+    <div class="qa" style="text-align:left">
+      <details open><summary>Tôi có phải đưa tài khoản Threads của mình không?</summary><p>Không. ThreadFlow vận hành bằng kho tài khoản của hệ thống, mỗi tài khoản giữ một giọng văn cố định. Bạn chỉ cần hồ sơ thương hiệu và @tag muốn được nhắc tới.</p></details>
+      <details><summary>Nếu tôi chưa kịp duyệt bài thì sao?</summary><p>Bài chờ tới khi bạn duyệt, trừ khi bạn bật chế độ tự duyệt. Báo cáo kỳ ghi riêng số bài đang chờ bạn để con số giao hàng không bị hiểu sai.</p></details>
+      <details><summary>Số bài và số tương tác cam kết có chính xác tuyệt đối không?</summary><p>Đó là con số xấp xỉ, chốt cứng lúc gói được kích hoạt. Nếu giao dưới 70% cam kết, đội vận hành nhận cảnh báo ngay trong kỳ. Bài đã đăng vẫn được tính kể cả khi tài khoản đăng bài sau đó bị khoá.</p></details>
+      <details><summary>Thanh toán và kích hoạt gói thế nào?</summary><p>Chọn gói, quét VietQR và chuyển khoản với đúng mã nội dung. Hệ thống nhận tiền và kích hoạt gói. Nếu chuyển thiếu, tiền vào ví và gói chờ bạn chuyển bù.</p></details>
+      <details><summary>Một người có quản lý được nhiều thương hiệu không?</summary><p>Được. Mỗi thương hiệu là một hợp đồng riêng với gói, lịch và báo cáo riêng. Bạn chuyển qua lại giữa các thương hiệu bằng một đăng nhập.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta panel center" id="dang-ky">
+  <div class="wrap">
+    <h2>Sẵn sàng có mặt đều đặn<br>trên <span class="red">Threads?</span></h2>
+    <div class="row">
+      <a class="btn btn-dark" href="#top">Đăng ký và chọn gói</a>
+      <a class="btn btn-outline" href="#cau-hoi">Đặt lịch tư vấn</a>
+    </div>
+  </div>
+  <svg class="waves" viewBox="0 0 1400 290" aria-hidden="true">
+    <path d="M0 60 C 160 20, 260 60, 360 110 S 640 230, 760 220 S 1000 160, 1160 80 S 1340 10, 1400 20" fill="none" stroke="var(--amber)" stroke-width="2"/>
+    <path d="M0 165 C 120 160, 200 160, 300 180 S 520 225, 640 220 S 860 120, 960 120 S 1240 160, 1400 210" fill="none" stroke="var(--violet)" stroke-width="2"/>
+    <path d="M0 250 C 120 200, 260 150, 360 160 S 520 270, 620 260 S 780 140, 880 130 S 1080 210, 1200 210 S 1340 190, 1400 180" fill="none" stroke="var(--green)" stroke-width="2"/>
+    <g>
+      <rect x="228" y="84" width="150" height="34" rx="6" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="252" y="106">Bài đã đăng</text>
+      <rect x="130" y="148" width="130" height="34" rx="6" fill="var(--violet-soft)" stroke="var(--violet)"/><text x="154" y="170">Đã duyệt</text>
+      <rect x="430" y="188" width="128" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)"/><text x="456" y="210">Bình luận</text>
+      <rect x="880" y="104" width="140" height="34" rx="6" fill="var(--violet-soft)" stroke="var(--violet)"/><text x="902" y="126">Báo cáo kỳ</text>
+      <rect x="1120" y="50" width="120" height="34" rx="6" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="1148" y="72">Repost</text>
+      <rect x="1140" y="194" width="168" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)"/><text x="1162" y="216">Gói đã kích hoạt</text>
+    </g>
+  </svg>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="fcols">
+      <div>
+        <a class="logo" href="#top"><svg width="30" height="30" style="color:#fff"><use href="#i-logo"/></svg><span><b>THREAD</b>FLOW</span></a>
+        <p>Dịch vụ đăng bài và tương tác Threads cho thương hiệu, có kiểm duyệt và báo cáo theo kỳ.</p>
+      </div>
+      <div><h4>Nền tảng</h4><ul><li><a href="#cach-hoat-dong">Lô nội dung theo kỳ</a></li><li><a href="#an-toan">AI gate</a></li><li><a href="#cach-hoat-dong">Checklist trước khi đăng</a></li><li><a href="#nen-tang">Lịch và cam kết</a></li><li><a href="#quy-mo">Báo cáo kỳ</a></li></ul></div>
+      <div><h4>Dành cho</h4><ul><li><a href="#quy-mo">Shop một thương hiệu</a></li><li><a href="#quy-mo">Thương hiệu mở rộng</a></li><li><a href="#quy-mo">Agency</a></li><li><a href="#theo-nganh">Theo ngành</a></li></ul></div>
+      <div><h4>Hỗ trợ</h4><ul><li><a href="#dang-ky">Đăng nhập</a></li><li><a href="#dang-ky">Đăng ký</a></li><li><a href="#cau-hoi">Câu hỏi thường gặp</a></li></ul></div>
+      <div><h4>Pháp lý</h4><ul><li><a href="#top">Điều khoản sử dụng</a></li><li><a href="#top">Chính sách dữ liệu</a></li><li><a href="#an-toan">Chính sách nội dung</a></li></ul></div>
+    </div>
+    <div class="legal"><span>© 2026 ThreadFlow</span><span>ThreadFlow không liên kết với Meta. Threads là nhãn hiệu của Meta Platforms, Inc.</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+
+  var data=[
+    {q:'Bạn bán hàng một mình hoặc với một nhóm nhỏ. Bạn muốn trang Threads có bài mới mỗi ngày mà không phải tự ngồi viết.',who:'Chủ shop',n1:'1 bài/ngày',t1:'lên đều theo lịch, bạn chỉ duyệt một lần cho cả lô',n2:'30 ngày',t2:'mỗi kỳ, có báo cáo chốt số khi kỳ đóng',period:'01/10 - 30/10',p:[29,30],i:[148,150]},
+    {q:'Bạn cần Threads chạy đều trong khi đội marketing lo kênh khác. Bình luận phải bám nội dung bài, và cuối tháng cần con số để báo cáo lên trên.',who:'Trưởng nhóm marketing',n1:'≥ 50%',t1:'tương tác là bình luận viết theo ngữ cảnh của từng bài',n2:'70%',t2:'ngưỡng cảnh báo: giao dưới mức này, đội vận hành được báo ngay',period:'01/09 - 30/09',p:[28,30],i:[431,450]},
+    {q:'Bạn chạy Threads cho nhiều khách hàng. Mỗi khách cần lịch riêng, người duyệt riêng và báo cáo tách bạch.',who:'Agency',n1:'Nhiều brand',t1:'dưới một đăng nhập, mỗi brand là một hợp đồng riêng',n2:'3 vai trò',t2:'chủ sở hữu, biên tập và chỉ xem cho từng brand',period:'01/09 - 30/09, 4 brand',p:[112,120],i:[1730,1800]}
+  ];
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  function set(id,v){document.getElementById(id).textContent=v}
+  function show(k){
+    var d=data[k];
+    tabs.forEach(function(t,j){t.setAttribute('aria-selected',j===k?'true':'false');t.tabIndex=j===k?0:-1});
+    document.getElementById('case').setAttribute('aria-labelledby','tab-'+k);
+    set('c-quote',d.q);set('c-who',d.who);set('c-n1',d.n1);set('c-t1',d.t1);set('c-n2',d.n2);set('c-t2',d.t2);set('r-period',d.period);
+    set('r-posts',d.p[0].toLocaleString('vi-VN')+' / '+d.p[1].toLocaleString('vi-VN'));
+    set('r-int',d.i[0].toLocaleString('vi-VN')+' / '+d.i[1].toLocaleString('vi-VN'));
+    document.getElementById('r-posts-bar').style.width=Math.round(d.p[0]/d.p[1]*100)+'%';
+    document.getElementById('r-int-bar').style.width=Math.round(d.i[0]/d.i[1]*100)+'%';
+    try{localStorage.setItem('tf-tab',String(k))}catch(e){}
+  }
+  tabs.forEach(function(t,j){
+    t.addEventListener('click',function(){show(j)});
+    t.addEventListener('keydown',function(e){
+      if(e.key==='ArrowRight'||e.key==='ArrowLeft'){var n=(j+(e.key==='ArrowRight'?1:2))%3;show(n);tabs[n].focus();e.preventDefault()}
+    });
+  });
+  var saved=1;try{var s=parseInt(localStorage.getItem('tf-tab'),10);if(s>=0&&s<3)saved=s}catch(e){}
+  show(saved);
+})();
+</script>
+
+</body>
+</html>
