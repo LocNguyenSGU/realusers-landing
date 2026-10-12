@@ -4,554 +4,571 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>ThreadFlow</title>
-<meta name="description" content="ThreadFlow: dịch vụ đăng bài và tương tác Threads cho thương hiệu, có kiểm duyệt và báo cáo theo kỳ.">
+<script>document.documentElement.classList.add('js')</script>
+<title>RealUsers</title>
+<meta name="description" content="RealUsers: dịch vụ đăng bài và tương tác Threads cho thương hiệu. Bạn duyệt trước khi đăng, cuối tháng có báo cáo kèm link từng bài.">
+<meta property="og:title" content="RealUsers: trang Threads của bạn, có bài mới mỗi ngày">
+<meta property="og:description" content="RealUsers viết bài, đăng bài và tạo tương tác thật cho thương hiệu trên Threads.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0866FF">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230866FF'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: RedTrack-style marketing page. White ground, rounded lavender panels inset 20px from the edge,
-   1280px content column, one coral-red accent for the emphasised line of each heading, black pill-less buttons. */
+/* RealUsers landing. Palette: white / Meta near-black / Meta blue only (.superdesign/design-system.md). */
 :root{
-  --bg:#ffffff;
-  --panel:#f6f7ff;          /* lavender section panels */
-  --panel-2:#edeff7;
-  --card:#ffffff;
-  --fg:#121214;
-  --fg-2:#3c3d47;
-  --muted:#6b6e7c;
-  --line:#d3d4e1;
-  --line-soft:#e6e7f0;
-  --accent:#ff473d;
-  --accent-ink:#c72c24;
-  --accent-soft:#ffeded;
-  --accent-soft-2:#ffd0ce;
-  --btn:#121214;
-  --btn-fg:#ffffff;
-  --green:#38d178;  --green-soft:#d5f6e3;
-  --violet:#806cfe; --violet-soft:#e4e0ff;
-  --amber:#fca757;  --amber-soft:#ffead7;
-  --footer:#1b1c22; --footer-fg:#e9eaf2; --footer-muted:#9a9cab;
-  --cube-top:#ffffff; --cube-a:#ffe3e1; --cube-b:#ffd0ce; --cube-side:#fff2f1;
-
-  --display:"Be Vietnam Pro","Helvetica Neue",Arial,sans-serif;
-  --body:"Helvetica Neue",Helvetica,Arial,"Be Vietnam Pro",sans-serif;
-  --r-panel:20px; --r-card:16px; --r-btn:8px;
-  --max:1280px;
+  --bg:#FFFFFF;
+  --surface:#F1F4F7;
+  --surface-2:#E4E9EE;
+  --ink:#1C2B33;
+  --ink-2:#465A69;
+  --muted:#67788A;
+  --line:#CBD2D9;
+  --black:#0A0A0A;
+  --blue:#0866FF;
+  --blue-hover:#0457D8;
+  --blue-soft:#E7F0FF;
+  --font:"Be Vietnam Pro",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  --r-panel:24px; --r-card:20px; --r-tile:16px;
+  --max:1200px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --shadow:0 24px 48px -24px rgba(28,43,51,.25);
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0e0f13; --panel:#15161d; --panel-2:#1c1e27; --card:#191b23;
-    --fg:#f2f3f7; --fg-2:#c9cbd6; --muted:#9a9db0; --line:#2e3040; --line-soft:#252735;
-    --accent:#ff5d52; --accent-ink:#ff8178; --accent-soft:#3a1b1a; --accent-soft-2:#5a2522;
-    --btn:#f2f3f7; --btn-fg:#121214;
-    --green:#4ade8a; --green-soft:#16301f; --violet:#9d8eff; --violet-soft:#25213f; --amber:#ffb36b; --amber-soft:#3a2a18;
-    --footer:#08090c; --footer-fg:#e9eaf2; --footer-muted:#8c8fa0;
-    --cube-top:#1d1f29; --cube-a:#3a1f22; --cube-b:#4a2427; --cube-side:#2a1b1e;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0e0f13; --panel:#15161d; --panel-2:#1c1e27; --card:#191b23;
-  --fg:#f2f3f7; --fg-2:#c9cbd6; --muted:#9a9db0; --line:#2e3040; --line-soft:#252735;
-  --accent:#ff5d52; --accent-ink:#ff8178; --accent-soft:#3a1b1a; --accent-soft-2:#5a2522;
-  --btn:#f2f3f7; --btn-fg:#121214;
-  --green:#4ade8a; --green-soft:#16301f; --violet:#9d8eff; --violet-soft:#25213f; --amber:#ffb36b; --amber-soft:#3a2a18;
-  --footer:#08090c; --footer-fg:#e9eaf2; --footer-muted:#8c8fa0;
-  --cube-top:#1d1f29; --cube-a:#3a1f22; --cube-b:#4a2427; --cube-side:#2a1b1e;
-  color-scheme:dark;
-}
-
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit}
-h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-0.01em}
+h1,h2,h3,h4{margin:0;font-family:var(--font);text-wrap:balance}
 p{margin:0}
-.red{color:var(--accent)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.blue{color:var(--blue)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:6px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-.wrap{max-width:var(--max);margin-inline:auto;padding-inline:clamp(16px,4.5vw,60px)}
-.panel{background:var(--panel);border-radius:var(--r-panel);margin-inline:clamp(0px,1.4vw,20px)}
-section{padding-block:clamp(56px,7vw,96px)}
+.wrap{max-width:var(--max);margin-inline:auto;padding-inline:clamp(16px,4vw,24px)}
+.panel{background:var(--surface);border-radius:var(--r-panel);margin-inline:clamp(0px,1.4vw,20px)}
+section{padding-block:clamp(64px,8vw,96px)}
 
-/* Buttons + badge */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:500 17px/1 var(--body);padding:19px 40px;border-radius:var(--r-btn);text-decoration:none;border:2px solid transparent;transition:background .15s,color .15s,border-color .15s;cursor:pointer;white-space:nowrap}
-.btn-dark{background:var(--btn);color:var(--btn-fg)}
-.btn-dark:hover{background:var(--accent);color:#fff}
-.btn-outline{border-color:var(--fg);color:var(--fg);background:transparent}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-.btn-sm{padding:12px 22px;font-size:16px}
-.link-arrow{font:500 17px/1.3 var(--body);text-decoration:none;display:inline-flex;gap:6px;align-items:center}
-.link-arrow:hover{color:var(--accent)}
-.badge{display:inline-block;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:5px 16px;font-size:15px;line-height:1.3}
+/* Scroll reveal: only hidden when JS is running, so the page still reads without it */
+.js [data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease),transform .7s var(--ease);transition-delay:calc(var(--d,0) * 90ms)}
+.js [data-reveal="left"]{transform:translateX(-24px)}
+.js [data-reveal="scale"]{transform:scale(.96)}
+.js [data-reveal].in{opacity:1;transform:none}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:17px;line-height:1;padding:0 28px;height:52px;border-radius:999px;text-decoration:none;border:1px solid transparent;transition:background .15s,color .15s,border-color .15s,transform .15s,box-shadow .2s;cursor:pointer;white-space:nowrap;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn .arr{display:inline-block;transition:transform .2s var(--ease)}
+.btn:hover .arr{transform:translateX(4px)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 10px 24px -14px rgba(8,102,255,.9)}
+.btn-primary:hover{background:var(--blue-hover);box-shadow:0 14px 28px -14px rgba(8,102,255,.95)}
+.btn-secondary{background:#fff;color:var(--ink);border-color:var(--ink)}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm{height:44px;padding:0 20px;font-size:16px}
+.link-arrow{font-weight:600;font-size:17px;text-decoration:none;color:var(--blue);display:inline-flex;gap:6px;align-items:center}
+.link-arrow .arr{transition:transform .2s var(--ease)}
+.link-arrow:hover{color:var(--blue-hover)}
+.link-arrow:hover .arr{transform:translateX(4px)}
+.badge{display:inline-block;background:var(--blue-soft);color:var(--blue);border-radius:999px;padding:6px 16px;font-size:14px;font-weight:600;line-height:1.3}
 .center{text-align:center}
-.lead{color:var(--fg-2);font-size:17px;max-width:62ch}
+.lead{color:var(--ink-2);font-size:17px;max-width:62ch}
 .center .lead{margin-inline:auto}
 
 /* Header */
-.util{background:var(--panel);font-size:13px;color:var(--fg-2)}
-.util .wrap{display:flex;justify-content:space-between;align-items:center;height:44px;gap:16px}
-.util nav{display:flex;gap:24px}
-.util a{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.util a:hover{color:var(--accent)}
-header.main{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);box-shadow:0 8px 24px -16px rgba(54,57,90,.25)}
+.progress{position:fixed;top:0;left:0;right:0;height:3px;background:var(--blue);transform:scaleX(0);transform-origin:0 50%;z-index:40;pointer-events:none}
+header.main{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(1.6) blur(12px);backdrop-filter:saturate(1.6) blur(12px);border-bottom:1px solid transparent;transition:border-color .2s,box-shadow .2s}
+header.main.scrolled{border-bottom-color:var(--line);box-shadow:0 10px 30px -22px rgba(28,43,51,.45)}
 header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
-.logo{display:flex;align-items:center;gap:8px;text-decoration:none;font:700 19px/1 var(--display);letter-spacing:-0.02em}
-.logo b{color:var(--accent);font-weight:700}
-.mainnav{display:flex;gap:26px;font-size:16px}
-.mainnav a{text-decoration:none}
-.mainnav a:hover{color:var(--accent)}
-.hdr-cta{margin-left:auto;display:flex;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--ink)}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:var(--blue);display:inline-block;flex:none;transition:transform .4s var(--ease)}
+.logo:hover .logo-mark{transform:rotate(-12deg) scale(1.06)}
+.mainnav{display:flex;gap:28px;font-size:16px;font-weight:500}
+.mainnav a{position:relative;text-decoration:none;color:var(--ink-2);padding-block:6px;transition:color .15s}
+.mainnav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--blue);transform:scaleX(0);transition:transform .25s var(--ease)}
+.mainnav a:hover,.mainnav a.active{color:var(--blue)}
+.mainnav a.active::after{transform:scaleX(1)}
+.hdr-cta{margin-left:auto;display:flex;gap:12px;align-items:center}
+.hdr-login{text-decoration:none;color:var(--ink);font-weight:600;font-size:16px}
+.hdr-login:hover{color:var(--blue)}
+.menu-btn{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;width:44px;height:44px;cursor:pointer;color:var(--ink);position:relative}
+.menu-btn i{position:absolute;left:12px;right:12px;height:2px;border-radius:2px;background:currentColor;transition:transform .25s var(--ease),opacity .2s}
+.menu-btn i:nth-child(1){top:15px}.menu-btn i:nth-child(2){top:21px}.menu-btn i:nth-child(3){top:27px}
+.nav-open .menu-btn i:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.nav-open .menu-btn i:nth-child(2){opacity:0}
+.nav-open .menu-btn i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.mnav{display:none}
 
 /* Hero */
-.hero{margin-top:28px;padding-block:clamp(36px,4vw,56px)}
-.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:40px;align-items:center}
-.hero h1{font-size:clamp(30px,3.3vw,46px);line-height:1.15;font-weight:700;margin-top:22px}
-.hero h1 span{display:block}
-.hero .lead{margin-top:26px}
-.hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:36px}
-.stack{width:100%;height:auto;max-width:100%}
-.stack text{font-family:var(--display)}
-.chip-r{fill:var(--card);stroke:var(--line-soft)}
-.chip-t{fill:var(--fg);font-size:13px;font-weight:500}
-.conn{fill:none;stroke:var(--accent-soft-2);stroke-width:2}
-.dot{fill:var(--accent)}
+.hero{margin-top:24px;padding-block:clamp(40px,5vw,72px);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;width:640px;height:640px;right:-160px;top:-180px;border-radius:50%;background:radial-gradient(circle,rgba(8,102,255,.10),rgba(8,102,255,0) 65%);pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:56px;align-items:center}
+.hero h1{font-size:clamp(36px,4.4vw,60px);line-height:1.1;font-weight:700;margin-top:20px;letter-spacing:-0.02em}
+.hero h1 .w{display:inline-block}
+.js .hero h1 .w{opacity:0;transform:translateY(.45em);animation:word .7s var(--ease) forwards;animation-delay:calc(var(--i) * 70ms + 120ms)}
+@keyframes word{to{opacity:1;transform:none}}
+.hl{position:relative;color:var(--blue);white-space:nowrap}
+.hl svg{position:absolute;left:0;bottom:-.12em;width:100%;height:.32em;overflow:visible}
+.hl path{fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round;stroke-dasharray:240;stroke-dashoffset:240;opacity:.35}
+.js .hl path{animation:draw 1s var(--ease) 1s forwards}
+html:not(.js) .hl path{stroke-dashoffset:0}
+@keyframes draw{to{stroke-dashoffset:0}}
+.hero .lead{margin-top:22px}
+.hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:32px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:28px;font-size:15px;color:var(--ink-2)}
+.hero-meta span{display:inline-flex;align-items:center;gap:8px}
+.hero-meta svg{width:18px;height:18px;color:var(--blue)}
 
-/* Stats */
-.stats .wrap{display:grid;grid-template-columns:1.25fr repeat(3,1fr);align-items:stretch}
-.stats .intro h2{font-size:clamp(26px,2.6vw,34px);line-height:1.25;font-weight:700}
-.stats .intro p{margin-top:14px;color:var(--muted);font-size:15px}
-.stat{border-left:1px solid var(--line);padding:6px 0 6px 40px}
-.stat strong{display:block;font:600 clamp(36px,3.6vw,48px)/1.1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
-.stat span{display:block;margin-top:14px;color:var(--fg-2);font-size:16px;max-width:24ch}
-.stats .intro{padding-right:24px}
+/* Phone mockup */
+.phone-wrap{position:relative;display:flex;justify-content:flex-start;padding-left:12px;perspective:1200px}
+.phone{width:300px;max-width:100%;background:#fff;border:1px solid var(--line);border-radius:36px;padding:14px;box-shadow:var(--shadow);transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .3s var(--ease);will-change:transform}
+.js .phone-float{animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.phone-screen{background:var(--surface);border-radius:26px;overflow:hidden;min-height:480px;display:flex;flex-direction:column}
+.phone-top{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;background:#fff;border-bottom:1px solid var(--line)}
+.pavatar{width:40px;height:40px;border-radius:999px;background:var(--blue-soft);display:grid;place-items:center;color:var(--blue);font-weight:700;flex:none}
+.phone-top>div{min-width:0}
+.pname{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phandle{color:var(--muted);font-size:13px}
+.posted{margin-left:auto;white-space:nowrap;flex:none;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--blue);background:var(--blue-soft);border-radius:999px;padding:4px 10px;transform:scale(.6);opacity:0;transition:transform .35s var(--ease),opacity .25s}
+.posted svg{width:13px;height:13px}
+.posted.on{transform:none;opacity:1}
+.ppost{background:#fff;padding:14px 16px 16px}
+.ppost p{font-size:14.5px;line-height:1.5;color:var(--ink)}
+.pactions{display:flex;gap:18px;margin-top:14px;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.pactions span{display:inline-flex;align-items:center;gap:6px}
+.pactions svg{width:20px;height:20px}
+.pactions .liked{color:var(--blue)}
+.pactions .liked svg{fill:var(--blue);animation:pop .35s var(--ease)}
+@keyframes pop{50%{transform:scale(1.3)}}
+.pcomments{flex:1;display:flex;flex-direction:column}
+.pcomment{display:flex;gap:10px;padding:12px 16px;border-top:1px solid var(--line);background:#fff}
+.js .pcomment{display:none}
+.js .pcomment.show{display:flex;animation:slidein .45s var(--ease)}
+@keyframes slidein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.pcomment .pavatar{width:30px;height:30px;font-size:12px}
+.pcomment b{font-size:13.5px}
+.pcomment div>span{display:block;font-size:13.5px;color:var(--ink-2);margin-top:2px;line-height:1.45}
+.typing{display:none;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--line);background:#fff;color:var(--muted);font-size:12.5px}
+.typing.show{display:flex}
+.typing .dots{display:inline-flex;gap:4px;background:var(--surface);border-radius:999px;padding:8px 10px}
+.typing .dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1s infinite}
+.typing .dots i:nth-child(2){animation-delay:.15s}.typing .dots i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
 
-/* One day timeline: a time ruler across the width, events hang above/below at their real time */
-.day{padding-top:8px}
-.day-head{display:grid;gap:12px;max-width:62ch}
-.day-head h2{font:600 clamp(26px,2.6vw,34px)/1.25 var(--display)}
-.day-head p{color:var(--fg-2);font-size:16px}
-.day-head .key{color:var(--accent);font-weight:500}
-.tl{position:relative;height:400px;margin-top:28px;list-style:none;padding:0}
-.ruler{position:absolute;left:0;right:0;top:calc(50% - 15px);height:30px;background:var(--panel);border-radius:8px}
-.ruler span{position:absolute;top:0;line-height:30px;transform:translateX(-50%);font:500 11.5px/30px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);font-variant-numeric:tabular-nums}
-.evt{position:absolute;left:calc(var(--x) * 1%);width:clamp(150px,15.5%,210px);transform:translateX(-4px);display:grid;gap:6px;align-content:end}
-.evt.up{bottom:calc(50% + 15px);padding-bottom:30px}
-.evt.down{top:calc(50% + 15px);padding-top:30px;align-content:start}
-.evt::before{content:"";position:absolute;left:4px;width:1px;height:30px;background:var(--line)}
-.evt.up::before{bottom:0}.evt.down::before{top:0}
-.evt::after{content:"";position:absolute;left:0;width:9px;height:9px;border-radius:2px;background:var(--fg)}
-.evt.up::after{bottom:-4px}.evt.down::after{top:-5px}
-.evt.end{transform:translateX(calc(-100% + 5px));text-align:right}
-.evt.end::before{left:auto;right:4px}.evt.end::after{left:auto;right:0}
-.evt.p14::after{background:var(--accent)}
-.evt.p14::before{background:var(--accent-soft-2)}
-.evt time{font:600 13px/1 ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;color:var(--fg)}
-.evt.p14 time{color:var(--accent)}
-.evt p{font-size:15.5px;line-height:1.4;color:var(--fg)}
-.evt small{font-size:13.5px;color:var(--muted);line-height:1.4}
-@media (max-width:1100px){
-  .tl{height:auto;margin-top:28px;display:grid;gap:22px;padding-left:28px}
-  .tl::before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:1px;background:var(--line)}
-  .ruler{display:none}
-  .evt,.evt.up,.evt.down,.evt.end{position:relative;left:auto;top:auto;bottom:auto;width:auto;transform:none;padding:0;text-align:left}
-  .evt::before{display:none}
-  .evt::after,.evt.up::after,.evt.down::after,.evt.end::after{left:-28px;right:auto;top:2px;bottom:auto}
-}
+.approve-card{position:absolute;right:0;top:140px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:0 18px 40px -20px rgba(28,43,51,.3);width:224px;z-index:2}
+.js .approve-card{opacity:0;transform:translateX(24px);animation:cardin .7s var(--ease) .9s forwards}
+@keyframes cardin{to{opacity:1;transform:none}}
+.approve-card .tag{display:inline-flex;align-items:center;gap:7px;background:var(--blue-soft);color:var(--blue);font-weight:600;font-size:13px;border-radius:999px;padding:5px 12px}
+.approve-card .tag i{width:8px;height:8px;border-radius:999px;background:var(--blue);display:inline-block;animation:pulse 1.6s ease-out infinite}
+.approve-card.done .tag i{animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(8,102,255,.55)}100%{box-shadow:0 0 0 8px rgba(8,102,255,0)}}
+.approve-card h4{font-size:14.5px;font-weight:600;margin-top:10px}
+.ac-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px;font-size:13px;color:var(--ink-2);overflow:hidden}
+.ac-list li{display:flex;gap:8px;align-items:flex-start;line-height:1.4}
+.ac-list li::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-top:6px}
+.ac-btns{display:flex;gap:8px;margin-top:12px}
+.ac-btns button{flex:1;height:34px;border-radius:999px;font-weight:600;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s,color .15s,transform .15s}
+.ac-btns button:hover{border-color:var(--blue);color:var(--blue)}
+.ac-btns button:active{transform:scale(.96)}
+.ac-btns .yes{background:var(--blue);color:#fff;border-color:var(--blue)}
+.ac-btns .yes:hover{background:var(--blue-hover);color:#fff}
+.ac-done{display:none;align-items:center;gap:10px;margin-top:12px;font-size:13px;color:var(--ink-2)}
+.ac-done svg{flex:none;width:30px;height:30px;color:#fff;background:var(--blue);border-radius:50%;padding:6px;animation:pop .4s var(--ease)}
+.approve-card.done .ac-btns,.approve-card.done .ac-list{display:none}
+.approve-card.done .ac-done{display:flex}
 
-/* Industries (logo cards slot) */
-.ind .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:40px;align-items:center}
-.ind h2{font-size:clamp(28px,3vw,38px);line-height:1.25}
-.ind .lead{margin-top:16px;font-size:16px}
-.ind .link-arrow{margin-top:22px}
-.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r-btn);padding:22px 20px;min-height:108px;display:flex;flex-direction:column;justify-content:center;gap:8px}
-.tile b{font:700 24px/1.15 var(--display);letter-spacing:-0.02em}
-.tile code{font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
-.tile.dash{grid-column:span 2;border-style:dashed;background:transparent}
-.tile.dash b{font-size:18px}
-.tile.dash span{color:var(--fg-2);font-size:14px}
+/* 3 key points */
+.keys .wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.kcard,.fcard,.scard{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-card);padding:28px;transition:transform .3s var(--ease),border-color .2s,box-shadow .3s}
+.kcard:hover,.fcard:hover,.scard:hover{transform:translateY(-4px);border-color:rgba(8,102,255,.45);box-shadow:var(--shadow)}
+.icon-tile{width:48px;height:48px;border-radius:12px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;transition:background .25s,color .25s,transform .35s var(--ease)}
+.icon-tile svg{width:24px;height:24px}
+.kcard:hover .icon-tile,.fcard:hover .icon-tile,.scard:hover .icon-tile{background:var(--blue);color:#fff;transform:rotate(-6deg)}
+.kcard h3{font-size:20px;font-weight:600;margin-top:20px}
+.kcard p{color:var(--ink-2);margin-top:10px;font-size:16px}
 
 /* How it works */
-.how h2{font-size:clamp(30px,3.6vw,48px);line-height:1.2;margin-top:22px}
-.how .btn{margin-top:36px}
-.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:56px;text-align:left}
-.step{position:relative;padding:0 48px 0 0}
-.step + .step{padding-left:52px}
-.step + .step::before{content:"";position:absolute;left:0;top:0;bottom:0;width:44px;
-  background:linear-gradient(to bottom right,transparent calc(50% - 1px),var(--line) 50%,transparent calc(50% + 1px)) top/100% 50% no-repeat,
-             linear-gradient(to top right,transparent calc(50% - 1px),var(--line) 50%,transparent calc(50% + 1px)) bottom/100% 50% no-repeat;transform:translateX(-36px)}
-.ic{width:48px;height:48px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
-.ic svg{width:24px;height:24px}
-.step h3,.fcard h3{font:500 22px/1.3 var(--body);margin-top:30px;letter-spacing:0}
-.step p,.fcard p{color:var(--fg-2);margin-top:14px;font-size:16px}
+.how h2{font-size:clamp(28px,3.6vw,44px);line-height:1.2;font-weight:700;letter-spacing:-0.01em}
+.how .btn{margin-top:32px}
+.steps{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:56px;text-align:left}
+.track{position:absolute;left:22px;right:calc(25% - 40px);top:21px;height:2px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--blue);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.6s var(--ease) .2s}
+.steps.in .track i{transform:scaleX(1)}
+html:not(.js) .track i{transform:scaleX(1)}
+.step{position:relative}
+.step .num{position:relative;width:44px;height:44px;border-radius:12px;background:#fff;border:2px solid var(--surface-2);color:var(--muted);display:grid;place-items:center;font-weight:700;font-size:18px;transition:background .3s,border-color .3s,color .3s,transform .4s var(--ease);transition-delay:calc(var(--d,0) * 350ms + 200ms)}
+.steps.in .num,html:not(.js) .step .num{background:var(--blue);border-color:var(--blue);color:#fff}
+.steps.in .num{animation:numpop .5s var(--ease) both;animation-delay:calc(var(--d,0) * 350ms + 200ms)}
+@keyframes numpop{50%{transform:scale(1.15)}}
+.step-top{display:flex;align-items:center;gap:12px}
+.who{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--surface-2);color:var(--ink-2)}
+.who.you{background:var(--blue-soft);color:var(--blue)}
+.step h3{font-size:20px;font-weight:600;margin-top:22px}
+.step p{color:var(--ink-2);margin-top:12px;font-size:16px}
 
-/* Feature cards */
-.feat h2,.safe h2{font-size:clamp(30px,3.6vw,48px);line-height:1.2}
-.feat .lead{margin-top:22px}
-.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:52px}
-.fcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px 24px 28px;min-width:0}
-.fcard h3{margin-top:24px}
+/* Features: spotlight follows the pointer */
+.feat h2{font-size:clamp(28px,3.6vw,44px);line-height:1.2;font-weight:700;letter-spacing:-0.01em}
+.fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:52px;text-align:left}
+.fcard{overflow:hidden}
+.fcard::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(8,102,255,.09),transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.fcard:hover::before{opacity:1}
+.fcard>*{position:relative}
+.fcard h3{font-size:20px;font-weight:600;margin-top:20px}
+.fcard p{color:var(--ink-2);margin-top:10px;font-size:16px}
 
-/* Tabs */
-.cases h2{font-size:clamp(30px,3.6vw,48px);line-height:1.2;margin-top:22px}
-.cases .lead{margin-top:22px}
-.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:44px}
-.tab{font:400 18px/1.3 var(--body);padding:18px 16px;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--card);color:var(--fg);cursor:pointer}
-.tab:hover{border-color:var(--accent)}
-.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
-.case{margin-top:32px;border:1px solid var(--line);border-radius:var(--r-panel);padding:24px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;background:var(--card)}
-.case-q{display:flex;gap:12px;font-style:italic;font-size:18px;line-height:1.5;padding:4px 0 0 0}
-.case-q svg{flex:none;width:16px;height:14px;margin-top:6px;color:var(--accent)}
-.case-who{margin-top:20px;font-size:17px}
-.case-who small{display:block;color:var(--muted);font-size:15px;margin-top:4px}
-.case-nums{display:grid;grid-template-columns:1fr 1fr;margin-top:40px}
-.case-nums div{padding-right:24px}
-.case-nums div+div{border-left:1px solid var(--line);padding-left:24px}
-.case-nums strong{font:600 clamp(28px,3vw,38px)/1.1 var(--display);display:block;letter-spacing:-0.02em}
-.case-nums span{display:block;margin-top:14px;color:var(--fg-2);font-size:16px}
-.report{background:var(--violet-soft);border-radius:var(--r-card);padding:clamp(18px,3vw,36px);display:flex;align-items:center}
-.rcard{background:var(--card);border-radius:14px;padding:22px;width:100%;box-shadow:0 18px 40px -24px rgba(54,57,90,.45)}
+/* Industries */
+.ind .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:48px;align-items:center}
+.ind h2{font-size:clamp(28px,3.4vw,40px);line-height:1.2;font-weight:700;letter-spacing:-0.01em}
+.ind .lead{margin-top:16px;font-size:16px}
+.ind .link-arrow{margin-top:22px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.tile{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-tile);padding:26px 22px;min-height:96px;display:flex;flex-direction:column;justify-content:center;gap:8px;transition:transform .3s var(--ease),border-color .2s,box-shadow .3s}
+.tile:not(.dash)::after{content:"→";position:absolute;right:22px;top:50%;transform:translate(-8px,-50%);opacity:0;color:var(--blue);font-weight:600;transition:transform .25s var(--ease),opacity .2s}
+.tile:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:var(--shadow)}
+.tile:hover::after{transform:translate(0,-50%);opacity:1}
+.tile b{font-size:20px;font-weight:600}
+.tile.dash{grid-column:1/-1;border-style:dashed;background:transparent}
+.tile.dash:hover{background:#fff}
+.tile.dash b{color:var(--blue)}
+.tile.dash span{color:var(--ink-2);font-size:15px;font-weight:400}
+
+/* Tabs / scale */
+.cases h2{font-size:clamp(28px,3.6vw,44px);line-height:1.2;font-weight:700;letter-spacing:-0.01em}
+.tabs{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:40px;background:var(--surface);border-radius:18px;padding:6px}
+.tab-ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 24px) / 3);border-radius:13px;background:#fff;box-shadow:0 6px 16px -10px rgba(28,43,51,.45);border:1px solid rgba(8,102,255,.35);transform:translateX(calc(var(--k,0) * (100% + 6px)));transition:transform .4s var(--ease)}
+.tab{position:relative;z-index:1;font-size:17px;font-weight:600;padding:14px;border:0;border-radius:13px;background:transparent;color:var(--ink-2);cursor:pointer;font-family:inherit;transition:color .2s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--blue)}
+.case{margin-top:28px;border:1px solid var(--line);border-radius:var(--r-panel);padding:32px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;background:#fff;text-align:left}
+.case-text{transition:opacity .25s,transform .25s var(--ease)}
+.case-text.swap{opacity:0;transform:translateY(8px)}
+.case-desc{font-size:clamp(18px,2vw,22px);line-height:1.5;color:var(--ink);font-weight:500}
+.case-who{margin-top:20px;font-size:17px;font-weight:600}
+.case-who small{display:block;color:var(--muted);font-size:14px;font-weight:400;margin-top:4px}
+.case-note{margin-top:24px;background:var(--surface);border-radius:14px;padding:18px 20px;font-size:16px;color:var(--ink-2);display:flex;gap:12px;align-items:flex-start}
+.case-note svg{flex:none;width:20px;height:20px;color:var(--blue);margin-top:2px}
+.report{background:var(--surface);border-radius:var(--r-card);padding:clamp(18px,3vw,28px);display:flex;align-items:center}
+.rcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;width:100%;box-shadow:var(--shadow)}
 .rcard-h{display:flex;justify-content:space-between;gap:12px;align-items:baseline;font-size:13px;color:var(--muted)}
-.rcard-h b{color:var(--fg);font:600 15px/1.3 var(--display)}
+.rcard-h b{color:var(--ink);font-weight:600;font-size:15px}
 .bar-row{margin-top:18px;font-size:14px}
-.bar-row .lbl{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.bar-row .lbl{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
 .bar-row .lbl span:last-child{color:var(--muted)}
-.bar{height:6px;border-radius:99px;background:transparent;margin-top:8px;overflow:hidden;display:flex}
-.bar i{display:block;height:100%}
-.mix-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--fg-2)}
-.mix-legend span{display:inline-flex;gap:6px;align-items:center}
+.bar{height:8px;border-radius:99px;background:var(--surface-2);margin-top:8px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;width:0;transition:width 1.1s var(--ease)}
+.bar i+i{border-left:2px solid #fff}
+.mix-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.mix-legend>span{display:inline-flex;gap:6px;align-items:center}
 .mix-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
-.proof{margin-top:18px;border-top:1px solid var(--line-soft);padding-top:14px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow-wrap:anywhere}
+.links{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;display:grid;gap:6px;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow-wrap:anywhere}
+.links span{display:flex;gap:8px;align-items:center}
+.links span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--blue);flex:none}
 .example-note{font-size:12px;color:var(--muted);margin-top:12px}
 
 /* Safety */
-.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:48px}
-.scard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:24px}
-.scard h3{font:400 21px/1.3 var(--body);margin-top:30px;letter-spacing:0}
-.scard p{margin-top:12px;color:var(--fg-2);font-size:15px}
-.nots{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:28px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,2fr);gap:32px}
-.nots h3{font:600 22px/1.3 var(--display)}
-.nots > div > p{margin-top:10px;color:var(--fg-2);font-size:15px}
-.nots ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}
-.nots li{display:flex;gap:12px;font-size:15.5px;color:var(--fg-2)}
-.nots li svg{flex:none;width:20px;height:20px;color:var(--accent);margin-top:2px}
+.safe h2{font-size:clamp(28px,3.6vw,44px);line-height:1.2;font-weight:700;letter-spacing:-0.01em}
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:48px;text-align:left}
+.scard h3{font-size:20px;font-weight:600;margin-top:20px}
+.scard p{margin-top:12px;color:var(--ink-2);font-size:16px}
 
 /* FAQ */
-.faq h2{font-size:clamp(28px,3vw,40px)}
-.qa{max-width:880px;margin:40px auto 0;border-top:1px solid var(--line)}
+.faq h2{font-size:clamp(28px,3.4vw,40px);font-weight:700;letter-spacing:-0.01em}
+.qa{max-width:820px;margin:40px auto 0;border-top:1px solid var(--line);text-align:left}
 .qa details{border-bottom:1px solid var(--line)}
-.qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:16px;padding:22px 0;font:500 18px/1.4 var(--body)}
+.qa summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 0;font-weight:600;font-size:18px;transition:color .15s}
+.qa summary:hover{color:var(--blue)}
 .qa summary::-webkit-details-marker{display:none}
-.qa summary::after{content:"+";font:400 26px/1 var(--display);color:var(--accent);transition:transform .2s}
-.qa details[open] summary::after{transform:rotate(45deg)}
-.qa details p{padding:0 0 22px;color:var(--fg-2);max-width:72ch}
+.qa summary::after{content:"+";flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:22px;line-height:1;color:var(--blue);background:var(--blue-soft);transition:transform .3s var(--ease),background .2s,color .2s}
+.qa details[open] summary::after{transform:rotate(45deg);background:var(--blue);color:#fff}
+.qa .ans{overflow:hidden}
+.qa .ans p{padding:0 0 22px;color:var(--ink-2);max-width:72ch}
 
 /* CTA */
-.cta{position:relative;overflow:hidden;padding-bottom:0}
-.cta h2{font-size:clamp(32px,4.6vw,64px);line-height:1.15;font-weight:700}
-.cta .row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:44px;position:relative;z-index:1}
-.waves{display:block;width:100%;height:auto;margin-top:-20px}
-.waves text{font-family:var(--display);font-size:15px;font-weight:500;fill:var(--fg)}
+.cta{position:relative;overflow:hidden}
+.cta .wrap{position:relative;z-index:1}
+.rings{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
+.rings i{position:absolute;left:-240px;top:-240px;width:480px;height:480px;border-radius:50%;border:1px solid rgba(8,102,255,.18);animation:ring 7s linear infinite;opacity:0}
+.rings i:nth-child(2){animation-delay:2.33s}.rings i:nth-child(3){animation-delay:4.66s}
+@keyframes ring{0%{transform:scale(.4);opacity:0}15%{opacity:1}100%{transform:scale(2.4);opacity:0}}
+.cta h2{font-size:clamp(32px,4.4vw,56px);line-height:1.15;font-weight:700;letter-spacing:-0.02em}
+.cta .lead{margin-top:18px}
+.cta .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
 
 /* Footer */
-footer{background:var(--footer);color:var(--footer-fg);margin-top:20px;padding-block:64px 36px}
+footer{background:var(--black);color:rgba(255,255,255,.88);margin-top:20px;padding-block:64px 36px}
 footer .logo{color:#fff}
-.fcols{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:32px}
-.fcols h4{font:600 15px/1.3 var(--display);margin:0 0 16px}
-.fcols ul{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:14px;color:var(--footer-muted)}
-.fcols a{text-decoration:none}.fcols a:hover{color:#fff}
-.fcols p{color:var(--footer-muted);font-size:14px;margin-top:16px;max-width:30ch}
-.legal{margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--footer-muted)}
+.fcols{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:40px}
+.fcols h4{font-weight:600;font-size:15px;margin:0 0 16px;color:#fff}
+.fcols ul{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:15px}
+.fcols a{text-decoration:none;color:rgba(255,255,255,.62);transition:color .15s}
+.fcols a:hover{color:#fff}
+.fcols p{color:rgba(255,255,255,.62);font-size:15px;margin-top:16px;max-width:34ch}
+.legal{margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px;color:rgba(255,255,255,.5)}
 
 /* Responsive */
-@media (max-width:1100px){
-  .mainnav{display:none}
-  .stats .wrap{grid-template-columns:repeat(3,1fr);row-gap:36px}
-  .stats .intro{grid-column:1/-1}
-  .stat:nth-child(2){border-left:0;padding-left:0}
+@media (max-width:1024px){
+  .mainnav,.hdr-login{display:none}
+  .menu-btn{display:block}
+  .hdr-cta{margin-left:auto}
+  .mnav{display:grid;gap:4px;max-height:0;overflow:hidden;transition:max-height .35s var(--ease),padding .35s var(--ease);padding:0 clamp(16px,4vw,24px);border-top:1px solid transparent}
+  .nav-open .mnav{max-height:360px;padding-block:12px 20px;border-top-color:var(--line)}
+  .mnav a{text-decoration:none;font-weight:600;font-size:18px;padding:12px 4px;border-bottom:1px solid var(--surface-2)}
+  .mnav a.active{color:var(--blue)}
+  .mnav .btn{margin-top:12px;border-bottom:0}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:40px}
+  .track{display:none}
   .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:48px}
-  .step:nth-child(3){padding-left:0}.step:nth-child(3)::before{display:none}
+  .phone-wrap{flex-direction:column;align-items:center;padding-left:0}
+  .approve-card{position:relative;right:auto;top:auto;margin-top:-14px;width:min(300px,100%)}
   .fcols{grid-template-columns:repeat(3,1fr)}
-  .fcols > div:first-child{grid-column:1/-1}
+  .fcols>div:first-child{grid-column:1/-1}
 }
 @media (max-width:860px){
-  .hero .wrap,.ind .wrap,.case,.nots{grid-template-columns:minmax(0,1fr)}
-  .sgrid{grid-template-columns:minmax(0,1fr)}
-  .nots ul{grid-template-columns:1fr}
-  .util nav:first-child{display:none}
+  .hero .wrap,.ind .wrap,.case{grid-template-columns:minmax(0,1fr)}
+  .hero .wrap{gap:48px}
+  .keys .wrap,.sgrid{grid-template-columns:minmax(0,1fr)}
+  .case{padding:22px;gap:28px}
 }
 @media (max-width:640px){
-  .hdr-cta .btn-outline{display:none}
   header.main .wrap{gap:12px;height:64px}
-  .stats .wrap{grid-template-columns:1fr}
-  .stat,.stat:nth-child(2){border-left:0;border-top:1px solid var(--line);padding:22px 0 0}
-  .steps,.fgrid{grid-template-columns:minmax(0,1fr)}
-  .step,.step + .step{padding:0}
-  .step::before{display:none}
-  .step + .step{border-top:1px solid var(--line);padding-top:36px}
-  .tabs{grid-template-columns:minmax(0,1fr);gap:10px}
-  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .tile.dash{grid-column:1/-1}
-  .case-nums{grid-template-columns:1fr}
-  .case-nums div+div{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:20px;margin-top:20px}
-  .btn{padding:16px 26px}
-  .hdr-cta .btn{padding:11px 16px;font-size:15px}
+  .hdr-cta .btn{display:none}
+  .fgrid{grid-template-columns:minmax(0,1fr)}
+  .steps{grid-template-columns:minmax(0,1fr)}
+  .tiles{grid-template-columns:minmax(0,1fr)}
+  .tab{font-size:14px;padding:12px 6px}
   .fcols{grid-template-columns:1fr 1fr}
+  .legal{flex-direction:column}
+  .phone-screen{min-height:500px}
+}
+@media (max-width:380px){
+  .btn{padding:0 20px}
+}
+@media (hover:none){.tile:not(.dash)::after{display:none}}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .js [data-reveal],.js .hero h1 .w,.js .approve-card{opacity:1!important;transform:none!important}
+  .hl path{stroke-dashoffset:0!important}
+  .js .pcomment{display:flex}
+  .posted{opacity:1;transform:none}
+  .rings{display:none}
 }
 </style>
 </head>
 <body>
-
+<div id="root">
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-chart" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 15v-3M12 15V9M15 15v-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
-    <symbol id="i-store" viewBox="0 0 24 24"><path d="M4 9l1.5-5h13L20 9M4 9h16M4 9c0 1.7 1.3 3 3 3s2.7-1.3 2.7-3c0 1.7 1.2 3 2.3 3s2.3-1.3 2.3-3c0 1.7 1.3 3 2.7 3s3-1.3 3-3M5.5 12v8h13v-8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5M15.5 5.2a3.2 3.2 0 010 5.8M17.5 14.3c1.6.7 2.7 2.4 3 4.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
-    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
-    <symbol id="i-img" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9.5" cy="10" r="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 17l4.5-4 3.5 3 2.5-2L20 17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-    <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14 14h2v2h-2zM18 14h2v2h-2zM16 16h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="currentColor"/></symbol>
-    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 16a8 8 0 1115 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 15l4-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7.5a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
-    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M8.5 3.5h7l5 5v7l-5 5h-7l-5-5v-7z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 9l6 6M15 9l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
-    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5h14a1 1 0 011 1v9a1 1 0 01-1 1h-8l-4 3v-3H5a1 1 0 01-1-1V6a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-    <symbol id="i-logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11.5" fill="none" stroke="currentColor" stroke-width="5"/><path d="M16 4.5A11.5 11.5 0 0127.5 16" fill="none" stroke="#ff473d" stroke-width="5" stroke-linecap="round"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5h14a1 1 0 011 1v9a1 1 0 01-1 1h-8l-4 3v-3H5a1 1 0 01-1-1V6a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M9 15v-3M12 15V9M15 15v-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M3.5 19c.6-3 2.8-5 5.5-5s4.9 2 5.5 5M15.5 5.2a3.2 3.2 0 010 5.8M17.5 14.3c1.6.7 2.7 2.4 3 4.7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M14 14h2v2h-2zM18 14h2v2h-2zM16 16h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="currentColor"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 16a8 8 0 1115 0" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><path d="M12 15l4-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M8 10V7.5a4 4 0 018 0V10" fill="none" stroke="currentColor" stroke-width="1.75"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><path d="M8.5 3.5h7l5 5v7l-5 5h-7l-5-5v-7z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-9.5A3.5 3.5 0 0112 7a3.5 3.5 0 017 3.5C19 15.5 12 20 12 20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 9l3-3h10l3 3M20 15l-3 3H7l-3-3M7 6v4M17 14v4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
 
-<div class="util">
-  <div class="wrap">
-    <nav aria-label="Tiện ích"><a href="#cau-hoi">Câu hỏi thường gặp</a></nav>
-    <nav aria-label="Tài khoản"><a href="#dang-ky"><svg width="14" height="14"><use href="#i-users"/></svg>Đăng nhập</a><a href="#cach-hoat-dong">Về ThreadFlow</a></nav>
-  </div>
-</div>
+<div class="progress" aria-hidden="true"></div>
 
 <header class="main">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="ThreadFlow, về đầu trang"><svg width="30" height="30"><use href="#i-logo"/></svg><span><b>THREAD</b>FLOW</span></a>
+    <a id="link-logo" class="logo" href="#top" aria-label="RealUsers, về đầu trang"><span class="logo-mark"></span><span>RealUsers</span></a>
     <nav class="mainnav" aria-label="Chính">
-      <a href="#nen-tang">Nền tảng</a>
-      <a href="#theo-nganh">Theo ngành</a>
-      <a href="#cach-hoat-dong">Cách hoạt động</a>
-      <a href="#quy-mo">Theo quy mô</a>
-      <a href="#an-toan">An toàn</a>
+      <a id="link-how" href="#cach-hoat-dong">Cách hoạt động</a>
+      <a id="link-feat" href="#tinh-nang">Tính năng</a>
+      <a id="link-ind" href="#theo-nganh">Theo ngành</a>
+      <a id="link-faq" href="#cau-hoi">Câu hỏi</a>
     </nav>
     <div class="hdr-cta">
-      <a class="btn btn-outline btn-sm" href="#dang-ky">Đặt lịch tư vấn</a>
-      <a class="btn btn-dark btn-sm" href="#dang-ky">Đăng ký ngay</a>
+      <a id="link-login" class="hdr-login" href="#dang-ky">Đăng nhập</a>
+      <a id="link-signup" class="btn btn-primary btn-sm" href="#dang-ky">Bắt đầu ngay</a>
     </div>
+    <button class="menu-btn" aria-label="Mở menu" aria-expanded="false" aria-controls="mnav" type="button"><i></i><i></i><i></i></button>
   </div>
+  <nav class="mnav" id="mnav" aria-label="Menu di động">
+    <a id="link-m-how" href="#cach-hoat-dong">Cách hoạt động</a>
+    <a id="link-m-feat" href="#tinh-nang">Tính năng</a>
+    <a id="link-m-ind" href="#theo-nganh">Theo ngành</a>
+    <a id="link-m-faq" href="#cau-hoi">Câu hỏi</a>
+    <a id="link-m-login" href="#dang-ky">Đăng nhập</a>
+    <a id="link-m-signup" class="btn btn-primary" href="#dang-ky">Bắt đầu ngay</a>
+  </nav>
 </header>
 
 <main id="top">
 <section class="hero panel">
   <div class="wrap">
     <div>
-      <span class="badge">Dịch vụ Threads cho thương hiệu</span>
-      <h1><span>Lên bài đều mỗi ngày.</span><span class="red">Tương tác đúng cam kết.</span><span>Bạn duyệt trước khi lên sóng.</span></h1>
-      <p class="lead">ThreadFlow viết trọn lô bài của kỳ theo playbook ngành bạn làm, cho AI và checklist kiểm từng bài, rồi chờ bạn duyệt. Bài được đăng và nhận bình luận theo lịch. Cuối kỳ bạn có báo cáo chốt số, kèm link minh chứng cho từng bài.</p>
-      <div class="hero-cta">
-        <a class="btn btn-dark" href="#dang-ky">Đăng ký và chọn gói</a>
-        <a class="link-arrow" href="#cach-hoat-dong">Xem ThreadFlow làm việc thế nào →</a>
+      <span class="badge" data-reveal>Dịch vụ Threads cho thương hiệu</span>
+      <h1 aria-label="Trang Threads của bạn, có bài mới mỗi ngày."><span aria-hidden="true"><span class="w" style="--i:0">Trang</span> <span class="w" style="--i:1">Threads</span> <span class="w" style="--i:2">của</span> <span class="w" style="--i:3">bạn,</span> <span class="w" style="--i:4">có</span> <span class="w" style="--i:5">bài</span> <span class="w" style="--i:6">mới</span> <span class="w hl" style="--i:7">mỗi ngày.<svg viewBox="0 0 200 12" preserveAspectRatio="none"><path d="M3 9 C 50 3, 120 3, 197 8"/></svg></span></span></h1>
+      <p class="lead" data-reveal style="--d:6">RealUsers viết bài, đăng bài và tạo tương tác thật cho thương hiệu trên Threads. Bạn chỉ cần duyệt nội dung và xem báo cáo cuối tháng.</p>
+      <div class="hero-cta" data-reveal style="--d:7">
+        <a id="link-hero-cta" class="btn btn-primary" href="#dang-ky">Bắt đầu ngay <span class="arr" aria-hidden="true">→</span></a>
+        <a id="link-hero-how" class="btn btn-secondary" href="#cach-hoat-dong">Xem cách hoạt động</a>
+      </div>
+      <div class="hero-meta" data-reveal style="--d:8">
+        <span><svg><use href="#i-check"/></svg>Bạn duyệt từng bài</span>
+        <span><svg><use href="#i-check"/></svg>Báo cáo hằng tháng</span>
       </div>
     </div>
 
-    <svg class="stack" viewBox="0 0 760 560" role="img" aria-label="Bốn tầng của ThreadFlow: nội dung, kiểm duyệt, vận hành, báo cáo">
-      <defs>
-        <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="var(--accent-soft)"/><stop offset="1" stop-color="var(--panel)" stop-opacity="0"/></radialGradient>
-      </defs>
-      <ellipse cx="380" cy="290" rx="270" ry="250" fill="url(#glow)"/>
-      <!-- connectors: left-top → Kiểm duyệt, left-bottom → Nội dung, right-top → Báo cáo, right-bottom → Vận hành -->
-      <path class="conn" d="M164 64H180M164 120H180M164 176H180M180 64V176M180 120H190Q196 120 196 126V294Q196 300 202 300H212"/>
-      <path class="conn" d="M164 382H180M164 438H180M164 494H180M180 382V494M180 438H190Q196 438 196 432V356Q196 350 202 350H212"/>
-      <path class="conn" d="M596 64H580M596 120H580M596 176H580M580 64V176M580 120H570Q564 120 564 126V206Q564 212 558 212H548"/>
-      <path class="conn" d="M596 382H580M596 438H580M596 494H580M580 382V494M580 438H570Q564 438 564 432V264Q564 258 558 258H548"/>
-
-      <!-- cube: 4 layers, h=46 -->
-      <g stroke="var(--line-soft)" stroke-width="1">
-        <polygon points="210,188 380,286 380,332 210,234" fill="var(--cube-side)"/>
-        <polygon points="380,286 550,188 550,234 380,332" fill="var(--cube-a)"/>
-        <polygon points="210,234 380,332 380,378 210,280" fill="var(--cube-a)"/>
-        <polygon points="380,332 550,234 550,280 380,378" fill="var(--cube-b)"/>
-        <polygon points="210,280 380,378 380,424 210,326" fill="var(--cube-b)"/>
-        <polygon points="380,378 550,280 550,326 380,424" fill="var(--cube-a)"/>
-        <polygon points="210,326 380,424 380,470 210,372" fill="var(--cube-side)"/>
-        <polygon points="380,424 550,326 550,372 380,470" fill="var(--cube-side)"/>
-        <polygon points="380,90 550,188 380,286 210,188" fill="var(--cube-top)"/>
-      </g>
-      <g font-size="15" font-weight="500" fill="var(--fg)">
-        <text transform="translate(224,214) skewY(30)">Báo cáo</text>
-        <text transform="translate(224,260) skewY(30)">Vận hành</text>
-        <text transform="translate(224,306) skewY(30)">Kiểm duyệt</text>
-        <text transform="translate(224,352) skewY(30)">Nội dung</text>
-      </g>
-      <circle class="dot" cx="212" cy="300" r="5"/><circle class="dot" cx="212" cy="350" r="5"/>
-      <circle class="dot" cx="548" cy="212" r="5"/><circle class="dot" cx="548" cy="258" r="5"/>
-      <!-- top face grid, mapped to the rhombus -->
-      <g transform="matrix(0.8673,0.5,-0.8673,0.5,380,90)">
-        <g stroke="var(--line-soft)" stroke-width="1.2" fill="none">
-          <path d="M65.3 0V196M130.7 0V196M0 65.3H196M0 130.7H196"/>
-        </g>
-        <rect x="69" y="69" width="58" height="58" rx="4" fill="var(--accent-soft-2)"/>
-        <circle cx="98" cy="98" r="15" fill="none" stroke="var(--fg)" stroke-width="7"/>
-        <path d="M98 83a15 15 0 0115 15" fill="none" stroke="#ff473d" stroke-width="7" stroke-linecap="round"/>
-        <g font-size="10.5" fill="var(--muted)" text-anchor="middle" font-family="Be Vietnam Pro, Arial, sans-serif">
-          <text x="32.6" y="36">Playbook</text>
-          <text x="98" y="36">Lô bài</text>
-          <text x="163.4" y="36">Lịch đăng</text>
-          <text x="32.6" y="101">Ảnh</text>
-          <text x="163.4" y="101">Tỉ lệ</text>
-          <text x="32.6" y="166">Duyệt</text>
-          <text x="98" y="166">AI gate</text>
-          <text x="163.4" y="166">Báo cáo</text>
-        </g>
-      </g>
-      <!-- chips -->
-      <g>
-        <rect class="chip-r" x="4" y="42" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="69" text-anchor="middle">AI gate</text>
-        <rect class="chip-r" x="4" y="98" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="125" text-anchor="middle">Checklist 9 mục</text>
-        <rect class="chip-r" x="4" y="154" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="181" text-anchor="middle">Bạn duyệt theo lô</text>
-        <rect class="chip-r" x="4" y="360" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="387" text-anchor="middle">Playbook theo ngành</text>
-        <rect class="chip-r" x="4" y="416" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="443" text-anchor="middle">Lô nội dung AI</text>
-        <rect class="chip-r" x="4" y="472" width="160" height="44" rx="22"/><text class="chip-t" x="84" y="499" text-anchor="middle">Thư viện ảnh riêng</text>
-        <rect class="chip-r" x="596" y="42" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="69" text-anchor="middle">Báo cáo kỳ</text>
-        <rect class="chip-r" x="596" y="98" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="125" text-anchor="middle">Link minh chứng</text>
-        <rect class="chip-r" x="596" y="154" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="181" text-anchor="middle">Thanh toán VietQR</text>
-        <rect class="chip-r" x="596" y="360" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="387" text-anchor="middle">Lịch đăng</text>
-        <rect class="chip-r" x="596" y="416" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="443" text-anchor="middle">Tỉ lệ tương tác</text>
-        <rect class="chip-r" x="596" y="472" width="160" height="44" rx="22"/><text class="chip-t" x="676" y="499" text-anchor="middle">Cổng an toàn</text>
-      </g>
-    </svg>
+    <div class="phone-wrap" data-reveal="scale" style="--d:3">
+      <div class="phone-float">
+        <div class="phone" id="phone">
+          <div class="phone-screen">
+            <div class="phone-top">
+              <span class="pavatar">N</span>
+              <div><div class="pname">Nhà sách Nắng</div><div class="phandle">@nhasachnang</div></div>
+              <span class="posted" id="posted"><svg><use href="#i-check"/></svg>Đã đăng</span>
+            </div>
+            <div class="ppost">
+              <p>Tuần này tụi mình vừa nhận về một kệ sách cũ in trước 1995, giấy đã ngả vàng nhưng chữ còn rất nét. Ghé xem thử nhé.</p>
+              <div class="pactions">
+                <span id="likes"><svg><use href="#i-heart"/></svg><b id="like-n">24</b></span>
+                <span><svg><use href="#i-chat"/></svg><b id="cmt-n">0</b></span>
+                <span><svg><use href="#i-repeat"/></svg><b>3</b></span>
+              </div>
+            </div>
+            <div class="pcomments" aria-live="off">
+              <div class="pcomment"><span class="pavatar">M</span><div><b>minh.doc</b><span>Mê mấy bản in cũ này quá, để chiều mình ghé ạ.</span></div></div>
+              <div class="pcomment"><span class="pavatar">T</span><div><b>thu.reads</b><span>Kệ này còn cuốn nào về Hà Nội xưa không shop?</span></div></div>
+              <div class="pcomment"><span class="pavatar">A</span><div><b>an.nguyen</b><span>Shop có ship ra Đà Nẵng không ạ?</span></div></div>
+              <div class="typing" id="typing"><span class="dots"><i></i><i></i><i></i></span>Có người đang trả lời…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="approve-card" id="approve">
+        <span class="tag"><i></i><span id="ac-tag">Chờ bạn duyệt</span></span>
+        <h4 id="ac-title">3 bài mới cho tháng này</h4>
+        <ul class="ac-list" id="ac-list" hidden>
+          <li>Kệ sách in trước 1995 vừa về</li>
+          <li>5 cuốn về Hà Nội xưa nên đọc</li>
+          <li>Cách giữ sách cũ không ố vàng</li>
+        </ul>
+        <div class="ac-btns"><button class="yes" id="ac-yes" type="button">Duyệt</button><button id="ac-view" type="button" aria-expanded="false" aria-controls="ac-list">Xem</button></div>
+        <div class="ac-done" role="status"><svg><use href="#i-check"/></svg><span>Đã duyệt. Bài đầu tiên lên lịch 19:30 tối nay.</span></div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="stats" aria-label="Con số của sản phẩm">
+<section class="keys">
   <div class="wrap">
-    <div class="intro">
-      <h2>Xây cho thương hiệu muốn có mặt <span class="red">mỗi ngày</span> trên Threads</h2>
-      <p>Các con số dưới đây là luật của sản phẩm, không phải kết quả quảng cáo.</p>
+    <div class="kcard" data-reveal style="--d:0">
+      <span class="icon-tile"><svg><use href="#i-check"/></svg></span>
+      <h3>Bạn duyệt trước khi đăng.</h3>
+      <p>Không bài nào lên Threads khi chưa có bạn đồng ý.</p>
     </div>
-    <div class="stat"><strong>9 mục</strong><span>kiểm tra trước khi bất kỳ bài nào được lên lịch</span></div>
-    <div class="stat"><strong>≥ 50%</strong><span>tương tác là bình luận. Like tối đa 40%, repost tối đa 10%</span></div>
-    <div class="stat"><strong>2.300+</strong><span>bài test tự động phải qua trước mỗi lần phát hành</span></div>
+    <div class="kcard" data-reveal style="--d:1">
+      <span class="icon-tile"><svg><use href="#i-chat"/></svg></span>
+      <h3>Bình luận theo nội dung bài.</h3>
+      <p>Hơn một nửa tương tác là bình luận viết riêng cho từng bài.</p>
+    </div>
+    <div class="kcard" data-reveal style="--d:2">
+      <span class="icon-tile"><svg><use href="#i-chart"/></svg></span>
+      <h3>Báo cáo có bằng chứng.</h3>
+      <p>Cuối tháng bạn nhận số liệu kèm đường link của từng bài.</p>
+    </div>
   </div>
 </section>
 
-<section class="day" aria-labelledby="day-h">
+<section class="how center panel" id="cach-hoat-dong">
   <div class="wrap">
-    <div class="day-head">
-      <h2 id="day-h">Một ngày của lô bài tháng 10</h2>
-      <p>Ví dụ minh hoạ với một nhà sách cũ. <span class="key">Màu đỏ</span> là đường đi của bài #14, từ lúc bị trả về tới lúc lên Threads.</p>
+    <span class="badge" data-reveal>Cách hoạt động</span>
+    <h2 style="margin-top:20px;--d:1" data-reveal>Bốn bước, <span class="blue">bạn chỉ làm hai.</span></h2>
+    <a id="link-how-cta" class="btn btn-primary" href="#dang-ky" data-reveal style="--d:2">Bắt đầu ngay <span class="arr" aria-hidden="true">→</span></a>
+    <div class="steps" data-reveal style="--d:2">
+      <div class="track" aria-hidden="true"><i></i></div>
+      <div class="step" style="--d:0">
+        <div class="step-top"><span class="num">1</span><span class="who you">Bạn</span></div>
+        <h3>Giới thiệu thương hiệu.</h3>
+        <p>Bạn điền thông tin thương hiệu, chọn ngành và chọn gói.</p>
+      </div>
+      <div class="step" style="--d:1">
+        <div class="step-top"><span class="num">2</span><span class="who">RealUsers</span></div>
+        <h3>Chúng tôi viết bài.</h3>
+        <p>Bài được viết theo cách nói của ngành bạn, rồi kiểm tra kỹ trước khi gửi bạn.</p>
+      </div>
+      <div class="step" style="--d:2">
+        <div class="step-top"><span class="num">3</span><span class="who you">Bạn</span></div>
+        <h3>Bạn duyệt.</h3>
+        <p>Duyệt, sửa hoặc bỏ từng bài. Bài chưa duyệt sẽ không được đăng.</p>
+      </div>
+      <div class="step" style="--d:3">
+        <div class="step-top"><span class="num">4</span><span class="who">RealUsers</span></div>
+        <h3>Đăng bài và báo cáo.</h3>
+        <p>Bài lên đúng lịch, có tương tác đi kèm. Cuối tháng bạn nhận báo cáo.</p>
+      </div>
     </div>
-    <ol class="tl" aria-label="Các mốc trong ngày">
-      <li class="ruler" aria-hidden="true"><span style="left:2.0%">07:00</span><span style="left:15.7%">09:00</span><span style="left:29.4%">11:00</span><span style="left:43.1%">13:00</span><span style="left:56.9%">15:00</span><span style="left:70.6%">17:00</span><span style="left:84.3%">19:00</span><span style="left:98.0%">21:00</span></li>
-      <li class="evt up " style="--x:10.6"><time>08:15</time><p>Bài #8 lên Threads đúng lịch.</p><small>Link bài được lưu cho báo cáo kỳ.</small></li>
-      <li class="evt down p14" style="--x:17.1"><time>09:12</time><p>AI gate trả bài #14 về.</p><small>Giá sách trong bài không có nguồn.</small></li>
-      <li class="evt up p14" style="--x:27.1"><time>10:40</time><p>Bài #14 sửa xong, đạt 9/9 mục.</p><small>Được xếp lịch đăng lúc 19:30.</small></li>
-      <li class="evt down " style="--x:34.0"><time>11:40</time><p>Bạn duyệt 12/15 bài của lô tháng 10.</p><small>Ba bài còn lại chờ bạn, không tự đăng.</small></li>
-      <li class="evt up " style="--x:52.3"><time>14:20</time><p>Bình luận chiếm 58% tương tác của kỳ.</p><small>Like 34%, repost 8%, trong giới hạn.</small></li>
-      <li class="evt down end p14" style="--x:87.7"><time>19:30</time><p>Bài #14 lên Threads.</p><small>Bình luận bắt đầu theo lịch của bài.</small></li>
-    </ol>
+  </div>
+</section>
+
+<section class="feat center" id="tinh-nang">
+  <div class="wrap">
+    <h2 data-reveal>Mọi thứ để trang Threads <span class="blue">chạy đều.</span></h2>
+    <div class="fgrid">
+      <div class="fcard" data-reveal style="--d:0"><span class="icon-tile"><svg><use href="#i-pen"/></svg></span><h3>Viết theo ngành</h3><p>Mỗi ngành có bộ hướng dẫn viết riêng, nên bài đọc lên đúng giọng của ngành.</p></div>
+      <div class="fcard" data-reveal style="--d:1"><span class="icon-tile"><svg><use href="#i-shield"/></svg></span><h3>Kiểm tra trước khi đăng</h3><p>Bài sai thông tin, thiếu nguồn hoặc lạc giọng thương hiệu bị giữ lại để sửa.</p></div>
+      <div class="fcard" data-reveal style="--d:2"><span class="icon-tile"><svg><use href="#i-chat"/></svg></span><h3>Bình luận đúng ngữ cảnh</h3><p>Bình luận được viết theo nội dung của từng bài, không dùng câu mẫu lặp lại.</p></div>
+      <div class="fcard" data-reveal style="--d:0"><span class="icon-tile"><svg><use href="#i-cal"/></svg></span><h3>Lịch đăng rõ ràng</h3><p>Xem trước bài nào lên ngày nào, số bài và số tương tác của tháng.</p></div>
+      <div class="fcard" data-reveal style="--d:1"><span class="icon-tile"><svg><use href="#i-users"/></svg></span><h3>Nhiều thương hiệu, một tài khoản</h3><p>Quản lý nhiều thương hiệu, mời đồng đội vào duyệt hoặc chỉ xem.</p></div>
+      <div class="fcard" data-reveal style="--d:2"><span class="icon-tile"><svg><use href="#i-qr"/></svg></span><h3>Thanh toán VietQR</h3><p>Chọn gói, quét mã, chuyển khoản. Gói được kích hoạt tự động.</p></div>
+    </div>
   </div>
 </section>
 
 <section class="ind panel" id="theo-nganh">
   <div class="wrap">
-    <div>
-      <h2>Viết theo<br><span class="red">playbook của ngành</span><br>bạn đang làm</h2>
-      <p class="lead">Mỗi ngành có một playbook do đội vận hành soạn, có phiên bản, tách riêng cho bài đăng, bình luận và bài trụ cột. AI chỉ nạp đúng phần cần cho loại nội dung đang viết.</p>
-      <a class="link-arrow" href="#cach-hoat-dong">Xem quy trình viết và kiểm →</a>
+    <div data-reveal="left">
+      <h2>Đã có sẵn cho <span class="blue">ngành của bạn.</span></h2>
+      <p class="lead">Mỗi ngành có bộ hướng dẫn viết riêng để bài đọc lên đúng giọng. Chưa có ngành của bạn? Chúng tôi soạn trước khi bắt đầu.</p>
+      <a id="link-ind-how" class="link-arrow" href="#cach-hoat-dong">Xem cách hoạt động <span class="arr" aria-hidden="true">→</span></a>
     </div>
     <div class="tiles">
-      <div class="tile"><b>Sách cũ</b></div>
-      <div class="tile"><b>F&amp;B</b></div>
-      <div class="tile"><b>Concert &amp; sự kiện</b></div>
-      <div class="tile"><b>App &amp; SaaS</b></div>
-      <div class="tile dash"><b>Ngành của bạn chưa có?</b><span>Đội vận hành soạn playbook riêng trước khi lô bài đầu tiên chạy.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="how center" id="cach-hoat-dong">
-  <div class="wrap">
-    <span class="badge">ThreadFlow làm việc thế nào</span>
-    <h2>Mỗi bài đều được kiểm.<br>Mỗi tương tác đều được đếm.<br><span class="red">Mỗi kỳ đều có báo cáo.</span></h2>
-    <a class="btn btn-dark" href="#dang-ky">Đăng ký và chọn gói</a>
-    <div class="steps">
-      <div class="step">
-        <span class="ic"><svg><use href="#i-store"/></svg></span>
-        <h3>Hiểu thương hiệu</h3>
-        <p>Bạn điền hồ sơ thương hiệu, chọn ngành, gói và @tag. Mỗi thương hiệu là một hợp đồng riêng.</p>
-      </div>
-      <div class="step">
-        <span class="ic"><svg><use href="#i-pen"/></svg></span>
-        <h3>Viết và kiểm</h3>
-        <p>AI viết trọn lô bài của kỳ theo playbook. AI gate và checklist 9 mục chặn bài sai trước khi tới tay bạn.</p>
-      </div>
-      <div class="step">
-        <span class="ic"><svg><use href="#i-check"/></svg></span>
-        <h3>Bạn duyệt</h3>
-        <p>Duyệt, sửa hoặc từ chối theo lô. Bài sửa xong được kiểm lại. Bài chưa duyệt thì chờ, không tự đăng.</p>
-      </div>
-      <div class="step">
-        <span class="ic"><svg><use href="#i-chart"/></svg></span>
-        <h3>Đăng và báo cáo</h3>
-        <p>Bài lên theo lịch, tương tác đúng tỉ lệ. Cuối kỳ hệ thống chốt số đã giao kèm link minh chứng.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="feat panel center" id="nen-tang">
-  <div class="wrap">
-    <h2>Mọi thứ còn lại là<br><span class="red">một lớp kiểm soát phía trên</span></h2>
-    <p class="lead">Lịch đăng, ảnh, thương hiệu và thanh toán cùng đọc từ một nguồn dữ liệu của gói bạn mua.</p>
-    <div class="fgrid" style="text-align:left">
-      <div class="fcard"><span class="ic"><svg><use href="#i-users"/></svg></span><h3>Nhiều thương hiệu</h3><p>Một đăng nhập quản lý nhiều brand. Mời đồng đội với vai trò chủ sở hữu, biên tập hoặc chỉ xem.</p></div>
-      <div class="fcard"><span class="ic"><svg><use href="#i-cal"/></svg></span><h3>Lịch và cam kết kỳ</h3><p>Xem trước lịch đăng và cam kết của kỳ. Cam kết chốt lúc kích hoạt gói, đổi bảng giá sau cũng không ảnh hưởng.</p></div>
-      <div class="fcard"><span class="ic"><svg><use href="#i-img"/></svg></span><h3>Thư viện ảnh riêng</h3><p>Bạn và đội vận hành cùng tải ảnh lên kho lưu trữ riêng tư. Bài cần ảnh lấy từ đúng thư viện của bạn.</p></div>
-      <div class="fcard"><span class="ic"><svg><use href="#i-qr"/></svg></span><h3>Thanh toán VietQR</h3><p>Chọn gói, quét mã, chuyển khoản đúng nội dung. Hệ thống nhận tiền rồi tự kích hoạt đúng gói bạn chọn.</p></div>
+      <div class="tile" data-reveal style="--d:0"><b>Sách</b></div>
+      <div class="tile" data-reveal style="--d:1"><b>Ăn uống (F&amp;B)</b></div>
+      <div class="tile" data-reveal style="--d:2"><b>Sự kiện &amp; concert</b></div>
+      <div class="tile" data-reveal style="--d:3"><b>App &amp; phần mềm</b></div>
+      <div class="tile dash" data-reveal style="--d:4"><b>Ngành khác?</b><span>Chúng tôi soạn hướng dẫn viết riêng cho ngành của bạn trước khi bắt đầu.</span></div>
     </div>
   </div>
 </section>
 
 <section class="cases center" id="quy-mo">
   <div class="wrap">
-    <span class="badge">Theo quy mô</span>
-    <h2>Một quy trình cho mọi cỡ đội</h2>
-    <p class="lead">Gói khác nhau ở số bài và số tương tác mỗi kỳ. Cách làm thì giống nhau.</p>
-    <div class="tabs" role="tablist" aria-label="Quy mô">
-      <button class="tab" role="tab" id="tab-0" aria-controls="case" aria-selected="false" type="button">Shop một thương hiệu</button>
-      <button class="tab" role="tab" id="tab-1" aria-controls="case" aria-selected="true" type="button">Thương hiệu đang mở rộng</button>
-      <button class="tab" role="tab" id="tab-2" aria-controls="case" aria-selected="false" type="button">Agency nhiều khách</button>
+    <span class="badge" data-reveal>Theo quy mô</span>
+    <h2 style="margin-top:20px" data-reveal>Phù hợp từ shop nhỏ tới agency.</h2>
+    <div class="tabs" role="tablist" aria-label="Quy mô" data-reveal>
+      <span class="tab-ind" aria-hidden="true"></span>
+      <button class="tab" role="tab" id="tab-0" aria-controls="case" aria-selected="true" type="button">Shop nhỏ</button>
+      <button class="tab" role="tab" id="tab-1" aria-controls="case" aria-selected="false" type="button" tabindex="-1">Thương hiệu đang lớn</button>
+      <button class="tab" role="tab" id="tab-2" aria-controls="case" aria-selected="false" type="button" tabindex="-1">Agency</button>
     </div>
-    <div class="case" id="case" role="tabpanel" aria-labelledby="tab-1" style="text-align:left">
-      <div>
-        <div class="case-q"><svg viewBox="0 0 16 14"><path d="M0 14L4 0h4L5 14zM8 14l4-14h4l-3 14z" fill="currentColor"/></svg><p id="c-quote">Bạn cần Threads chạy đều trong khi đội marketing lo kênh khác. Bình luận phải bám nội dung bài, và cuối tháng cần con số để báo cáo lên trên.</p></div>
-        <p class="case-who"><span id="c-who">Trưởng nhóm marketing</span><small id="c-sub">Kịch bản điển hình, không phải lời khách</small></p>
-        <div class="case-nums">
-          <div><strong id="c-n1">≥ 50%</strong><span id="c-t1">tương tác là bình luận viết theo ngữ cảnh của từng bài</span></div>
-          <div><strong id="c-n2">70%</strong><span id="c-t2">ngưỡng cảnh báo: giao dưới mức này, đội vận hành được báo ngay</span></div>
-        </div>
+    <div class="case" id="case" role="tabpanel" aria-labelledby="tab-0" data-reveal>
+      <div class="case-text" id="case-text">
+        <p class="case-desc" id="c-desc">Bạn muốn trang có bài mới mỗi ngày mà không phải tự viết.</p>
+        <p class="case-who"><span id="c-who">Shop nhỏ</span><small>Kịch bản minh hoạ</small></p>
+        <div class="case-note"><svg><use href="#i-check"/></svg><span id="c-note">1 bài mỗi ngày, duyệt một lần cho cả tháng.</span></div>
       </div>
       <div class="report">
-        <div class="rcard" aria-label="Xem trước báo cáo kỳ">
-          <div class="rcard-h"><b>Báo cáo kỳ</b><span id="r-period">01/09 - 30/09</span></div>
-          <div class="bar-row"><div class="lbl"><span>Bài đã đăng</span><span id="r-posts">28 / 30</span></div><div class="bar"><i id="r-posts-bar" style="width:93%;background:var(--accent)"></i></div></div>
-          <div class="bar-row"><div class="lbl"><span>Tương tác đã giao</span><span id="r-int">431 / 450</span></div><div class="bar"><i id="r-int-bar" style="width:96%;background:var(--fg)"></i></div></div>
-          <div class="bar-row"><div class="lbl"><span>Cơ cấu tương tác</span><span>giới hạn 50 / 40 / 10</span></div>
-            <div class="bar"><i style="width:58%;background:var(--accent)"></i><i style="width:34%;background:var(--violet)"></i><i style="width:8%;background:var(--amber)"></i></div>
-            <div class="mix-legend"><span><i style="background:var(--accent)"></i>Bình luận 58%</span><span><i style="background:var(--violet)"></i>Like 34%</span><span><i style="background:var(--amber)"></i>Repost 8%</span></div>
+        <div class="rcard" id="rcard" aria-label="Xem trước báo cáo tháng">
+          <div class="rcard-h"><b>Báo cáo tháng</b><span id="r-period">01/10 - 31/10</span></div>
+          <div class="bar-row"><div class="lbl"><span>Bài đã đăng</span><span><b data-count id="r-p">29</b> / <span id="r-pt">30</span></span></div><div class="bar"><i id="r-pb" style="background:var(--blue)"></i></div></div>
+          <div class="bar-row"><div class="lbl"><span>Tương tác</span><span><b data-count id="r-i">148</b> / <span id="r-it">150</span></span></div><div class="bar"><i id="r-ib" style="background:var(--ink)"></i></div></div>
+          <div class="bar-row"><div class="lbl"><span>Cơ cấu tương tác</span><span>Bình luận <span id="r-c">58</span>%</span></div>
+            <div class="bar"><i id="r-m0" style="background:var(--blue)"></i><i id="r-m1" style="background:var(--ink)"></i><i id="r-m2" style="background:var(--muted)"></i></div>
+            <div class="mix-legend"><span><i style="background:var(--blue)"></i>Bình luận <span id="r-l0">58</span>%</span><span><i style="background:var(--ink)"></i>Thích <span id="r-l1">34</span>%</span><span><i style="background:var(--muted)"></i>Chia sẻ <span id="r-l2">8</span>%</span></div>
           </div>
-          <div class="proof">threads.net/@…/post/C8x… · đã đăng 19:30<br>threads.net/@…/post/C8y… · đã đăng 08:15</div>
+          <div class="links" aria-label="Link bài đã đăng"><span>threads.net/@nhasachnang/post/C8x… · 19:30</span><span>threads.net/@nhasachnang/post/C8y… · 08:15</span></div>
           <p class="example-note">Số liệu minh hoạ</p>
         </div>
       </div>
@@ -561,58 +578,38 @@ footer .logo{color:#fff}
 
 <section class="safe panel center" id="an-toan">
   <div class="wrap">
-    <h2>An toàn, minh bạch và <span class="red">có giới hạn</span></h2>
-    <div class="sgrid" style="text-align:left">
-      <div class="scard"><span class="ic"><svg><use href="#i-gauge"/></svg></span><h3>Hạn mức trên từng tài khoản</h3><p>Mỗi tài khoản có giới hạn theo giờ và theo ngày, thời gian nghỉ và khung giờ hoạt động. Vượt giới hạn thì việc dừng lại.</p></div>
-      <div class="scard"><span class="ic"><svg><use href="#i-lock"/></svg></span><h3>Dữ liệu tách theo hợp đồng</h3><p>Khách không xem được dữ liệu của nhau và không vào được trang quản trị. Việc cách ly có test riêng chạy mỗi lần phát hành.</p></div>
-      <div class="scard"><span class="ic"><svg><use href="#i-stop"/></svg></span><h3>Lỗi thì dừng, không cho qua</h3><p>Nếu AI không kiểm được một bài, bài đó bị giữ lại để người xem. Kết quả lỗi không bao giờ được tính là đạt.</p></div>
-    </div>
-    <div class="nots" style="text-align:left">
-      <div><h3>Những việc ThreadFlow không làm</h3><p>Danh sách này nằm trong quyết định sản phẩm, không phải khẩu hiệu.</p></div>
-      <ul>
-        <li><svg><use href="#i-x"/></svg>Dựng kịch bản để nhiều tài khoản giả làm một cuộc thảo luận tự nhiên.</li>
-        <li><svg><use href="#i-x"/></svg>Nhắc thương hiệu của bạn như thể đó là lời của người dùng độc lập.</li>
-        <li><svg><use href="#i-x"/></svg>Chèn quảng cáo vào cuộc trò chuyện của người lạ.</li>
-        <li><svg><use href="#i-x"/></svg>Hứa con số tuyệt đối. Cam kết là xấp xỉ, và báo cáo cho bạn thấy số đã giao thật.</li>
-      </ul>
+    <h2 data-reveal>An toàn cho <span class="blue">thương hiệu của bạn.</span></h2>
+    <div class="sgrid">
+      <div class="scard" data-reveal style="--d:0"><span class="icon-tile"><svg><use href="#i-gauge"/></svg></span><h3>Hoạt động có giới hạn</h3><p>Mỗi tài khoản có giới hạn số lượt theo giờ và theo ngày, có thời gian nghỉ.</p></div>
+      <div class="scard" data-reveal style="--d:1"><span class="icon-tile"><svg><use href="#i-lock"/></svg></span><h3>Dữ liệu riêng từng thương hiệu</h3><p>Không ai xem được dữ liệu của thương hiệu khác.</p></div>
+      <div class="scard" data-reveal style="--d:2"><span class="icon-tile"><svg><use href="#i-stop"/></svg></span><h3>Lỗi thì dừng lại</h3><p>Bài chưa kiểm tra được sẽ được giữ lại để người xem, không tự đăng.</p></div>
     </div>
   </div>
 </section>
 
 <section class="faq center" id="cau-hoi">
   <div class="wrap">
-    <h2>Câu hỏi thường gặp</h2>
-    <div class="qa" style="text-align:left">
-      <details open><summary>Tôi có phải đưa tài khoản Threads của mình không?</summary><p>Không. ThreadFlow vận hành bằng kho tài khoản của hệ thống, mỗi tài khoản giữ một giọng văn cố định. Bạn chỉ cần hồ sơ thương hiệu và @tag muốn được nhắc tới.</p></details>
-      <details><summary>Nếu tôi chưa kịp duyệt bài thì sao?</summary><p>Bài chờ tới khi bạn duyệt, trừ khi bạn bật chế độ tự duyệt. Báo cáo kỳ ghi riêng số bài đang chờ bạn để con số giao hàng không bị hiểu sai.</p></details>
-      <details><summary>Số bài và số tương tác cam kết có chính xác tuyệt đối không?</summary><p>Đó là con số xấp xỉ, chốt cứng lúc gói được kích hoạt. Nếu giao dưới 70% cam kết, đội vận hành nhận cảnh báo ngay trong kỳ. Bài đã đăng vẫn được tính kể cả khi tài khoản đăng bài sau đó bị khoá.</p></details>
-      <details><summary>Thanh toán và kích hoạt gói thế nào?</summary><p>Chọn gói, quét VietQR và chuyển khoản với đúng mã nội dung. Hệ thống nhận tiền và kích hoạt gói. Nếu chuyển thiếu, tiền vào ví và gói chờ bạn chuyển bù.</p></details>
-      <details><summary>Một người có quản lý được nhiều thương hiệu không?</summary><p>Được. Mỗi thương hiệu là một hợp đồng riêng với gói, lịch và báo cáo riêng. Bạn chuyển qua lại giữa các thương hiệu bằng một đăng nhập.</p></details>
+    <h2 data-reveal>Câu hỏi thường gặp</h2>
+    <div class="qa" data-reveal>
+      <details open><summary>Tôi có cần đưa tài khoản Threads của mình không?</summary><div class="ans"><p>Không. Bạn chỉ cần thông tin thương hiệu và tài khoản Threads muốn được nhắc tới.</p></div></details>
+      <details><summary>Nếu tôi chưa kịp duyệt bài thì sao?</summary><div class="ans"><p>Bài sẽ chờ bạn. Nếu muốn, bạn có thể bật chế độ tự duyệt.</p></div></details>
+      <details><summary>Số bài và số tương tác có đúng tuyệt đối không?</summary><div class="ans"><p>Đó là con số dự kiến, chốt khi gói được kích hoạt. Báo cáo cuối tháng cho bạn thấy số thực tế đã làm.</p></div></details>
+      <details><summary>Thanh toán thế nào?</summary><div class="ans"><p>Chọn gói, quét mã VietQR và chuyển khoản đúng nội dung. Gói được kích hoạt ngay khi nhận tiền.</p></div></details>
+      <details><summary>Một người quản lý được nhiều thương hiệu không?</summary><div class="ans"><p>Được. Mỗi thương hiệu có gói, lịch và báo cáo riêng.</p></div></details>
     </div>
   </div>
 </section>
 
 <section class="cta panel center" id="dang-ky">
+  <div class="rings" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="wrap">
-    <h2>Sẵn sàng có mặt đều đặn<br>trên <span class="red">Threads?</span></h2>
-    <div class="row">
-      <a class="btn btn-dark" href="#top">Đăng ký và chọn gói</a>
-      <a class="btn btn-outline" href="#cau-hoi">Đặt lịch tư vấn</a>
+    <h2 data-reveal>Sẵn sàng để trang Threads <span class="blue">chạy đều?</span></h2>
+    <p class="lead" data-reveal style="--d:1">Đăng ký, chọn gói và nhận lô bài đầu tiên để duyệt.</p>
+    <div class="row" data-reveal style="--d:2">
+      <a id="link-cta-signup" class="btn btn-primary" href="#top">Bắt đầu ngay <span class="arr" aria-hidden="true">→</span></a>
+      <a id="link-cta-consult" class="btn btn-secondary" href="#cau-hoi">Nhận tư vấn</a>
     </div>
   </div>
-  <svg class="waves" viewBox="0 0 1400 290" aria-hidden="true">
-    <path d="M0 60 C 160 20, 260 60, 360 110 S 640 230, 760 220 S 1000 160, 1160 80 S 1340 10, 1400 20" fill="none" stroke="var(--amber)" stroke-width="2"/>
-    <path d="M0 165 C 120 160, 200 160, 300 180 S 520 225, 640 220 S 860 120, 960 120 S 1240 160, 1400 210" fill="none" stroke="var(--violet)" stroke-width="2"/>
-    <path d="M0 250 C 120 200, 260 150, 360 160 S 520 270, 620 260 S 780 140, 880 130 S 1080 210, 1200 210 S 1340 190, 1400 180" fill="none" stroke="var(--green)" stroke-width="2"/>
-    <g>
-      <rect x="228" y="84" width="150" height="34" rx="6" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="252" y="106">Bài đã đăng</text>
-      <rect x="130" y="148" width="130" height="34" rx="6" fill="var(--violet-soft)" stroke="var(--violet)"/><text x="154" y="170">Đã duyệt</text>
-      <rect x="430" y="188" width="128" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)"/><text x="456" y="210">Bình luận</text>
-      <rect x="880" y="104" width="140" height="34" rx="6" fill="var(--violet-soft)" stroke="var(--violet)"/><text x="902" y="126">Báo cáo kỳ</text>
-      <rect x="1120" y="50" width="120" height="34" rx="6" fill="var(--amber-soft)" stroke="var(--amber)"/><text x="1148" y="72">Repost</text>
-      <rect x="1140" y="194" width="168" height="34" rx="6" fill="var(--green-soft)" stroke="var(--green)"/><text x="1162" y="216">Gói đã kích hoạt</text>
-    </g>
-  </svg>
 </section>
 </main>
 
@@ -620,49 +617,228 @@ footer .logo{color:#fff}
   <div class="wrap">
     <div class="fcols">
       <div>
-        <a class="logo" href="#top"><svg width="30" height="30" style="color:#fff"><use href="#i-logo"/></svg><span><b>THREAD</b>FLOW</span></a>
-        <p>Dịch vụ đăng bài và tương tác Threads cho thương hiệu, có kiểm duyệt và báo cáo theo kỳ.</p>
+        <a id="link-footer-logo" class="logo" href="#top"><span class="logo-mark"></span><span>RealUsers</span></a>
+        <p>RealUsers, dịch vụ đăng bài và tương tác Threads cho thương hiệu.</p>
       </div>
-      <div><h4>Nền tảng</h4><ul><li><a href="#cach-hoat-dong">Lô nội dung theo kỳ</a></li><li><a href="#an-toan">AI gate</a></li><li><a href="#cach-hoat-dong">Checklist trước khi đăng</a></li><li><a href="#nen-tang">Lịch và cam kết</a></li><li><a href="#quy-mo">Báo cáo kỳ</a></li></ul></div>
-      <div><h4>Dành cho</h4><ul><li><a href="#quy-mo">Shop một thương hiệu</a></li><li><a href="#quy-mo">Thương hiệu mở rộng</a></li><li><a href="#quy-mo">Agency</a></li><li><a href="#theo-nganh">Theo ngành</a></li></ul></div>
-      <div><h4>Hỗ trợ</h4><ul><li><a href="#dang-ky">Đăng nhập</a></li><li><a href="#dang-ky">Đăng ký</a></li><li><a href="#cau-hoi">Câu hỏi thường gặp</a></li></ul></div>
-      <div><h4>Pháp lý</h4><ul><li><a href="#top">Điều khoản sử dụng</a></li><li><a href="#top">Chính sách dữ liệu</a></li><li><a href="#an-toan">Chính sách nội dung</a></li></ul></div>
+      <div><h4>Sản phẩm</h4><ul><li><a id="link-f-how" href="#cach-hoat-dong">Cách hoạt động</a></li><li><a id="link-f-feat" href="#tinh-nang">Tính năng</a></li><li><a id="link-f-ind" href="#theo-nganh">Theo ngành</a></li></ul></div>
+      <div><h4>Hỗ trợ</h4><ul><li><a id="link-f-login" href="#dang-ky">Đăng nhập</a></li><li><a id="link-f-signup" href="#dang-ky">Đăng ký</a></li><li><a id="link-f-faq" href="#cau-hoi">Câu hỏi</a></li></ul></div>
+      <div><h4>Pháp lý</h4><ul><li><a id="link-f-terms" href="#top">Điều khoản</a></li><li><a id="link-f-data" href="#top">Chính sách dữ liệu</a></li></ul></div>
     </div>
-    <div class="legal"><span>© 2026 ThreadFlow</span><span>ThreadFlow không liên kết với Meta. Threads là nhãn hiệu của Meta Platforms, Inc.</span></div>
+    <div class="legal"><span>© 2026 RealUsers.</span><span>RealUsers không liên kết với Meta. Threads là nhãn hiệu của Meta Platforms, Inc.</span></div>
   </div>
 </footer>
 
 <script>
 (function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function(s, r){ return (r || document).querySelector(s); };
+  var $$ = function(s, r){ return [].slice.call((r || document).querySelectorAll(s)); };
+  var io = 'IntersectionObserver' in window;
 
-  var data=[
-    {q:'Bạn bán hàng một mình hoặc với một nhóm nhỏ. Bạn muốn trang Threads có bài mới mỗi ngày mà không phải tự ngồi viết.',who:'Chủ shop',n1:'1 bài/ngày',t1:'lên đều theo lịch, bạn chỉ duyệt một lần cho cả lô',n2:'30 ngày',t2:'mỗi kỳ, có báo cáo chốt số khi kỳ đóng',period:'01/10 - 30/10',p:[29,30],i:[148,150]},
-    {q:'Bạn cần Threads chạy đều trong khi đội marketing lo kênh khác. Bình luận phải bám nội dung bài, và cuối tháng cần con số để báo cáo lên trên.',who:'Trưởng nhóm marketing',n1:'≥ 50%',t1:'tương tác là bình luận viết theo ngữ cảnh của từng bài',n2:'70%',t2:'ngưỡng cảnh báo: giao dưới mức này, đội vận hành được báo ngay',period:'01/09 - 30/09',p:[28,30],i:[431,450]},
-    {q:'Bạn chạy Threads cho nhiều khách hàng. Mỗi khách cần lịch riêng, người duyệt riêng và báo cáo tách bạch.',who:'Agency',n1:'Nhiều brand',t1:'dưới một đăng nhập, mỗi brand là một hợp đồng riêng',n2:'3 vai trò',t2:'chủ sở hữu, biên tập và chỉ xem cho từng brand',period:'01/09 - 30/09, 4 brand',p:[112,120],i:[1730,1800]}
-  ];
-  var tabs=[].slice.call(document.querySelectorAll('.tab'));
-  function set(id,v){document.getElementById(id).textContent=v}
-  function show(k){
-    var d=data[k];
-    tabs.forEach(function(t,j){t.setAttribute('aria-selected',j===k?'true':'false');t.tabIndex=j===k?0:-1});
-    document.getElementById('case').setAttribute('aria-labelledby','tab-'+k);
-    set('c-quote',d.q);set('c-who',d.who);set('c-n1',d.n1);set('c-t1',d.t1);set('c-n2',d.n2);set('c-t2',d.t2);set('r-period',d.period);
-    set('r-posts',d.p[0].toLocaleString('vi-VN')+' / '+d.p[1].toLocaleString('vi-VN'));
-    set('r-int',d.i[0].toLocaleString('vi-VN')+' / '+d.i[1].toLocaleString('vi-VN'));
-    document.getElementById('r-posts-bar').style.width=Math.round(d.p[0]/d.p[1]*100)+'%';
-    document.getElementById('r-int-bar').style.width=Math.round(d.i[0]/d.i[1]*100)+'%';
-    try{localStorage.setItem('tf-tab',String(k))}catch(e){}
+  /* Scroll reveal */
+  var revealEls = $$('[data-reveal]');
+  if (!io || reduce) {
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var ro = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    revealEls.forEach(function(el){ ro.observe(el); });
   }
-  tabs.forEach(function(t,j){
-    t.addEventListener('click',function(){show(j)});
-    t.addEventListener('keydown',function(e){
-      if(e.key==='ArrowRight'||e.key==='ArrowLeft'){var n=(j+(e.key==='ArrowRight'?1:2))%3;show(n);tabs[n].focus();e.preventDefault()}
+
+  /* Header shadow + scroll progress */
+  var header = $('header.main'), bar = $('.progress'), ticking = false;
+  function onScroll(){
+    var y = window.scrollY, h = document.documentElement.scrollHeight - window.innerHeight;
+    header.classList.toggle('scrolled', y > 8);
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, y / h) : 0) + ')';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){ if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  onScroll();
+
+  /* Scroll spy for the nav */
+  var navLinks = $$('.mainnav a, .mnav a[href^="#"]:not(.btn)');
+  if (io) {
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        var id = '#' + e.target.id;
+        navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === id); });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    ['cach-hoat-dong','tinh-nang','theo-nganh','cau-hoi'].forEach(function(id){ var s = document.getElementById(id); if (s) spy.observe(s); });
+  }
+
+  /* Mobile menu */
+  var menuBtn = $('.menu-btn');
+  function setMenu(open){
+    header.classList.toggle('nav-open', open);
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menuBtn.setAttribute('aria-label', open ? 'Đóng menu' : 'Mở menu');
+  }
+  menuBtn.addEventListener('click', function(){ setMenu(!header.classList.contains('nav-open')); });
+  $$('.mnav a').forEach(function(a){ a.addEventListener('click', function(){ setMenu(false); }); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setMenu(false); });
+
+  /* Phone tilt follows the pointer (desktop only) */
+  var phone = $('#phone'), wrap = $('.phone-wrap');
+  if (!reduce && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    wrap.addEventListener('pointermove', function(e){
+      var r = wrap.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      phone.style.setProperty('--ry', (x * 10).toFixed(2) + 'deg');
+      phone.style.setProperty('--rx', (-y * 8).toFixed(2) + 'deg');
+    });
+    wrap.addEventListener('pointerleave', function(){ phone.style.setProperty('--ry', '0deg'); phone.style.setProperty('--rx', '0deg'); });
+  }
+
+  /* Phone demo loop: post goes live, comments arrive one by one, likes climb */
+  var comments = $$('.pcomment'), typing = $('#typing'), posted = $('#posted');
+  var likeN = $('#like-n'), cmtN = $('#cmt-n'), likes = $('#likes');
+  var heroVisible = true;
+  if (io) new IntersectionObserver(function(es){ heroVisible = es[0].isIntersecting; }).observe($('.hero'));
+  function wait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
+  function whenVisible(){
+    return new Promise(function(res){
+      (function check(){ if (heroVisible && !document.hidden) res(); else setTimeout(check, 500); })();
+    });
+  }
+  function bump(el, to){
+    el.textContent = to;
+    if (el === likeN) { likes.classList.remove('liked'); void likes.offsetWidth; likes.classList.add('liked'); }
+  }
+  async function loop(){
+    var like = 24;
+    while (true) {
+      await whenVisible();
+      comments.forEach(function(c){ c.classList.remove('show'); });
+      posted.classList.remove('on'); likes.classList.remove('liked');
+      like = 24; likeN.textContent = like; cmtN.textContent = 0;
+      await wait(1400);
+      posted.classList.add('on');
+      for (var i = 0; i < comments.length; i++) {
+        await wait(900);
+        typing.classList.add('show');
+        await wait(1300);
+        typing.classList.remove('show');
+        comments[i].classList.add('show');
+        cmtN.textContent = i + 1;
+        like += 7 + Math.floor(Math.random() * 9);
+        bump(likeN, like);
+      }
+      await wait(5200);
+    }
+  }
+  if (reduce) { comments.forEach(function(c){ c.classList.add('show'); }); posted.classList.add('on'); cmtN.textContent = comments.length; }
+  else loop();
+
+  /* Approval card: real buttons */
+  var card = $('#approve'), list = $('#ac-list'), view = $('#ac-view');
+  view.addEventListener('click', function(){
+    var open = list.hidden;
+    list.hidden = !open;
+    view.textContent = open ? 'Thu gọn' : 'Xem';
+    view.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  $('#ac-yes').addEventListener('click', function(){
+    card.classList.add('done');
+    $('#ac-tag').textContent = 'Đã duyệt';
+    $('#ac-title').textContent = '3 bài đã sẵn sàng';
+    clearTimeout(card._t);
+    card._t = setTimeout(function(){
+      card.classList.remove('done');
+      $('#ac-tag').textContent = 'Chờ bạn duyệt';
+      $('#ac-title').textContent = '3 bài mới cho tháng này';
+      list.hidden = true; view.textContent = 'Xem'; view.setAttribute('aria-expanded', 'false');
+    }, 6000);
+  });
+
+  /* Feature card spotlight */
+  $$('.fcard').forEach(function(c){
+    c.addEventListener('pointermove', function(e){
+      var r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      c.style.setProperty('--my', (e.clientY - r.top) + 'px');
     });
   });
-  var saved=1;try{var s=parseInt(localStorage.getItem('tf-tab'),10);if(s>=0&&s<3)saved=s}catch(e){}
+
+  /* Tabs + animated report */
+  var data = [
+    { desc:'Bạn muốn trang có bài mới mỗi ngày mà không phải tự viết.', who:'Shop nhỏ', note:'1 bài mỗi ngày, duyệt một lần cho cả tháng.', period:'01/10 - 31/10', p:[29,30], i:[148,150], mix:[58,34,8] },
+    { desc:'Đội marketing lo nhiều kênh, cần Threads chạy đều và có số liệu báo cáo lên trên.', who:'Thương hiệu đang lớn', note:'Báo cáo tháng có link từng bài.', period:'01/10 - 31/10', p:[28,30], i:[431,450], mix:[56,35,9] },
+    { desc:'Bạn chạy Threads cho nhiều khách. Mỗi khách có lịch, người duyệt và báo cáo riêng.', who:'Agency', note:'Nhiều thương hiệu dưới một đăng nhập.', period:'01/10 - 31/10 · 4 thương hiệu', p:[112,120], i:[1730,1800], mix:[60,32,8] }
+  ];
+  var tabs = $$('.tab'), tabsBox = $('.tabs'), text = $('#case-text'), cur = 0, reportSeen = false;
+  function set(id, v){ document.getElementById(id).textContent = v; }
+  function fmt(n){ return Math.round(n).toLocaleString('vi-VN'); }
+  function count(el, to){
+    var from = parseInt((el.dataset.v || '0'), 10), start = null;
+    el.dataset.v = to;
+    if (reduce) { el.textContent = fmt(to); return; }
+    function step(t){
+      if (!start) start = t;
+      var k = Math.min(1, (t - start) / 900), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function drawTotals(d){ set('r-period', d.period); set('r-pt', fmt(d.p[1])); set('r-it', fmt(d.i[1])); }
+  function drawReport(d){
+    drawTotals(d);
+    count($('#r-p'), d.p[0]); count($('#r-i'), d.i[0]);
+    $('#r-pb').style.width = (d.p[0] / d.p[1] * 100).toFixed(1) + '%';
+    $('#r-ib').style.width = (d.i[0] / d.i[1] * 100).toFixed(1) + '%';
+    d.mix.forEach(function(m, j){ $('#r-m' + j).style.width = m + '%'; set('r-l' + j, m); });
+    set('r-c', d.mix[0]);
+  }
+  function show(k, focus){
+    var d = data[k]; cur = k;
+    tabsBox.style.setProperty('--k', k);
+    tabs.forEach(function(t, j){ t.setAttribute('aria-selected', j === k ? 'true' : 'false'); t.tabIndex = j === k ? 0 : -1; });
+    $('#case').setAttribute('aria-labelledby', 'tab-' + k);
+    text.classList.add('swap');
+    setTimeout(function(){ set('c-desc', d.desc); set('c-who', d.who); set('c-note', d.note); text.classList.remove('swap'); }, reduce ? 0 : 200);
+    if (reportSeen) drawReport(d); else drawTotals(d);
+    if (focus) tabs[k].focus();
+    try { localStorage.setItem('ru-tab', String(k)); } catch (e) {}
+  }
+  tabs.forEach(function(t, j){
+    t.addEventListener('click', function(){ show(j); });
+    t.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { show((j + (e.key === 'ArrowRight' ? 1 : 2)) % 3, true); e.preventDefault(); }
+    });
+  });
+  var saved = 0; try { var s = parseInt(localStorage.getItem('ru-tab'), 10); if (s >= 0 && s < 3) saved = s; } catch (e) {}
+  $$('[data-count]').forEach(function(el){ el.textContent = '0'; });
   show(saved);
+  function firstDraw(){ reportSeen = true; drawReport(data[cur]); }
+  if (io && !reduce) {
+    var rio = new IntersectionObserver(function(es){ if (es[0].isIntersecting) { firstDraw(); rio.disconnect(); } }, { threshold: .4 });
+    rio.observe($('#rcard'));
+  } else firstDraw();
+
+  /* FAQ: animate open and close */
+  $$('.qa details').forEach(function(d){
+    var sum = $('summary', d), ans = $('.ans', d);
+    sum.addEventListener('click', function(e){
+      if (reduce || !ans.animate) return;
+      e.preventDefault();
+      if (d.open) {
+        var a = ans.animate([{ height: ans.offsetHeight + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 260, easing: 'ease-out' });
+        a.onfinish = function(){ d.open = false; };
+      } else {
+        d.open = true;
+        ans.animate([{ height: '0px', opacity: 0 }, { height: ans.offsetHeight + 'px', opacity: 1 }], { duration: 300, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      }
+    });
+  });
 })();
 </script>
 
+</div>
 </body>
 </html>

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/": {
+      "targetKind": "existing-ui",
+      "projectId": "1e491195-f6aa-466a-8e4f-fa133e516bed",
+      "baselineDraftId": "08f99e93-9cd9-4876-bfb9-f991e7fedb16",
+      "activeDraftId": "fa7e6c20-77ff-4fd3-995a-a781cc8cfd7f",
+      "designSystemPath": ".superdesign/design-system.md",
+      "referenceIds": [],
+      "brandAssets": {},
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "CONTENT.md",
+        "index.html"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "39573e268859ca42076e18e4abd29057b9172ee0a8e46f84a020494ca1432dbf",
+        "CONTENT.md": "a48052f919cf831b5071e540f316183a5d181a196458e478ffd2a9c9701a3708",
+        "index.html": "6732e0557d7a59266806c8971f9ace0436252cd73fb1949a19e44e5ba66f9235"
+      },
+      "components": [],
+      "drafts": {
+        "08f99e93-9cd9-4876-bfb9-f991e7fedb16": {
+          "role": "baseline",
+          "description": "Imported current ThreadFlow index.html"
+        },
+        "fa7e6c20-77ff-4fd3-995a-a781cc8cfd7f": {
+          "role": "selected",
+          "description": "A selected; v2 = finished index.html with animations, imported from repo",
+          "currentVersion": 2
+        },
+        "d893f18f-efb0-4c3a-b17d-290543e85b1d": {
+          "role": "branch",
+          "description": "B: Meta for Business style"
+        },
+        "84d4da3f-3a88-4764-8add-80dd0e9642d0": {
+          "role": "branch",
+          "description": "C: minimal editorial"
+        }
+      },
+      "note": "Direction A selected 2026-10-12. index.html in repo is the source of truth; v2 of draft A mirrors it."
+    }
+  }
+}
