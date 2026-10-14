@@ -1,6 +1,6 @@
 # RealUsers landing page
 
-Landing page cho RealUsers, dịch vụ đăng bài và tương tác Threads cho thương hiệu (trước đây là bản nháp ThreadFlow).
+Landing page cho RealUsers, nền tảng Conversation Marketing ứng dụng AI trên Threads (trước đây là bản nháp ThreadFlow).
 
 **Xem trang:** https://locnguyensgu.github.io/threadflow-landing/
 
@@ -18,7 +18,7 @@ Mọi số liệu trong thẻ báo cáo là **minh hoạ**, không phải dữ l
 
 ## Hiệu ứng và tương tác
 
-- Hero: tiêu đề hiện từng chữ, bài Threads trong điện thoại nhận bình luận lần lượt và số like tăng, điện thoại nghiêng theo chuột. Thẻ "Chờ bạn duyệt" có nút Duyệt và Xem bấm được.
+- Hero: tiêu đề hiện từng chữ, bài mở chủ đề trong điện thoại nhận trả lời lần lượt và số like tăng, điện thoại nghiêng theo chuột. Thẻ "Chờ bạn duyệt" (gợi ý trả lời) có nút Duyệt và Xem bấm được.
 - Cuộn trang: các khối trượt lên, thanh tiến độ ở mép trên, menu tự đánh dấu mục đang xem.
 - Cách hoạt động: đường nối chạy qua 4 bước, mỗi bước ghi ai làm.
 - Theo quy mô: tab trượt, thẻ báo cáo đổi số theo tab, thanh số liệu chạy và số đếm tăng dần.
