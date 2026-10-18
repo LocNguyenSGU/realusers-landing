@@ -305,6 +305,40 @@ footer .logo{color:#fff}
 .fcols p{color:rgba(255,255,255,.62);font-size:15px;margin-top:16px;max-width:34ch}
 .legal{margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px;color:rgba(255,255,255,.5)}
 
+
+/* Product tour: real app screens in a browser frame */
+.tour h2,.pricing h2{font-size:clamp(28px,3.6vw,44px);line-height:1.2;font-weight:700;letter-spacing:-0.01em}
+.ttabs{display:inline-flex;gap:6px;margin-top:32px;background:var(--surface);border-radius:999px;padding:6px}
+.ttab{border:0;background:transparent;font:inherit;font-size:15px;font-weight:600;color:var(--ink-2);padding:10px 20px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s}
+.ttab:hover{color:var(--ink)}
+.ttab[aria-selected="true"]{background:#fff;color:var(--blue);box-shadow:0 6px 16px -10px rgba(28,43,51,.45)}
+.frame{max-width:1040px;margin:28px auto 0;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 40px 80px -40px rgba(28,43,51,.35);overflow:hidden;text-align:left}
+.frame-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.frame-bar i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}
+.frame-url{margin-left:12px;flex:1;max-width:360px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frame img{display:block;width:100%;height:auto;transition:opacity .25s var(--ease)}
+.frame img.swap{opacity:0}
+.tour-cap{max-width:760px;margin:22px auto 0;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 24px;color:var(--ink-2);font-size:16px}
+.tour-cap b{color:var(--ink)}
+/* Pricing */
+.pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:48px;text-align:left;align-items:stretch}
+.pcard{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-card);padding:28px;display:flex;flex-direction:column;transition:transform .3s var(--ease),box-shadow .3s,border-color .2s}
+.pcard:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:rgba(8,102,255,.45)}
+.pcard.hot{border:2px solid var(--blue);box-shadow:0 24px 48px -24px rgba(8,102,255,.45)}
+.pcard .flag{position:absolute;top:-13px;left:24px;background:var(--blue);color:#fff;font-size:12.5px;font-weight:700;border-radius:999px;padding:4px 12px}
+.pcard h3{font-size:17px;font-weight:600;color:var(--ink-2)}
+.pcard.hot h3{color:var(--blue)}
+.price{margin-top:10px;font-size:34px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums}
+.price small{font-size:15px;font-weight:500;color:var(--muted);letter-spacing:0}
+.pcard .for{margin-top:4px;font-size:15px;color:var(--muted)}
+.pcard ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:12px;font-size:15.5px}
+.pcard li{display:flex;gap:10px;align-items:flex-start}
+.pcard li svg{flex:none;width:20px;height:20px;color:var(--blue);margin-top:2px}
+.pcard .btn{margin-top:auto;width:100%}
+.pcard ul{margin-bottom:28px}
+.price-note{margin-top:22px;font-size:14px;color:var(--muted)}
+@media (max-width:860px){.pgrid{grid-template-columns:minmax(0,1fr)}.ttab{padding:9px 14px;font-size:14px}}
+
 /* Responsive */
 @media (max-width:1024px){
   .mainnav,.hdr-login{display:none}
@@ -385,7 +419,7 @@ footer .logo{color:#fff}
     <nav class="mainnav" aria-label="Chính">
       <a id="link-how" href="#cach-hoat-dong">Cách hoạt động</a>
       <a id="link-feat" href="#tinh-nang">Tính năng</a>
-      <a id="link-ind" href="#theo-nganh">Theo ngành</a>
+      <a id="link-price" href="#bang-gia">Bảng giá</a>
       <a id="link-faq" href="#cau-hoi">Câu hỏi</a>
     </nav>
     <div class="hdr-cta">
@@ -397,7 +431,7 @@ footer .logo{color:#fff}
   <nav class="mnav" id="mnav" aria-label="Menu di động">
     <a id="link-m-how" href="#cach-hoat-dong">Cách hoạt động</a>
     <a id="link-m-feat" href="#tinh-nang">Tính năng</a>
-    <a id="link-m-ind" href="#theo-nganh">Theo ngành</a>
+    <a id="link-m-price" href="#bang-gia">Bảng giá</a>
     <a id="link-m-faq" href="#cau-hoi">Câu hỏi</a>
     <a id="link-m-login" href="#dang-ky">Đăng nhập</a>
     <a id="link-m-signup" class="btn btn-primary" href="#dang-ky">Bắt đầu ngay</a>
@@ -527,6 +561,24 @@ footer .logo{color:#fff}
   </div>
 </section>
 
+<section class="tour center" id="ben-trong">
+  <div class="wrap">
+    <span class="badge" data-reveal>Bên trong RealUsers</span>
+    <h2 style="margin-top:20px" data-reveal>Mọi việc nằm gọn <span class="blue">trong một chỗ.</span></h2>
+    <p class="lead" data-reveal style="margin-top:14px">Đây là màn hình thật bạn dùng mỗi ngày: xem tiến độ, duyệt bài, theo dõi ai đang trả lời thương hiệu của bạn.</p>
+    <div class="ttabs" role="tablist" aria-label="Màn hình trong app" data-reveal>
+      <button class="ttab" role="tab" aria-selected="true" type="button" data-shot="0">Tổng quan</button>
+      <button class="ttab" role="tab" aria-selected="false" type="button" data-shot="1">Duyệt bài</button>
+      <button class="ttab" role="tab" aria-selected="false" type="button" data-shot="2">Báo cáo</button>
+    </div>
+    <div class="frame" data-reveal="scale">
+      <div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url" id="tour-url">app.realusers.vn/tong-quan</span></div>
+      <img id="tour-img" src="assets/app-tong-quan.jpg" width="1200" height="733" alt="Màn hình Tổng quan của RealUsers: số bài chờ duyệt, tiến độ đăng bài trong tháng và các bài gần đây" loading="lazy">
+    </div>
+    <div class="tour-cap" data-reveal><span id="tour-cap">Biết ngay hôm nay cần làm gì: <b>3 bài chờ duyệt</b>, tiến độ tháng và ai vừa trả lời.</span><a id="link-tour-demo" class="link-arrow" href="#dang-ky">Mở bản xem thử <span class="arr" aria-hidden="true">→</span></a></div>
+  </div>
+</section>
+
 <section class="ind panel" id="theo-nganh">
   <div class="wrap">
     <div data-reveal="left">
@@ -577,7 +629,7 @@ footer .logo{color:#fff}
   </div>
 </section>
 
-<section class="safe panel center" id="an-toan">
+<section class="safe center" id="an-toan">
   <div class="wrap">
     <h2 data-reveal>An toàn cho <span class="blue">thương hiệu của bạn.</span></h2>
     <div class="sgrid">
@@ -585,6 +637,40 @@ footer .logo{color:#fff}
       <div class="scard" data-reveal style="--d:1"><span class="icon-tile"><svg><use href="#i-lock"/></svg></span><h3>Dữ liệu riêng từng thương hiệu</h3><p>Không ai xem được dữ liệu của thương hiệu khác.</p></div>
       <div class="scard" data-reveal style="--d:2"><span class="icon-tile"><svg><use href="#i-stop"/></svg></span><h3>Lỗi thì dừng lại</h3><p>Nội dung chưa kiểm tra được sẽ được giữ lại để người xem, không tự đăng.</p></div>
     </div>
+  </div>
+</section>
+
+<!-- Giá dưới đây là SỐ MINH HOẠ lấy từ dữ liệu demo — thay bằng bảng giá thật trước khi đưa ra ngoài. -->
+<section class="pricing panel center" id="bang-gia">
+  <div class="wrap">
+    <span class="badge" data-reveal>Bảng giá</span>
+    <h2 style="margin-top:20px" data-reveal>Chọn gói theo <span class="blue">nhịp đăng bài.</span></h2>
+    <p class="lead" data-reveal style="margin-top:14px">Trả theo tháng, gia hạn khi bạn muốn. Thanh toán bằng chuyển khoản VietQR, gói chạy sau vài giây.</p>
+    <div class="pgrid">
+      <div class="pcard" data-reveal style="--d:0">
+        <h3>Khởi động</h3>
+        <p class="price">990.000 ₫ <small>/ tháng</small></p>
+        <p class="for">Cho shop nhỏ mới bắt đầu trên Threads</p>
+        <ul><li><svg><use href="#i-check"/></svg>Khoảng 30 bài mở chủ đề</li><li><svg><use href="#i-check"/></svg>Khoảng 150 lượt tương tác</li><li><svg><use href="#i-check"/></svg>Bạn duyệt từng bài trước khi đăng</li><li><svg><use href="#i-check"/></svg>Báo cáo tháng có link từng bài</li></ul>
+        <a id="link-price-1" class="btn btn-secondary" href="#dang-ky">Bắt đầu</a>
+      </div>
+      <div class="pcard hot" data-reveal style="--d:1">
+        <span class="flag">Nên chọn</span>
+        <h3>Tăng trưởng</h3>
+        <p class="price">2.490.000 ₫ <small>/ tháng</small></p>
+        <p class="for">Cho thương hiệu muốn có mặt đều mỗi ngày</p>
+        <ul><li><svg><use href="#i-check"/></svg>Khoảng 60 bài mở chủ đề</li><li><svg><use href="#i-check"/></svg>Khoảng 450 lượt tương tác</li><li><svg><use href="#i-check"/></svg>Chuỗi hội thoại nhiều lượt</li><li><svg><use href="#i-check"/></svg>Ưu tiên hỗ trợ</li></ul>
+        <a id="link-price-2" class="btn btn-primary" href="#dang-ky">Bắt đầu <span class="arr" aria-hidden="true">→</span></a>
+      </div>
+      <div class="pcard" data-reveal style="--d:2">
+        <h3>Agency và thương hiệu lớn</h3>
+        <p class="price">Liên hệ</p>
+        <p class="for">Nhiều thương hiệu, số lượng theo nhu cầu</p>
+        <ul><li><svg><use href="#i-check"/></svg>Nhiều thương hiệu, một đăng nhập</li><li><svg><use href="#i-check"/></svg>Nhiều người duyệt trong đội</li><li><svg><use href="#i-check"/></svg>Người phụ trách riêng</li></ul>
+        <a id="link-price-3" class="btn btn-secondary" href="#cau-hoi">Nhận tư vấn</a>
+      </div>
+    </div>
+    <p class="price-note" data-reveal>Số bài và tương tác là con số dự kiến, chốt khi gói kích hoạt. Chưa cần thanh toán để tạo tài khoản.</p>
   </div>
 </section>
 
@@ -622,7 +708,7 @@ footer .logo{color:#fff}
         <a id="link-footer-logo" class="logo" href="#top"><span class="logo-mark"></span><span>RealUsers</span></a>
         <p>RealUsers, nền tảng Conversation Marketing ứng dụng AI trên Threads.</p>
       </div>
-      <div><h4>Sản phẩm</h4><ul><li><a id="link-f-how" href="#cach-hoat-dong">Cách hoạt động</a></li><li><a id="link-f-feat" href="#tinh-nang">Tính năng</a></li><li><a id="link-f-ind" href="#theo-nganh">Theo ngành</a></li></ul></div>
+      <div><h4>Sản phẩm</h4><ul><li><a id="link-f-how" href="#cach-hoat-dong">Cách hoạt động</a></li><li><a id="link-f-feat" href="#tinh-nang">Tính năng</a></li><li><a id="link-f-ben-trong" href="#ben-trong">Xem bên trong</a></li><li><a id="link-f-price" href="#bang-gia">Bảng giá</a></li></ul></div>
       <div><h4>Hỗ trợ</h4><ul><li><a id="link-f-login" href="#dang-ky">Đăng nhập</a></li><li><a id="link-f-signup" href="#dang-ky">Đăng ký</a></li><li><a id="link-f-faq" href="#cau-hoi">Câu hỏi</a></li></ul></div>
       <div><h4>Pháp lý</h4><ul><li><a id="link-f-terms" href="#top">Điều khoản</a></li><li><a id="link-f-data" href="#top">Chính sách dữ liệu</a></li></ul></div>
     </div>
@@ -671,7 +757,7 @@ footer .logo{color:#fff}
         navLinks.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href') === id); });
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    ['cach-hoat-dong','tinh-nang','theo-nganh','cau-hoi'].forEach(function(id){ var s = document.getElementById(id); if (s) spy.observe(s); });
+    ['cach-hoat-dong','tinh-nang','bang-gia','cau-hoi'].forEach(function(id){ var s = document.getElementById(id); if (s) spy.observe(s); });
   }
 
   /* Mobile menu */
@@ -822,6 +908,29 @@ footer .logo{color:#fff}
     var rio = new IntersectionObserver(function(es){ if (es[0].isIntersecting) { firstDraw(); rio.disconnect(); } }, { threshold: .4 });
     rio.observe($('#rcard'));
   } else firstDraw();
+
+
+  /* Product tour tabs */
+  var shots = [
+    { src: 'assets/app-tong-quan.jpg', url: 'app.realusers.vn/tong-quan', alt: 'Màn hình Tổng quan của RealUsers: số bài chờ duyệt, tiến độ đăng bài trong tháng và các bài gần đây', cap: 'Biết ngay hôm nay cần làm gì: <b>3 bài chờ duyệt</b>, tiến độ tháng và ai vừa trả lời.' },
+    { src: 'assets/app-duyet-bai.jpg', url: 'app.realusers.vn/duyet-bai', alt: 'Màn hình Duyệt bài: từng bài hiện như bài Threads thật, có nút Duyệt, Sửa, Bỏ', cap: 'Mỗi bài hiện đúng như khi lên Threads. <b>Duyệt, sửa hoặc bỏ</b> bằng một chạm.' },
+    { src: 'assets/app-bao-cao.jpg', url: 'app.realusers.vn/bao-cao', alt: 'Màn hình Báo cáo: số bài đã đăng, người ngoài trả lời theo ngày và link từng bài', cap: 'Cuối tháng có báo cáo: <b>ai đã trả lời</b>, bài nào được quan tâm, link từng bài.' }
+  ];
+  var ttabs = $$('.ttab'), timg = $('#tour-img'), turl = $('#tour-url'), tcap = $('#tour-cap');
+  shots.slice(1).forEach(function(s){ var i = new Image(); i.src = s.src; });
+  function showShot(k, focus){
+    var s = shots[k];
+    ttabs.forEach(function(t, j){ t.setAttribute('aria-selected', j === k ? 'true' : 'false'); t.tabIndex = j === k ? 0 : -1; });
+    timg.classList.add('swap');
+    setTimeout(function(){ timg.src = s.src; timg.alt = s.alt; turl.textContent = s.url; tcap.innerHTML = s.cap; timg.classList.remove('swap'); }, reduce ? 0 : 180);
+    if (focus) ttabs[k].focus();
+  }
+  ttabs.forEach(function(t, j){
+    t.addEventListener('click', function(){ showShot(j); });
+    t.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { showShot((j + (e.key === 'ArrowRight' ? 1 : 2)) % 3, true); e.preventDefault(); }
+    });
+  });
 
   /* FAQ: animate open and close */
   $$('.qa details').forEach(function(d){
