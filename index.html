@@ -11,7 +11,7 @@
 <meta property="og:description" content="Nền tảng Conversation Marketing ứng dụng AI: tạo nội dung hội thoại, tìm cơ hội tương tác và gợi ý phản hồi đúng ngữ cảnh trên Threads.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#0866FF">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230866FF'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230866FF'/%3E%3Cpath fill='%23fff' fill-rule='evenodd' d='M10 7h7.3c3.7 0 5.9 2.1 5.9 5.3 0 2.3-1.2 4-3.2 4.8L24 25h-5l-3.6-7.4h-1V25H10V7zm4.4 3.7v3.6h2.6c1.2 0 1.9-.7 1.9-1.8s-.7-1.8-1.9-1.8h-2.6z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
@@ -79,9 +79,9 @@ section{padding-block:clamp(64px,8vw,96px)}
 header.main{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.92);-webkit-backdrop-filter:saturate(1.6) blur(12px);backdrop-filter:saturate(1.6) blur(12px);border-bottom:1px solid transparent;transition:border-color .2s,box-shadow .2s}
 header.main.scrolled{border-bottom-color:var(--line);box-shadow:0 10px 30px -22px rgba(28,43,51,.45)}
 header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
-.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--ink)}
-.logo-mark{width:28px;height:28px;border-radius:8px;background:var(--blue);display:inline-block;flex:none;transition:transform .4s var(--ease)}
-.logo:hover .logo-mark{transform:rotate(-12deg) scale(1.06)}
+.logo{display:flex;align-items:center;gap:0;text-decoration:none;font-weight:700;font-size:20px;letter-spacing:-0.02em;color:var(--ink)}
+.logo-mark{background:var(--blue);color:#fff;border:2px solid var(--blue);border-radius:8px 0 0 8px;padding:2px 7px 3px;line-height:1.1}
+.logo-users{border:2px solid var(--blue);border-left:0;border-radius:0 8px 8px 0;padding:2px 7px 3px;line-height:1.1}
 .mainnav{display:flex;gap:28px;font-size:16px;font-weight:500}
 .mainnav a{position:relative;text-decoration:none;color:var(--ink-2);padding-block:6px;transition:color .15s}
 .mainnav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:var(--blue);transform:scaleX(0);transition:transform .25s var(--ease)}
@@ -415,7 +415,7 @@ footer .logo{color:#fff}
 
 <header class="main">
   <div class="wrap">
-    <a id="link-logo" class="logo" href="#top" aria-label="RealUsers, về đầu trang"><span class="logo-mark"></span><span>RealUsers</span></a>
+    <a id="link-logo" class="logo" href="#top" aria-label="RealUsers, về đầu trang"><span class="logo-mark">Real</span><span class="logo-users">Users</span></a>
     <nav class="mainnav" aria-label="Chính">
       <a id="link-how" href="#cach-hoat-dong">Cách hoạt động</a>
       <a id="link-feat" href="#tinh-nang">Tính năng</a>
@@ -705,7 +705,7 @@ footer .logo{color:#fff}
   <div class="wrap">
     <div class="fcols">
       <div>
-        <a id="link-footer-logo" class="logo" href="#top"><span class="logo-mark"></span><span>RealUsers</span></a>
+        <a id="link-footer-logo" class="logo" href="#top"><span class="logo-mark">Real</span><span class="logo-users">Users</span></a>
         <p>RealUsers, nền tảng Conversation Marketing ứng dụng AI trên Threads.</p>
       </div>
       <div><h4>Sản phẩm</h4><ul><li><a id="link-f-how" href="#cach-hoat-dong">Cách hoạt động</a></li><li><a id="link-f-feat" href="#tinh-nang">Tính năng</a></li><li><a id="link-f-ben-trong" href="#ben-trong">Xem bên trong</a></li><li><a id="link-f-price" href="#bang-gia">Bảng giá</a></li></ul></div>

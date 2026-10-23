@@ -29,7 +29,7 @@ Mọi số liệu trong thẻ báo cáo là **minh hoạ**, không phải dữ l
 
 1. Mục "Những việc ... không làm" đã tạm bỏ, vì code `thread-secret` vẫn còn quyền kịch bản thảo luận (`Plan.hoi_thoai_kich_ban_bat`). Giữ hay bỏ hẳn?
 2. Thanh toán VietQR viết theo plan SePay, chưa chạy giao dịch thật, D-31 chưa chốt.
-3. Chưa có logo RealUsers. Trang đang dùng chữ kèm một ô vuông xanh.
+3. Logo lấy theo app `thread-secret` (commit `bf7842c`): chữ "Real" trong ô xanh, chữ "Users" trong ô viền xanh. Favicon dùng chữ "R" trong ô xanh, vì chữ "Real" không vừa ở cỡ 16–32px. Đây là logo dựng bằng chữ, chưa có file logo thiết kế chính thức.
 4. Trang chưa có giá. Giá gói do admin cấu hình, chưa có bảng giá công khai.
 5. Các nút "Bắt đầu ngay", "Đăng nhập" đang trỏ về mục cuối trang, chưa nối vào app thật.
 
