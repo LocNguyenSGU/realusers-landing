@@ -181,6 +181,16 @@ export const Posts: CollectionConfig<'posts'> = {
     }),
   ],
   hooks: {
+    beforeValidate: [
+      // Tạo bài qua API mà không gửi slug: tự sinh từ tiêu đề trước bước kiểm tra
+      // (slugField của Payload chỉ sinh ở beforeChange, lúc đó kiểm tra "bắt buộc" đã chạy xong và báo lỗi).
+      ({ data, operation }) => {
+        if (operation === 'create' && data && !data.slug && typeof data.title === 'string') {
+          data.slug = slugify(data.title)
+        }
+        return data
+      },
+    ],
     beforeChange: [
       ({ data, req }) => {
         // Người viết chỉ lưu nháp. Đăng bài là việc của biên tập hoặc admin.

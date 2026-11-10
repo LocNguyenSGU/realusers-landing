@@ -118,6 +118,18 @@ describe('quyền', () => {
 })
 
 describe('slug và chuyển hướng', () => {
+  it('tạo bài qua API không gửi slug thì tự sinh slug tiếng Việt không dấu từ tiêu đề', async () => {
+    const cat = await payload.find({ collection: 'categories', limit: 1 })
+    const post = await payload.create({
+      collection: 'posts',
+      context: ctx,
+      // Không có slug: kiểu dữ liệu bắt buộc slug nên ép kiểu, đúng như một lời gọi REST thiếu slug.
+      data: { title: 'Đăng bài Threads lúc mấy giờ?', excerpt: 'x', content: emptyContent('x'), category: cat.docs[0].id, _status: 'published' } as never,
+    })
+    expect(post.slug).toBe('dang-bai-threads-luc-may-gio')
+    await payload.delete({ collection: 'posts', id: post.id, context: ctx })
+  })
+
   it('không cho dùng slug trùng đường dẫn hệ thống', async () => {
     const cat = await payload.find({ collection: 'categories', limit: 1 })
     await expect(
