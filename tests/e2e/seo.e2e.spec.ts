@@ -87,6 +87,13 @@ test.describe('SEO', () => {
     expect(og.headers()['content-type']).toBe('image/png')
   })
 
+  test('favicon là file thật Google đọc được, trang nào cũng trỏ tới', async ({ request }) => {
+    const icon = await request.get('/favicon.svg')
+    expect(icon.status()).toBe(200)
+    expect(icon.headers()['content-type']).toContain('image/svg+xml')
+    for (const path of ['/', '/blog/']) expect((await html(request, path)).body).toMatch(/<link rel="icon" href="\/favicon\.svg"/)
+  })
+
   test('landing vẫn ở "/"', async ({ request }) => {
     const { status, body } = await html(request, '/')
     expect(status).toBe(200)
