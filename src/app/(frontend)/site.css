@@ -135,9 +135,13 @@ header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
 .toc{position:sticky;top:96px;font-size:14.5px;border-left:2px solid var(--surface-2);padding-left:16px}
 .toc h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:10px}
 .toc ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.toc a{text-decoration:none;color:var(--ink-2);line-height:1.4;display:block}
+.toc a{text-decoration:none;color:var(--ink-2);line-height:1.4;display:block;position:relative;transition:color .15s}
 .toc a:hover{color:var(--blue)}
-.toc .l3{padding-left:14px;font-size:14px}
+.toc .l3 a{padding-left:14px;font-size:14px}
+/* Mục đang đọc (Toc.tsx đặt aria-current khi lướt bài): chữ xanh + vạch xanh đè lên đường kẻ trái */
+.toc a[aria-current]{color:var(--blue);font-weight:600}
+.toc a[aria-current]::before{content:"";position:absolute;left:-18px;top:0;bottom:0;width:2px;border-radius:2px;background:var(--blue)}
+.toc-mobile a[aria-current]{color:var(--blue);font-weight:600}
 .toc-mobile{display:none;margin-bottom:28px;background:var(--surface);border-radius:var(--r-tile);padding:14px 18px}
 .toc-mobile summary{cursor:pointer;font-weight:600}
 .toc-mobile ol{margin:12px 0 0;padding-left:18px;display:grid;gap:6px;font-size:15px}

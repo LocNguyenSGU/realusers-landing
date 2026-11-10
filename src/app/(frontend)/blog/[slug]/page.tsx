@@ -9,6 +9,7 @@ import { JsonLd } from '@/components/JsonLd'
 import { PostCard } from '@/components/PostCard'
 import { RichText } from '@/components/RichText'
 import { ShareButtons } from '@/components/ShareButtons'
+import { Toc } from '@/components/Toc'
 import {
   asAuthor,
   asCategory,
@@ -123,18 +124,7 @@ export default async function PostPage({ params }: Args) {
 
         <div className="post-layout">
           <div className="post-main">
-            {toc.length >= 3 ? (
-              <details className="toc-mobile">
-                <summary>Mục lục</summary>
-                <ol>
-                  {toc.map((t) => (
-                    <li key={t.id} className={`l${t.level}`}>
-                      <a href={`#${t.id}`}>{t.text}</a>
-                    </li>
-                  ))}
-                </ol>
-              </details>
-            ) : null}
+            {toc.length >= 3 ? <Toc items={toc} variant="mobile" /> : null}
 
             <RichText data={post.content} />
 
@@ -184,18 +174,7 @@ export default async function PostPage({ params }: Args) {
             ) : null}
           </div>
 
-          {toc.length >= 3 ? (
-            <nav className="toc" aria-label="Mục lục">
-              <h2>Mục lục</h2>
-              <ol>
-                {toc.map((t) => (
-                  <li key={t.id} className={`l${t.level}`}>
-                    <a href={`#${t.id}`}>{t.text}</a>
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          ) : null}
+          {toc.length >= 3 ? <Toc items={toc} variant="side" /> : null}
         </div>
       </article>
 

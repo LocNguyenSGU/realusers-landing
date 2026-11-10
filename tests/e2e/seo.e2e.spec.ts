@@ -104,6 +104,21 @@ test.describe('Giao diện', () => {
     })
   }
 
+  test('lướt bài thì mục lục sáng đúng mục đang đọc', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Mục lục bên phải chỉ có trên màn rộng')
+    await page.goto(`/blog/${OLD_POSTS[1]}/`)
+    const links = page.locator('nav.toc a')
+    const third = (await links.nth(2).getAttribute('href'))!.slice(1)
+    await page.evaluate((id) => {
+      const el = document.getElementById(id)!
+      window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 100)
+    }, third)
+    await expect(links.nth(2)).toHaveAttribute('aria-current', 'location')
+    await expect(page.locator('nav.toc a[aria-current]')).toHaveCount(1)
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect(page.locator('nav.toc a[aria-current]')).toHaveCount(0)
+  })
+
   test('mục lục nhảy đúng tới heading', async ({ page, isMobile }) => {
     await page.goto(`/blog/${OLD_POSTS[1]}/`)
     const toc = isMobile ? page.locator('.toc-mobile') : page.locator('nav.toc')
