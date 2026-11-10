@@ -2,6 +2,17 @@ import Link from 'next/link'
 
 import { APP_URL } from '@/lib/site'
 
+import { MobileMenu } from './MobileMenu'
+
+// Cùng menu với landing (public/landing.html), để khách đi qua lại không thấy mất mục.
+const NAV = [
+  { href: '/#cach-hoat-dong', label: 'Cách hoạt động' },
+  { href: '/#tinh-nang', label: 'Tính năng' },
+  { href: '/#bang-gia', label: 'Bảng giá' },
+  { href: '/#cau-hoi', label: 'Câu hỏi' },
+  { href: '/blog/', label: 'Blog', current: true },
+]
+
 function Logo() {
   return (
     <>
@@ -19,11 +30,17 @@ export function SiteHeader() {
           <Logo />
         </a>
         <nav className="mainnav" aria-label="Chính">
-          <a href="/#tinh-nang">Tính năng</a>
-          <a href="/#bang-gia">Bảng giá</a>
-          <Link href="/blog/" aria-current="page">
-            Blog
-          </Link>
+          {NAV.map((it) =>
+            it.current ? (
+              <Link key={it.href} href={it.href} aria-current="page">
+                {it.label}
+              </Link>
+            ) : (
+              <a key={it.href} href={it.href}>
+                {it.label}
+              </a>
+            ),
+          )}
         </nav>
         <div className="hdr-cta">
           <a className="hdr-login" href={`${APP_URL}/login`}>
@@ -33,6 +50,7 @@ export function SiteHeader() {
             Bắt đầu ngay
           </a>
         </div>
+        <MobileMenu items={NAV} loginUrl={`${APP_URL}/login`} signupUrl={`${APP_URL}/dang-ky`} />
       </div>
     </header>
   )

@@ -40,6 +40,13 @@ header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
 .hdr-cta{margin-left:auto;display:flex;gap:12px;align-items:center}
 .hdr-login{text-decoration:none;color:var(--ink);font-weight:600;font-size:16px}
 .hdr-login:hover{color:var(--blue)}
+.menu-btn{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;width:44px;height:44px;cursor:pointer;color:var(--ink);position:relative;flex:none}
+.menu-btn i{position:absolute;left:12px;right:12px;height:2px;border-radius:2px;background:currentColor;transition:transform .25s var(--ease),opacity .2s}
+.menu-btn i:nth-child(1){top:15px}.menu-btn i:nth-child(2){top:21px}.menu-btn i:nth-child(3){top:27px}
+.nav-open .menu-btn i:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.nav-open .menu-btn i:nth-child(2){opacity:0}
+.nav-open .menu-btn i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.mnav{display:none}
 
 /* Breadcrumb */
 .crumb{padding-top:28px;font-size:14.5px;color:var(--muted)}
@@ -222,7 +229,14 @@ footer.site .logo{color:#fff}
   .lien-quan .posts{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:1024px){
-  .mainnav{gap:20px}
+  /* Giống landing: màn hẹp thì gom menu vào nút ba gạch */
+  .mainnav,.hdr-login{display:none}
+  .menu-btn{display:block}
+  .mnav{display:grid;gap:4px;max-height:0;overflow:hidden;transition:max-height .35s var(--ease),padding .35s var(--ease);padding:0 clamp(16px,4vw,24px);border-top:1px solid transparent;background:#fff;position:absolute;top:100%;left:0;right:0}
+  .nav-open .mnav{max-height:460px;padding-block:12px 20px;border-top-color:var(--line);box-shadow:0 24px 32px -24px rgba(28,43,51,.35)}
+  .mnav a{text-decoration:none;font-weight:600;font-size:18px;padding:12px 4px;border-bottom:1px solid var(--surface-2)}
+  .mnav a[aria-current]{color:var(--blue)}
+  .mnav .btn{margin-top:12px;border-bottom:0;color:#fff}
   .listing{grid-template-columns:minmax(0,1fr)}
   .sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}
   .sidebar .box.dark{grid-column:1/-1}
@@ -235,7 +249,6 @@ footer.site .logo{color:#fff}
 }
 @media (max-width:640px){
   header.main .wrap{gap:12px;height:64px}
-  .hdr-login,.mainnav{display:none}
   .posts,.posts.three,.lien-quan .posts,.sidebar{grid-template-columns:minmax(0,1fr)}
   .tabs{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
   .tabs a{flex:none}
