@@ -86,5 +86,7 @@ npm run build && PW_CHANNEL=chrome E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... np
 
 ## Deploy (Vercel)
 
+Việc dựng production (DB, R2, Vercel, đổi tên miền) và cách kiểm: xem `DEPLOY.md`.
+
 Biến môi trường production: xem `.env.example`. Bắt buộc có `R2_*`, vì Vercel không giữ file ghi ra đĩa.
 Hẹn giờ đăng bài chạy qua Vercel Cron (`vercel.json`) gọi `/api/payload-jobs/run`, kèm `CRON_SECRET`.
