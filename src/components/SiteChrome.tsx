@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { DICT, pathsFor, type Locale } from '@/i18n'
 import { APP_URL } from '@/lib/site'
 
+import { Icon } from './Icon'
 import { LangSwitch } from './LangSwitch'
 import { MobileMenu } from './MobileMenu'
 
@@ -96,7 +97,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             <p className="fh">{d.footer.resources}</p>
             <ul>
               <li><Link href={p.blog}>{d.blog}</Link></li>
-              <li><a href={p.rss}>RSS</a></li>
+              <li><a className="with-ic" href={p.rss}><Icon name="rss" size={14} />RSS</a></li>
               <li><a href="/#cau-hoi">{d.footer.faq}</a></li>
             </ul>
           </div>

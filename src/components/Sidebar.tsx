@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { getBlogSettings, getCategories, getPicks } from '@/lib/data'
 import { DICT, pathsFor, type Locale } from '@/i18n'
 
+import { Icon } from './Icon'
+
 export async function Sidebar({ locale, currentCategory }: { locale: Locale; currentCategory?: string }) {
   const [picks, categories, settings] = await Promise.all([getPicks(locale, 5), getCategories(locale), getBlogSettings(locale)])
   const d = DICT[locale]
@@ -43,6 +45,7 @@ export async function Sidebar({ locale, currentCategory }: { locale: Locale; cur
           {cta.url ? (
             <a className="btn btn-primary btn-sm" href={cta.url}>
               {cta.buttonLabel || d.signup}
+              <Icon name="arrowRight" />
             </a>
           ) : null}
         </section>

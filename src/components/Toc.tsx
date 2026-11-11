@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 
 import type { TocItem } from '@/lib/lexical'
 
+import { Icon } from './Icon'
+
 // Heading được coi là "đang đọc" khi mép trên đã lên quá vạch này (tính cả header dính 72px).
 const OFFSET = 120
 
@@ -55,14 +57,20 @@ export function Toc({ items, variant, title }: { items: TocItem[]; variant: 'sid
   if (variant === 'mobile') {
     return (
       <details className="toc-mobile">
-        <summary>{title}</summary>
+        <summary>
+          <Icon name="list" />
+          {title}
+        </summary>
         {list}
       </details>
     )
   }
   return (
     <nav className="toc" aria-label={title}>
-      <h2>{title}</h2>
+      <h2>
+        <Icon name="list" size={14} />
+        {title}
+      </h2>
       {list}
     </nav>
   )

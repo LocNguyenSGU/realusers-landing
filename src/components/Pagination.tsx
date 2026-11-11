@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { Icon } from './Icon'
+
 /** Dãy số trang: luôn có trang đầu, trang cuối và 1 trang mỗi bên trang hiện tại; chỗ hở là "…". */
 export function pageWindow(current: number, total: number): (number | 'gap')[] {
   const keep = new Set([1, total, current - 1, current, current + 1].filter((n) => n >= 1 && n <= total))
@@ -28,7 +30,7 @@ export function Pagination({
     <nav className="pagination" aria-label={labels.nav}>
       {current > 1 ? (
         <Link href={href(current - 1)} rel="prev" aria-label={labels.prev}>
-          ←
+          <Icon name="arrowLeft" />
         </Link>
       ) : null}
       {pageWindow(current, total).map((n, i) =>
@@ -48,7 +50,7 @@ export function Pagination({
       )}
       {current < total ? (
         <Link href={href(current + 1)} rel="next" aria-label={labels.next}>
-          →
+          <Icon name="arrowRight" />
         </Link>
       ) : null}
     </nav>

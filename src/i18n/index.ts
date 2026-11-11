@@ -163,7 +163,7 @@ export const DICT: Record<Locale, Dict> = {
       faq: 'Câu hỏi',
       signup: 'Đăng ký',
     },
-    legal: 'RealUsers không liên kết với Meta. Threads là nhãn hiệu của Meta Platforms, Inc.',
+    legal: 'RealUsers không liên kết với Meta. Threads và Facebook là nhãn hiệu của Meta Platforms, Inc.',
     language: 'Ngôn ngữ',
   },
   en: {
@@ -219,7 +219,7 @@ export const DICT: Record<Locale, Dict> = {
       faq: 'FAQ',
       signup: 'Sign up',
     },
-    legal: 'RealUsers is not affiliated with Meta. Threads is a trademark of Meta Platforms, Inc.',
+    legal: 'RealUsers is not affiliated with Meta. Threads and Facebook are trademarks of Meta Platforms, Inc.',
     language: 'Language',
   },
 }

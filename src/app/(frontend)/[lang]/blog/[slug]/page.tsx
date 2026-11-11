@@ -8,6 +8,7 @@ import { Breadcrumb } from '@/components/Breadcrumb'
 import { JsonLd } from '@/components/JsonLd'
 import { PostCard } from '@/components/PostCard'
 import { RichText } from '@/components/RichText'
+import { Icon } from '@/components/Icon'
 import { ShareButtons } from '@/components/ShareButtons'
 import { Toc } from '@/components/Toc'
 import { DICT, isLocale, pathsFor } from '@/i18n'
@@ -118,15 +119,22 @@ export default async function PostPage({ params }: Args) {
             {author ? <Link href={paths.author(author.slug as string)}>{author.name}</Link> : <span>{d.teamName}</span>}
             {post.publishedAt ? (
               <span>
+                <Icon name="calendar" size={14} />
                 {d.published} <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
               </span>
             ) : null}
             {updated ? (
               <span>
+                <Icon name="refresh" size={14} />
                 {d.updated} <time dateTime={updated}>{formatDate(updated, locale)}</time>
               </span>
             ) : null}
-            {post.readingMinutes ? <span>{d.minRead(post.readingMinutes)}</span> : null}
+            {post.readingMinutes ? (
+              <span>
+                <Icon name="clock" size={14} />
+                {d.minRead(post.readingMinutes)}
+              </span>
+            ) : null}
           </p>
         </header>
 
@@ -169,6 +177,7 @@ export default async function PostPage({ params }: Args) {
                 {cta.url ? (
                   <a className="btn btn-primary" href={cta.url}>
                     {cta.buttonLabel || d.signup}
+                    <Icon name="arrowRight" />
                   </a>
                 ) : null}
               </aside>

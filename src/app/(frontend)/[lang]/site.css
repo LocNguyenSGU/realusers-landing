@@ -278,3 +278,76 @@ footer.site .logo{color:#fff}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important}
 }
+
+/* ===== Lớp tinh chỉnh (icon + micro-interaction), theo design-taste-frontend: thẻ có link nhấc 2px,
+   ảnh zoom 1.03 trong khung, nút nhích khi hover và nhấn xuống khi bấm, gạch chân vẽ ra. ===== */
+.i{flex:none;display:inline-block;vertical-align:-0.15em}
+
+/* Nút: nhích lên khi hover, nhấn xuống khi bấm, mũi tên chạy nhẹ */
+.btn{transition:background .15s,color .15s,border-color .15s,box-shadow .2s,transform .2s var(--ease)}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn .i{transition:transform .2s var(--ease)}
+.btn:hover .i{transform:translateX(3px)}
+
+/* Thẻ bài: ảnh zoom trong khung, tiêu đề đổi màu, mũi tên trượt vào */
+.pcard .thumb img,.featured .thumb img{transition:transform .5s var(--ease)}
+.pcard:hover .thumb img,.featured:hover .thumb img{transform:scale(1.03)}
+.pcard h2,.pcard h3,.featured h2{transition:color .2s}
+.pcard:hover h2,.pcard:hover h3,.featured:hover h2{color:var(--blue)}
+.featured{transition:border-color .2s,transform .3s var(--ease)}
+.featured:hover{transform:translateY(-2px)}
+.pcard .foot{margin-top:auto;padding-top:6px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pcard .foot .meta{margin-top:0;padding-top:0}
+.pcard .go{width:32px;height:32px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#fff;color:var(--ink);border:1px solid var(--surface-2);transition:background .2s,color .2s,border-color .2s,transform .3s var(--ease)}
+.pcard:hover .go{background:var(--blue);border-color:var(--blue);color:#fff;transform:translateX(2px)}
+
+/* Dòng meta: các mục cách nhau bằng chấm nhỏ, icon cùng màu chữ */
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.meta>*+*::before{content:"";display:inline-block;width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.45;margin-right:8px;vertical-align:middle}
+.meta .mins{display:inline-flex;align-items:center;gap:4px}
+.byline>span{display:inline-flex;align-items:center;gap:6px}
+.byline .i{color:var(--muted)}
+
+/* Thẻ chuyên mục và link trong bài */
+.tag{transition:background .2s,color .2s}
+a.tag:hover{background:var(--blue);color:#fff}
+.body a{text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/100% 1px no-repeat;transition:background-size .25s var(--ease)}
+.body a:hover{background-size:0 1px;background-position:100% 100%}
+
+/* Chia sẻ: logo thật của nền tảng + icon link, viên thuốc nhích khi hover */
+.share{gap:8px}
+.share>span{margin-right:4px}
+.share a,.share button{gap:8px;height:40px;padding:0 16px 0 12px;transition:border-color .2s,color .2s,background .2s,transform .2s var(--ease),box-shadow .2s}
+.share a:hover,.share button:hover{transform:translateY(-1px);box-shadow:0 6px 16px -10px rgba(28,43,51,.35)}
+.share a:active,.share button:active{transform:scale(.97)}
+.share .brand-ic{width:18px;height:18px;display:block}
+.share button .i{width:16px;height:16px}
+.share button.is-done{border-color:#16A34A;color:#15803D;background:#F0FDF4}
+
+/* Mục lục: tiêu đề có icon */
+.toc h2{display:flex;align-items:center;gap:6px}
+.toc-mobile summary{display:flex;align-items:center;gap:8px;list-style:none}
+.toc-mobile summary::-webkit-details-marker{display:none}
+.toc-mobile summary::after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);transform:rotate(45deg);transition:transform .2s}
+.toc-mobile[open] summary::after{transform:rotate(225deg)}
+
+/* Phân trang */
+.pagination a{transition:border-color .2s,color .2s,transform .2s var(--ease)}
+.pagination a:hover{transform:translateY(-1px)}
+.pagination a:active{transform:scale(.96)}
+
+/* Chân trang */
+.fcols a{transition:color .15s}
+.fcols a.with-ic{display:inline-flex;align-items:center;gap:6px}
+
+/* Cột phụ */
+.catlist a{transition:color .15s,padding .2s var(--ease)}
+.catlist a:hover{padding-left:4px}
+
+@media (prefers-reduced-motion:reduce){
+  .btn:hover,.pcard:hover,.featured:hover,.share a:hover,.share button:hover,.pagination a:hover{transform:none}
+  .pcard:hover .thumb img,.featured:hover .thumb img,.btn:hover .i,.pcard:hover .go{transform:none}
+}
+.featured .meta{display:flex}
+.pcard .meta{flex-wrap:nowrap;white-space:nowrap}

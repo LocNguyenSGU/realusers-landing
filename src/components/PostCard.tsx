@@ -8,13 +8,20 @@ import { DICT, pathsFor, type Locale } from '@/i18n'
 import { formatDate } from '@/lib/format'
 import { postImage } from '@/lib/media'
 
-export function PostMetaLine({ post, locale }: { post: Post; locale: Locale }) {
+import { Icon } from './Icon'
+
+export function PostMetaLine({ post, locale, showAuthor = true }: { post: Post; locale: Locale; showAuthor?: boolean }) {
   const author = asAuthor(post.author)
   return (
     <span className="meta">
-      {author ? `${author.name} · ` : ''}
+      {showAuthor && author ? <span>{author.name}</span> : null}
       {post.publishedAt ? <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time> : null}
-      {post.readingMinutes ? ` · ${DICT[locale].minRead(post.readingMinutes)}` : ''}
+      {post.readingMinutes ? (
+        <span className="mins">
+          <Icon name="clock" size={13} />
+          {DICT[locale].minRead(post.readingMinutes)}
+        </span>
+      ) : null}
     </span>
   )
 }
@@ -52,7 +59,13 @@ export function PostCard({
         {category ? <span className="tag">{category.name}</span> : null}
         <H>{post.title}</H>
         {post.excerpt ? <p>{post.excerpt}</p> : null}
-        <PostMetaLine post={post} locale={locale} />
+        <div className="foot">
+          {/* Thẻ hẹp: bỏ tên tác giả để dòng meta nằm gọn một hàng (tác giả có ở trang bài). */}
+          <PostMetaLine post={post} locale={locale} showAuthor={false} />
+          <span className="go" aria-hidden="true">
+            <Icon name="arrowRight" />
+          </span>
+        </div>
       </div>
     </Link>
   )

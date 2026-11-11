@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+import { BrandIcon, Icon } from './Icon'
+
 export function ShareButtons({ url, title, labels }: { url: string; title: string; labels: { share: string; copy: string; copied: string } }) {
   const [copied, setCopied] = useState(false)
   const enc = encodeURIComponent
@@ -9,13 +11,17 @@ export function ShareButtons({ url, title, labels }: { url: string; title: strin
     <div className="share">
       <span>{labels.share}</span>
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`} target="_blank" rel="noopener noreferrer">
+        <BrandIcon name="facebook" />
         Facebook
       </a>
       <a href={`https://www.threads.net/intent/post?text=${enc(`${title} ${url}`)}`} target="_blank" rel="noopener noreferrer">
+        <BrandIcon name="threads" />
         Threads
       </a>
       <button
         type="button"
+        className={copied ? 'is-done' : undefined}
+        aria-live="polite"
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(url)
@@ -26,6 +32,7 @@ export function ShareButtons({ url, title, labels }: { url: string; title: strin
           }
         }}
       >
+        <Icon name={copied ? 'check' : 'link'} />
         {copied ? labels.copied : labels.copy}
       </button>
     </div>
