@@ -206,7 +206,9 @@ header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
 /* Bài liên quan */
 .lien-quan{padding-block:clamp(48px,6vw,72px) clamp(56px,8vw,88px)}
 .lien-quan>h2{font-size:24px;font-weight:700;margin-bottom:20px}
-.lien-quan .posts{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+/* auto-fill (không phải auto-fit): ít bài thì thẻ vẫn giữ đúng bề rộng cột, không kéo giãn hết hàng (lỗi trang tác giả tiếng Anh 1 bài, 11/11) */
+.lien-quan .posts{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.lien-quan .posts.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 
 /* Trang tác giả */
 .author-hero{display:flex;gap:20px;align-items:center;padding-block:clamp(40px,6vw,64px) 32px}
@@ -253,7 +255,7 @@ footer.site .logo{color:#fff}
   .listing{grid-template-columns:minmax(0,1fr)}
   .sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}
   .sidebar .box.dark{grid-column:1/-1}
-  .posts.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .posts.three,.lien-quan .posts.three{grid-template-columns:repeat(2,minmax(0,1fr))}
   .fcols{grid-template-columns:repeat(3,1fr)}
   .fcols>div:first-child{grid-column:1/-1}
 }
@@ -262,7 +264,7 @@ footer.site .logo{color:#fff}
 }
 @media (max-width:640px){
   header.main .wrap{gap:12px;height:64px}
-  .posts,.posts.three,.lien-quan .posts,.sidebar{grid-template-columns:minmax(0,1fr)}
+  .posts,.posts.three,.lien-quan .posts,.lien-quan .posts.three,.sidebar{grid-template-columns:minmax(0,1fr)}
   .tabs{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
   .tabs a{flex:none}
   .body p,.body ul,.body ol{font-size:17px}

@@ -96,3 +96,13 @@ test('URL tiếng Việt dưới /en/ và /vi/ không tạo trang trùng', async
   expect(new URL(vi.headers()['location'], SITE).pathname).toBe('/blog/')
   expect((await request.get('/en/blog/category/writing-posts/', { maxRedirects: 0 })).status()).toBe(200)
 })
+
+test('trang tác giả tiếng Anh ít bài: thẻ giữ bề rộng cột như bản tiếng Việt, không kéo giãn hết hàng', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'Màn hẹp vốn một cột')
+  for (const path of ['/blog/tac-gia/doi-realusers/', '/en/blog/author/doi-realusers/']) {
+    await page.goto(path)
+    const grid = await page.locator('.lien-quan .posts').boundingBox()
+    const card = await page.locator('.lien-quan .pcard').first().boundingBox()
+    expect(card!.width).toBeLessThan(grid!.width / 2)
+  }
+})
