@@ -96,14 +96,14 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('vi' | 'en') | ('vi' | 'en')[];
   globals: {
     'blog-settings': BlogSetting;
   };
   globalsSelect: {
     'blog-settings': BlogSettingsSelect<false> | BlogSettingsSelect<true>;
   };
-  locale: null;
+  locale: 'vi' | 'en';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -288,6 +288,10 @@ export interface Category {
 export interface Author {
   id: number;
   name: string;
+  /**
+   * Google hiểu tác giả là người hay tổ chức theo ô này.
+   */
+  kind: 'person' | 'organization';
   jobTitle?: string | null;
   avatar?: (number | null) | Media;
   bio?: string | null;
@@ -589,6 +593,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface AuthorsSelect<T extends boolean = true> {
   name?: T;
+  kind?: T;
   jobTitle?: T;
   avatar?: T;
   bio?: T;

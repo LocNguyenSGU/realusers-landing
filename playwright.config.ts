@@ -11,6 +11,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: 'list',
+  // Một luồng: các spec đăng bài / dịch bài cùng ghi vào một DB, chạy song song sẽ giẫm nhau.
+  workers: 1,
   use: { baseURL: `http://localhost:${port}`, trace: 'retain-on-failure' },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], channel } },

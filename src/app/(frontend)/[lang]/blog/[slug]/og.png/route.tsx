@@ -3,14 +3,16 @@ import fs from 'fs/promises'
 import path from 'path'
 import { ImageResponse } from 'next/og'
 
+import { DICT, isLocale } from '@/i18n'
 import { getPostBySlug } from '@/lib/data'
 
 const fontPath = path.join(process.cwd(), 'src/assets/fonts/BeVietnamPro-Bold.ttf')
 
-export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const post = await getPostBySlug(decodeURIComponent(slug))
-  if (!post) return new Response('Không có bài', { status: 404 })
+export async function GET(_req: Request, { params }: { params: Promise<{ lang: string; slug: string }> }) {
+  const { lang, slug } = await params
+  if (!isLocale(lang)) return new Response('Not found', { status: 404 })
+  const post = await getPostBySlug(lang, decodeURIComponent(slug))
+  if (!post) return new Response('Not found', { status: 404 })
   const font = await fs.readFile(fontPath)
   const title = post.title
   const size = title.length > 70 ? 54 : 64
@@ -50,7 +52,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           <div style={{ fontSize: size, lineHeight: 1.18, letterSpacing: -1, maxWidth: 960 }}>{title}</div>
-          <div style={{ fontSize: 28, opacity: 0.75 }}>Blog RealUsers</div>
+          <div style={{ fontSize: 28, opacity: 0.75 }}>{DICT[lang].blogName}</div>
         </div>
       </div>
     ),

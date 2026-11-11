@@ -40,6 +40,10 @@ header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
 .hdr-cta{margin-left:auto;display:flex;gap:12px;align-items:center}
 .hdr-login{text-decoration:none;color:var(--ink);font-weight:600;font-size:16px}
 .hdr-login:hover{color:var(--blue)}
+.lang{display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:600}
+.lang a,.lang span{padding:3px 9px;border-radius:999px;text-decoration:none;color:var(--ink-2);line-height:1.4}
+.lang a:hover{color:var(--blue)}
+.lang [aria-current]{background:var(--ink);color:#fff}
 .menu-btn{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;width:44px;height:44px;cursor:pointer;color:var(--ink);position:relative;flex:none}
 .menu-btn i{position:absolute;left:12px;right:12px;height:2px;border-radius:2px;background:currentColor;transition:transform .25s var(--ease),opacity .2s}
 .menu-btn i:nth-child(1){top:15px}.menu-btn i:nth-child(2){top:21px}.menu-btn i:nth-child(3){top:27px}
@@ -242,6 +246,10 @@ footer.site .logo{color:#fff}
   .mnav a{text-decoration:none;font-weight:600;font-size:18px;padding:12px 4px;border-bottom:1px solid var(--surface-2)}
   .mnav a[aria-current]{color:var(--blue)}
   .mnav .btn{margin-top:12px;border-bottom:0;color:#fff}
+  .hdr-cta .lang{display:none}
+  .mnav-lang{padding:12px 4px;border-bottom:1px solid var(--surface-2)}
+  .mnav-lang .lang{display:inline-flex;font-size:15px}
+  .mnav .lang a,.mnav .lang span{padding:4px 12px;border:0}
   .listing{grid-template-columns:minmax(0,1fr)}
   .sidebar{position:static;grid-template-columns:repeat(2,minmax(0,1fr))}
   .sidebar .box.dark{grid-column:1/-1}

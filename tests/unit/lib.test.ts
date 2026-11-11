@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { pageWindow } from '@/components/Pagination'
-import { dayKey, formatDateVN } from '@/lib/format'
+import { dayKey, formatDate, formatDateVN } from '@/lib/format'
 import { blogPostingJsonLd, breadcrumbJsonLd, faqJsonLd, serializeJsonLd } from '@/lib/jsonld'
 import { headingIds, readingMinutes, tableOfContents, type RichTextValue } from '@/lib/lexical'
 import { postMetadata, postOgImage } from '@/lib/seo'
@@ -131,3 +131,62 @@ describe('ngày giờ', () => {
     expect(dayKey('2026-10-19T18:00:00.000Z')).toBe('2026-10-20')
   })
 })
+
+describe('đa ngôn ngữ', () => {
+  it('tiếng Việt giữ URL cũ không tiền tố, tiếng Anh có /en/ và tên đoạn tiếng Anh', async () => {
+    const { pathsFor } = await import('@/i18n')
+    expect(pathsFor('vi').post('a')).toBe('/blog/a/')
+    expect(pathsFor('en').post('a')).toBe('/en/blog/a/')
+    expect(pathsFor('en').category('x', 2)).toBe('/en/blog/category/x/page/2/')
+    expect(pathsFor('en').author('doi')).toBe('/en/blog/author/doi/')
+    expect(pathsFor('en').blogPage(3)).toBe('/en/blog/page/3/')
+  })
+
+  it('đổi URL công khai sang cây thư mục nội bộ', async () => {
+    const { toInternalPath } = await import('@/i18n')
+    expect(toInternalPath('/blog/')?.path).toBe('/vi/blog/')
+    expect(toInternalPath('/blog/chu-de/viet-bai/trang/2/')?.path).toBe('/vi/blog/chu-de/viet-bai/trang/2/')
+    expect(toInternalPath('/en/blog/category/writing/page/2/')?.path).toBe('/en/blog/chu-de/writing/trang/2/')
+    expect(toInternalPath('/en/blog/page/2/')?.path).toBe('/en/blog/trang/2/')
+    expect(toInternalPath('/en/blog/author/team/')?.path).toBe('/en/blog/tac-gia/team/')
+    expect(toInternalPath('/en/blog/some-post/')?.path).toBe('/en/blog/some-post/')
+    // Tên đoạn tiếng Việt dưới /en/ là URL trùng: đẩy vào trang 404
+    expect(toInternalPath('/en/blog/chu-de/x/')?.path).toBe('/en/blog/__khong-co__/')
+    // /vi/ và ngôn ngữ lạ không phải URL công khai
+    expect(toInternalPath('/vi/blog/')).toBeNull()
+    expect(toInternalPath('/fr/blog/')).toBeNull()
+    expect(toInternalPath('/')).toBeNull()
+  })
+
+  it('hreflang chỉ khai khi có từ 2 bản, x-default trỏ bản tiếng Việt', async () => {
+    const { languageAlternates } = await import('@/lib/seo')
+    expect(languageAlternates({ vi: '/blog/a/' })).toBeUndefined()
+    expect(languageAlternates({ vi: '/blog/a/', en: '/en/blog/b/' })).toEqual({
+      vi: `${SITE_URL}/blog/a/`,
+      en: `${SITE_URL}/en/blog/b/`,
+      'x-default': `${SITE_URL}/blog/a/`,
+    })
+  })
+
+  it('metadata bài tiếng Anh: canonical /en/, og:locale en_US, hreflang hai chiều', () => {
+    const m = postMetadata({ ...base_en }, { locale: 'en', alternates: { vi: '/blog/bai-thu/', en: '/en/blog/test-post/' } })
+    expect(m.alternates?.canonical).toBe(`${SITE_URL}/en/blog/test-post/`)
+    expect((m.openGraph as { locale?: string }).locale).toBe('en_US')
+    expect(m.alternates?.languages).toMatchObject({ vi: `${SITE_URL}/blog/bai-thu/`, en: `${SITE_URL}/en/blog/test-post/` })
+  })
+
+  it('ngày tiếng Anh', () => {
+    expect(formatDate('2026-10-19T18:00:00.000Z', 'en')).toBe('Oct 20, 2026')
+  })
+})
+
+const base_en = {
+  id: 1,
+  title: 'Test post',
+  slug: 'test-post',
+  excerpt: 'Excerpt',
+  updatedAt: '2026-11-01T00:00:00.000Z',
+  createdAt: '2026-10-20T00:00:00.000Z',
+  publishedAt: '2026-10-20T00:00:00.000Z',
+  content: { root: { type: 'root', children: [] } },
+} as unknown as Post

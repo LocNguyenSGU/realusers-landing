@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 
-export function ShareButtons({ url, title }: { url: string; title: string }) {
+export function ShareButtons({ url, title, labels }: { url: string; title: string; labels: { share: string; copy: string; copied: string } }) {
   const [copied, setCopied] = useState(false)
   const enc = encodeURIComponent
   return (
     <div className="share">
-      <span>Chia sẻ:</span>
+      <span>{labels.share}</span>
       <a href={`https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`} target="_blank" rel="noopener noreferrer">
         Facebook
       </a>
@@ -26,7 +26,7 @@ export function ShareButtons({ url, title }: { url: string; title: string }) {
           }
         }}
       >
-        {copied ? 'Đã chép link' : 'Chép link'}
+        {copied ? labels.copied : labels.copy}
       </button>
     </div>
   )

@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { DICT, pathsFor, type Locale } from '@/i18n'
 import type { Category } from '@/payload-types'
 
 import { getBlogSettings, getCategories, getFeaturedPost, getPostList } from '@/lib/data'
 import { collectionPageJsonLd } from '@/lib/jsonld'
-import { BLOG_NAME, paths } from '@/lib/site'
 
 import { Breadcrumb } from './Breadcrumb'
 import { JsonLd } from './JsonLd'
@@ -13,52 +13,54 @@ import { Pagination } from './Pagination'
 import { FeaturedPost, PostCard } from './PostCard'
 import { Sidebar } from './Sidebar'
 
-export const categoryDescription = (c: Category) =>
-  c.description?.trim() || `Các bài viết chuyên mục ${c.name} trên ${BLOG_NAME}: hướng dẫn làm thương hiệu trên Threads.`
+export const categoryDescription = (c: Category, locale: Locale) => c.description?.trim() || DICT[locale].categoryFallback(c.name)
 
-/** Trang danh sách bài: /blog/, /blog/trang/n/, /blog/chu-de/<slug>/ (+ /trang/n/). */
-export async function BlogListing({ page, category }: { page: number; category?: Category }) {
+/** Trang danh sách bài: /blog/, /blog/trang/n/, /blog/chu-de/<slug>/ (+ /trang/n/), và bản /en/... */
+export async function BlogListing({ locale, page, category }: { locale: Locale; page: number; category?: Category }) {
   if (!Number.isInteger(page) || page < 1) notFound()
-  const [settings, categories] = await Promise.all([getBlogSettings(), getCategories()])
+  const d = DICT[locale]
+  const paths = pathsFor(locale)
+  const [settings, categories] = await Promise.all([getBlogSettings(locale), getCategories(locale)])
   // Bài nổi bật chỉ ở trang /blog/ và bị loại khỏi lưới ở mọi trang, để phân trang không lệch.
-  const featured = category ? null : await getFeaturedPost()
-  const list = await getPostList({ page, categoryId: category?.id, excludeId: featured?.id })
+  const featured = category ? null : await getFeaturedPost(locale)
+  const list = await getPostList(locale, page, { categoryId: category?.id, excludeId: featured?.id })
   if (page > 1 && page > list.totalPages) notFound()
 
   const path = category ? paths.category(category.slug as string, page) : paths.blogPage(page)
   const crumbs = [
-    { name: 'Trang chủ', path: '/' },
-    { name: 'Blog', path: '/blog/' },
+    { name: d.home, path: paths.home },
+    { name: d.blog, path: paths.blog },
     ...(category ? [{ name: category.name, path: paths.category(category.slug as string) }] : []),
-    ...(page > 1 ? [{ name: `Trang ${page}`, path }] : []),
+    ...(page > 1 ? [{ name: d.pageN(page), path }] : []),
   ]
   const title = category ? category.name : settings.heroTitle
-  const intro = category ? categoryDescription(category) : settings.heroIntro
+  const intro = category ? categoryDescription(category, locale) : settings.heroIntro
 
   return (
     <main className="wrap">
-      <Breadcrumb items={crumbs} />
+      <Breadcrumb items={crumbs} label={d.breadcrumb} />
       <JsonLd
         data={collectionPageJsonLd({
-          name: category ? `${category.name} | ${BLOG_NAME}` : BLOG_NAME,
+          name: category ? `${category.name} | ${d.blogName}` : d.blogName,
           description: intro || '',
           path,
+          locale,
         })}
       />
       <section className="blog-hero">
-        <span className="eyebrow">{category ? 'Chuyên mục' : settings.heroLabel || BLOG_NAME}</span>
+        <span className="eyebrow">{category ? d.category : settings.heroLabel}</span>
         <h1>
           {title}
-          {page > 1 ? <span className="sr-only"> — Trang {page}</span> : null}
+          {page > 1 ? <span className="sr-only"> — {d.pageN(page)}</span> : null}
         </h1>
         {intro ? <p>{intro}</p> : null}
       </section>
 
-      {featured && page === 1 ? <FeaturedPost post={featured} /> : null}
+      {featured && page === 1 ? <FeaturedPost post={featured} locale={locale} /> : null}
 
-      <nav className="tabs" aria-label="Chuyên mục">
-        <Link href="/blog/" aria-current={!category ? 'page' : undefined}>
-          Tất cả
+      <nav className="tabs" aria-label={d.categories}>
+        <Link href={paths.blog} aria-current={!category ? 'page' : undefined}>
+          {d.all}
         </Link>
         {categories
           .filter((c) => c.count > 0)
@@ -74,19 +76,20 @@ export async function BlogListing({ page, category }: { page: number; category?:
           {list.docs.length ? (
             <div className="posts">
               {list.docs.map((p, i) => (
-                <PostCard key={p.id} post={p} priority={!featured && i < 2} />
+                <PostCard key={p.id} post={p} locale={locale} priority={!featured && i < 2} />
               ))}
             </div>
           ) : (
-            <p className="empty">{featured ? 'Chưa có bài nào khác.' : 'Chưa có bài nào trong mục này.'}</p>
+            <p className="empty">{featured ? d.noOtherPosts : d.noPosts}</p>
           )}
           <Pagination
             current={page}
             total={list.totalPages}
             href={(n) => (category ? paths.category(category.slug as string, n) : paths.blogPage(n))}
+            labels={{ nav: d.pagination, prev: d.prev, next: d.next }}
           />
         </div>
-        <Sidebar currentCategory={category?.slug ?? undefined} />
+        <Sidebar locale={locale} currentCategory={category?.slug ?? undefined} />
       </div>
     </main>
   )

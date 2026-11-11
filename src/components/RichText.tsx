@@ -6,7 +6,7 @@ import type { CalloutBlock, CtaBlock, Media, Post } from '@/payload-types'
 
 import { headingIds, type RichTextValue } from '@/lib/lexical'
 import { mediaDims, mediaUrl } from '@/lib/media'
-import { paths } from '@/lib/site'
+import { DEFAULT_LOCALE, pathsFor, type Locale } from '@/i18n'
 
 type NodeTypes = DefaultNodeTypes | SerializedBlockNode<CtaBlock | CalloutBlock>
 
@@ -14,7 +14,7 @@ type NodeTypes = DefaultNodeTypes | SerializedBlockNode<CtaBlock | CalloutBlock>
  * Render nội dung Lexical ra HTML. Heading được gán id (khớp mục lục), ảnh dùng next/image (WebP, đúng cỡ),
  * link nội bộ tới bài khác ra /blog/<slug>/.
  */
-export function RichText({ data }: { data: Post['content'] }) {
+export function RichText({ data, locale = DEFAULT_LOCALE }: { data: Post['content']; locale?: Locale }) {
   const ids = headingIds(data as RichTextValue).map((h) => h.id)
   let headingIndex = 0
 
@@ -25,9 +25,9 @@ export function RichText({ data }: { data: Post['content'] }) {
         const doc = linkNode.fields.doc
         const value = doc?.value
         if (doc?.relationTo === 'posts' && value && typeof value === 'object' && 'slug' in value) {
-          return paths.post(String(value.slug))
+          return pathsFor(locale).post(String(value.slug))
         }
-        return '/'
+        return pathsFor(locale).blog
       },
     }),
     heading: ({ node, nodesToJSX }) => {

@@ -14,6 +14,12 @@ export function mediaUrl(media: Media | null | undefined, size?: MediaSize): str
   return url && url.startsWith(`${SITE_URL}/`) ? url.slice(SITE_URL.length) : url
 }
 
+/** Ảnh của bài: ảnh đầu bài nếu có, không thì ảnh tự vẽ theo tiêu đề (đúng ngôn ngữ đang xem). */
+export function postImage(cover: Media | null | undefined, size: MediaSize, fallbackPath: string): { src: string; generated: boolean } {
+  const src = mediaUrl(cover, size)
+  return src ? { src, generated: false } : { src: fallbackPath, generated: true }
+}
+
 export function mediaDims(media: Media | null | undefined, size?: MediaSize): { width: number; height: number } {
   const s = size ? media?.sizes?.[size] : null
   return {

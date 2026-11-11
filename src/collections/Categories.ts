@@ -16,15 +16,16 @@ export const Categories: CollectionConfig = {
   },
   defaultSort: 'order',
   fields: [
-    { name: 'name', label: 'Tên', type: 'text', required: true },
+    { name: 'name', label: 'Tên', type: 'text', required: true, localized: true },
     {
       name: 'description',
       label: 'Mô tả',
       type: 'textarea',
+      localized: true,
       admin: { description: 'Hiện ở đầu trang chuyên mục và làm mô tả cho Google (120–160 ký tự là đẹp).' },
     },
     { name: 'order', label: 'Thứ tự trên tab', type: 'number', defaultValue: 10, admin: { position: 'sidebar' } },
-    slugField({ useAsSlug: 'name', slugify: ({ valueToSlugify }) => slugify(String(valueToSlugify ?? '')) }),
+    slugField({ localized: true, useAsSlug: 'name', slugify: ({ valueToSlugify }) => slugify(String(valueToSlugify ?? '')) }),
   ],
   hooks: {
     afterChange: [({ doc, req }) => (revalidateBlog(req), doc)],

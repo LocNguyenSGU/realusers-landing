@@ -20,7 +20,8 @@ import { isAdminOrEditor, loggedIn, publishedOrLoggedIn, roleOf } from '@/access
 import { CalloutBlock, CtaBlock } from '@/blocks'
 import { revalidateBlog } from '@/hooks/revalidate'
 import { readingMinutes } from '@/lib/lexical'
-import { paths, RESERVED_POST_SLUGS } from '@/lib/site'
+import { DEFAULT_LOCALE, isLocale, pathsFor } from '@/i18n'
+import { RESERVED_POST_SLUGS } from '@/lib/site'
 import { slugify } from '@/lib/slugify'
 
 export const postContentEditor = lexicalEditor({
@@ -35,9 +36,9 @@ export const postContentEditor = lexicalEditor({
   ],
 })
 
-const previewUrl = (slug: unknown): string | null => {
+const previewUrl = (slug: unknown, locale: unknown): string | null => {
   if (typeof slug !== 'string' || !slug) return null
-  const params = new URLSearchParams({ path: paths.post(slug), previewSecret: process.env.PREVIEW_SECRET || '' })
+  const params = new URLSearchParams({ path: pathsFor(isLocale(locale) ? locale : DEFAULT_LOCALE).post(slug), previewSecret: process.env.PREVIEW_SECRET || '' })
   return `/next/preview?${params.toString()}`
 }
 
@@ -65,10 +66,10 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'category', '_status', 'publishedAt', 'updatedAt'],
     group: 'Nội dung',
-    preview: (doc) => previewUrl(doc?.slug),
+    preview: (doc, { locale }) => previewUrl(doc?.slug, locale),
   },
   fields: [
-    { name: 'title', label: 'Tiêu đề (H1)', type: 'text', required: true },
+    { name: 'title', label: 'Tiêu đề (H1)', type: 'text', required: true, localized: true },
     {
       type: 'tabs',
       tabs: [
@@ -80,14 +81,23 @@ export const Posts: CollectionConfig<'posts'> = {
               label: 'Sapo (đoạn mở đầu)',
               type: 'textarea',
               required: true,
+              localized: true,
               admin: { description: 'Hiện dưới tiêu đề và trên thẻ bài. Dùng làm mô tả Google nếu tab SEO để trống.' },
             },
-            { name: 'coverImage', label: 'Ảnh đầu bài', type: 'upload', relationTo: 'media' },
-            { name: 'content', label: false, type: 'richText', required: true, editor: postContentEditor },
+            {
+              name: 'coverImage',
+              label: 'Ảnh đầu bài',
+              type: 'upload',
+              relationTo: 'media',
+              // Ảnh thường có chữ (tiêu đề bài) nên mỗi ngôn ngữ một ảnh. Để trống thì site tự vẽ ảnh theo tiêu đề.
+              localized: true,
+            },
+            { name: 'content', label: false, type: 'richText', required: true, localized: true, editor: postContentEditor },
             {
               name: 'faq',
               label: 'Câu hỏi thường gặp',
               type: 'array',
+              localized: true,
               admin: { description: 'Hiện cuối bài và khai báo FAQPage cho Google.' },
               labels: { singular: 'Câu hỏi', plural: 'Câu hỏi' },
               fields: [
@@ -102,9 +112,9 @@ export const Posts: CollectionConfig<'posts'> = {
           label: 'SEO',
           fields: [
             OverviewField({ titlePath: 'meta.title', descriptionPath: 'meta.description', imagePath: 'meta.image' }),
-            MetaTitleField({ hasGenerateFn: true }),
-            MetaDescriptionField({ hasGenerateFn: true }),
-            MetaImageField({ relationTo: 'media' }),
+            MetaTitleField({ hasGenerateFn: true, overrides: { localized: true } }),
+            MetaDescriptionField({ hasGenerateFn: true, overrides: { localized: true } }),
+            MetaImageField({ relationTo: 'media', overrides: { localized: true } }),
             PreviewField({ hasGenerateFn: true, titlePath: 'meta.title', descriptionPath: 'meta.description' }),
           ],
         },
@@ -154,10 +164,13 @@ export const Posts: CollectionConfig<'posts'> = {
       name: 'readingMinutes',
       label: 'Phút đọc (tự tính)',
       type: 'number',
+      localized: true,
       admin: { position: 'sidebar', readOnly: true },
     },
     slugField({
       position: 'sidebar',
+      // Mỗi ngôn ngữ một đường dẫn riêng: /blog/<slug-vi>/ và /en/blog/<slug-en>/.
+      localized: true,
       slugify: ({ valueToSlugify }) => slugify(String(valueToSlugify ?? '')),
       overrides: (row) => {
         row.fields = row.fields.map((f) => {
@@ -204,6 +217,7 @@ export const Posts: CollectionConfig<'posts'> = {
     ],
     afterChange: [
       async ({ doc, previousDoc, operation, req }) => {
+        const locale = isLocale(req.locale) ? req.locale : DEFAULT_LOCALE
         // Đổi slug của bài đã đăng: tự thêm chuyển hướng 301 từ link cũ, Google và link cũ không bị 404.
         const oldSlug = previousDoc?.slug
         if (
@@ -213,7 +227,7 @@ export const Posts: CollectionConfig<'posts'> = {
           oldSlug &&
           oldSlug !== doc.slug
         ) {
-          const from = paths.post(oldSlug)
+          const from = pathsFor(locale).post(oldSlug)
           const existing = await req.payload.count({ collection: 'redirects', where: { from: { equals: from } }, req })
           if (existing.totalDocs === 0) {
             await req.payload.create({

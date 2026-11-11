@@ -22,9 +22,10 @@ export const Media: CollectionConfig = {
       label: 'Mô tả ảnh (alt)',
       type: 'text',
       required: true,
+      localized: true,
       admin: { description: 'Tả ngắn ảnh có gì, như kể cho người không nhìn thấy. Google dùng chữ này để hiểu ảnh.' },
     },
-    { name: 'caption', label: 'Chú thích dưới ảnh', type: 'text' },
+    { name: 'caption', label: 'Chú thích dưới ảnh', type: 'text', localized: true },
   ],
   upload: {
     // Thư mục lưu ảnh khi không dùng R2. Test tích hợp dùng thư mục riêng (MEDIA_DIR) để không đụng ảnh dev.

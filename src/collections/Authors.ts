@@ -19,10 +19,23 @@ export const Authors: CollectionConfig = {
     delete: isAdminOrEditor,
   },
   fields: [
-    { name: 'name', label: 'Tên hiển thị', type: 'text', required: true },
-    { name: 'jobTitle', label: 'Chức danh', type: 'text' },
+    // Tên dịch được (vd 'Đội RealUsers' / 'RealUsers Team'); slug dùng chung cho mọi ngôn ngữ.
+    { name: 'name', label: 'Tên hiển thị', type: 'text', required: true, localized: true },
+    {
+      name: 'kind',
+      label: 'Là',
+      type: 'select',
+      required: true,
+      defaultValue: 'person',
+      options: [
+        { label: 'Một người', value: 'person' },
+        { label: 'Một nhóm / tổ chức (vd "Đội RealUsers")', value: 'organization' },
+      ],
+      admin: { description: 'Google hiểu tác giả là người hay tổ chức theo ô này.' },
+    },
+    { name: 'jobTitle', label: 'Chức danh', type: 'text', localized: true },
     { name: 'avatar', label: 'Ảnh đại diện', type: 'upload', relationTo: 'media' },
-    { name: 'bio', label: 'Giới thiệu ngắn', type: 'textarea' },
+    { name: 'bio', label: 'Giới thiệu ngắn', type: 'textarea', localized: true },
     {
       name: 'sameAs',
       label: 'Trang cá nhân khác (Threads, LinkedIn…)',

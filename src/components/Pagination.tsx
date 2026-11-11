@@ -12,12 +12,22 @@ export function pageWindow(current: number, total: number): (number | 'gap')[] {
   return out
 }
 
-export function Pagination({ current, total, href }: { current: number; total: number; href: (n: number) => string }) {
+export function Pagination({
+  current,
+  total,
+  href,
+  labels,
+}: {
+  current: number
+  total: number
+  href: (n: number) => string
+  labels: { nav: string; prev: string; next: string }
+}) {
   if (total <= 1) return null
   return (
-    <nav className="pagination" aria-label="Phân trang">
+    <nav className="pagination" aria-label={labels.nav}>
       {current > 1 ? (
-        <Link href={href(current - 1)} rel="prev" aria-label="Trang trước">
+        <Link href={href(current - 1)} rel="prev" aria-label={labels.prev}>
           ←
         </Link>
       ) : null}
@@ -37,7 +47,7 @@ export function Pagination({ current, total, href }: { current: number; total: n
         ),
       )}
       {current < total ? (
-        <Link href={href(current + 1)} rel="next" aria-label="Trang sau">
+        <Link href={href(current + 1)} rel="next" aria-label={labels.next}>
           →
         </Link>
       ) : null}

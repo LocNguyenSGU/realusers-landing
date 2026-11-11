@@ -1,16 +1,18 @@
 import Link from 'next/link'
 
 import { getBlogSettings, getCategories, getPicks } from '@/lib/data'
-import { paths } from '@/lib/site'
+import { DICT, pathsFor, type Locale } from '@/i18n'
 
-export async function Sidebar({ currentCategory }: { currentCategory?: string }) {
-  const [picks, categories, settings] = await Promise.all([getPicks(5), getCategories(), getBlogSettings()])
+export async function Sidebar({ locale, currentCategory }: { locale: Locale; currentCategory?: string }) {
+  const [picks, categories, settings] = await Promise.all([getPicks(locale, 5), getCategories(locale), getBlogSettings(locale)])
+  const d = DICT[locale]
+  const paths = pathsFor(locale)
   const cta = settings.cta
   return (
-    <aside className="sidebar" aria-label="Cột phụ">
+    <aside className="sidebar" aria-label={d.picks}>
       {picks.length ? (
         <section className="box">
-          <h2>Bài nên đọc</h2>
+          <h2>{d.picks}</h2>
           <ol className="picks">
             {picks.map((p) => (
               <li key={p.id}>
@@ -20,11 +22,11 @@ export async function Sidebar({ currentCategory }: { currentCategory?: string })
           </ol>
         </section>
       ) : null}
-      {categories.length ? (
+      {categories.filter((c) => c.count > 0).length ? (
         <section className="box">
-          <h2>Chuyên mục</h2>
+          <h2>{d.categories}</h2>
           <ul className="catlist">
-            {categories.map((c) => (
+            {categories.filter((c) => c.count > 0).map((c) => (
               <li key={c.id}>
                 <Link href={paths.category(c.slug as string)} aria-current={c.slug === currentCategory ? 'page' : undefined}>
                   {c.name} <span>{c.count}</span>
@@ -40,7 +42,7 @@ export async function Sidebar({ currentCategory }: { currentCategory?: string })
           {cta.text ? <p>{cta.text}</p> : null}
           {cta.url ? (
             <a className="btn btn-primary btn-sm" href={cta.url}>
-              {cta.buttonLabel || 'Bắt đầu ngay'}
+              {cta.buttonLabel || d.signup}
             </a>
           ) : null}
         </section>

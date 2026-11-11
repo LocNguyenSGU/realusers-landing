@@ -11,8 +11,8 @@ export async function GET(req: NextRequest): Promise<Response> {
   if (!process.env.PREVIEW_SECRET || searchParams.get('previewSecret') !== process.env.PREVIEW_SECRET) {
     return new Response('Không được phép xem trước', { status: 403 })
   }
-  // Chỉ cho chuyển tới đường dẫn nội bộ dưới /blog/, chặn open redirect.
-  if (!path || !path.startsWith('/blog/') || path.startsWith('//')) {
+  // Chỉ cho chuyển tới đường dẫn nội bộ dưới /blog/ hoặc /<ngôn ngữ>/blog/, chặn open redirect.
+  if (!path || !/^\/(?:[a-z]{2}\/)?blog\//.test(path)) {
     return new Response('Đường dẫn không hợp lệ', { status: 400 })
   }
 

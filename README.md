@@ -13,6 +13,7 @@ Plan và audit: `hub_docs/plans/2026-11-10-blog-cms-seo.md`.
 | `/blog/`, `/blog/trang/<n>/` | Danh sách bài: bài nổi bật, tab chuyên mục, lưới thẻ, cột "Bài nên đọc", phân trang |
 | `/blog/<slug>/` | Bài viết: breadcrumb, mục lục, FAQ, chia sẻ, khối kêu gọi, tác giả, bài liên quan |
 | `/blog/chu-de/<slug>/` | Trang chuyên mục |
+| `/en/blog/...` | Bản tiếng Anh của mọi trang blog (xem mục Đa ngôn ngữ) |
 | `/blog/tac-gia/<slug>/` | Trang tác giả |
 | `/blog/<slug>/og.png` | Ảnh chia sẻ tự vẽ khi bài chưa có ảnh |
 | `/blog/rss.xml`, `/sitemap.xml`, `/robots.txt` | RSS, sitemap (lastmod thật), robots |
@@ -21,6 +22,18 @@ Plan và audit: `hub_docs/plans/2026-11-10-blog-cms-seo.md`.
 
 Vai trò tài khoản quản trị: `admin` (toàn quyền), `editor` (viết + đăng), `writer` (chỉ lưu nháp).
 Tài khoản đầu tiên tạo ở `/admin` tự thành `admin`.
+
+## Đa ngôn ngữ
+
+- Ngôn ngữ đang có: tiếng Việt (mặc định, URL không tiền tố, giữ đúng URL cũ) và tiếng Anh (`/en/blog/...`).
+- Đường dẫn tiếng Anh dùng chữ tiếng Anh: `/en/blog/category/<slug>/`, `/en/blog/author/<slug>/`, `/en/blog/page/2/`.
+- Dịch bài: mở bài trong `/admin`, chọn **Locale: English** góc trên, nhập tiêu đề, sapo, nội dung, đường dẫn tiếng Anh, bấm Publish.
+  Bài chưa dịch thì không hiện ở trang tiếng Anh (không lấy chữ tiếng Việt đắp vào).
+- Mỗi ngôn ngữ một ảnh đầu bài. Chưa có ảnh thì site tự vẽ ảnh theo tiêu đề đúng ngôn ngữ.
+- Trang có bản dịch thì khai `hreflang` hai chiều (và trong sitemap); nút VI/EN trên đầu trang nhảy đúng sang bản dịch.
+- Gọi API ghi dữ liệu nên kèm `?locale=vi` hoặc `?locale=en`; không kèm thì hiểu là tiếng Việt.
+- Thêm ngôn ngữ mới: xem đầu file `src/i18n/index.ts` (mã ngôn ngữ, bộ chữ, tên đoạn đường dẫn), thêm vào `localization` trong `src/payload.config.ts`, rồi tạo migration.
+- Landing (`/`) hiện mới có tiếng Việt.
 
 ## SEO đã làm
 
@@ -65,7 +78,8 @@ Production chạy `npm run ci` (= `db:migrate` rồi `build`), nên migration đ
 npm run typecheck
 npm run test:unit                  # hàm thuần: slug, phút đọc, mục lục, JSON-LD, metadata
 npm run test:int                   # Payload + Postgres thật, DB test riêng (TEST_DATABASE_URL)
-npm run build && PW_CHANNEL=chrome npm run test:e2e   # kiểm SEO trên bản build, desktop + điện thoại 412px
+npm run build && PW_CHANNEL=chrome E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... npm run test:e2e
+# kiểm SEO, đa ngôn ngữ, luồng đăng bài trên bản build, desktop + điện thoại 412px
 ```
 
 `test:e2e` cần DB trong `.env` đã migrate và seed. `PW_CHANNEL=chrome` dùng Chrome có sẵn trên máy.

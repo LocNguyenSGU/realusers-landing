@@ -37,6 +37,18 @@ export default buildConfig({
     dateFormat: 'dd/MM/yyyy HH:mm',
   },
   i18n: { supportedLanguages: { vi, en }, fallbackLanguage: 'vi' },
+  // Nội dung đa ngôn ngữ, tiếng Việt là ngôn ngữ chính.
+  // fallback: true để lời gọi API không ghi ?locale= vẫn hiểu là tiếng Việt (để false thì Payload 3.92 không gán
+  // ngôn ngữ cho request và ghi hỏng dữ liệu, lỗi đã gặp 11/11). Trang công khai vẫn KHÔNG đắp chữ tiếng Việt vào
+  // trang tiếng Anh: src/lib/data.ts luôn truy vấn với fallbackLocale: false.
+  localization: {
+    locales: [
+      { code: 'vi', label: 'Tiếng Việt' },
+      { code: 'en', label: 'English' },
+    ],
+    defaultLocale: 'vi',
+    fallback: true,
+  },
   collections: [Posts, Categories, Authors, Media, Users],
   globals: [BlogSettings],
   editor: lexicalEditor(),

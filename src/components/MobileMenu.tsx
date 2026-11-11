@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from 'react'
 
+import type { Locale } from '@/i18n'
+
+import { LangSwitch } from './LangSwitch'
+
 type Item = { href: string; label: string; current?: boolean }
 
 /** Nút ba gạch + menu thả xuống trên màn hẹp, giống landing (public/landing.html). */
-export function MobileMenu({ items, loginUrl, signupUrl }: { items: Item[]; loginUrl: string; signupUrl: string }) {
+type Labels = { open: string; close: string; menu: string; login: string; signup: string; language: string }
+
+export function MobileMenu({ items, loginUrl, signupUrl, labels, locale }: { items: Item[]; loginUrl: string; signupUrl: string; labels: Labels; locale: Locale }) {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -18,7 +24,7 @@ export function MobileMenu({ items, loginUrl, signupUrl }: { items: Item[]; logi
       <button
         className="menu-btn"
         type="button"
-        aria-label={open ? 'Đóng menu' : 'Mở menu'}
+        aria-label={open ? labels.close : labels.open}
         aria-expanded={open}
         aria-controls="mnav"
         onClick={() => setOpen((v) => !v)}
@@ -27,15 +33,18 @@ export function MobileMenu({ items, loginUrl, signupUrl }: { items: Item[]; logi
         <i />
         <i />
       </button>
-      <nav className="mnav" id="mnav" aria-label="Menu di động" onClick={() => setOpen(false)}>
+      <nav className="mnav" id="mnav" aria-label={labels.menu} onClick={() => setOpen(false)}>
         {items.map((it) => (
           <a key={it.href} href={it.href} aria-current={it.current ? 'page' : undefined}>
             {it.label}
           </a>
         ))}
-        <a href={loginUrl}>Đăng nhập</a>
+        <div className="mnav-lang">
+          <LangSwitch locale={locale} label={labels.language} />
+        </div>
+        <a href={loginUrl}>{labels.login}</a>
         <a className="btn btn-primary" href={signupUrl}>
-          Bắt đầu ngay
+          {labels.signup}
         </a>
       </nav>
     </>

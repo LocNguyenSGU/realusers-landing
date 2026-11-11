@@ -1,7 +1,9 @@
 // Dữ liệu có cấu trúc (schema.org) cho Google. Hàm thuần: nhận dữ liệu đã chuẩn hoá, trả object JSON-LD.
 import type { BlogPosting, BreadcrumbList, CollectionPage, FAQPage, Organization, ProfilePage, WithContext } from 'schema-dts'
 
-import { absoluteUrl, BLOG_NAME, SITE_NAME, SITE_URL } from './site'
+import { DEFAULT_LOCALE, DICT, pathsFor, type Locale } from '@/i18n'
+
+import { absoluteUrl, SITE_NAME, SITE_URL } from './site'
 
 export const organization = (): Organization => ({
   '@type': 'Organization',
@@ -35,7 +37,8 @@ export type PostForJsonLd = {
   updatedAt: string
   section?: string
   wordCount?: number
-  author: { name: string; path?: string; sameAs?: string[] } | null
+  locale?: Locale
+  author: { name: string; kind?: 'person' | 'organization'; path?: string; sameAs?: string[] } | null
 }
 
 export function blogPostingJsonLd(p: PostForJsonLd): WithContext<BlogPosting> {
@@ -49,14 +52,14 @@ export function blogPostingJsonLd(p: PostForJsonLd): WithContext<BlogPosting> {
     image: [absoluteUrl(p.image)],
     datePublished: p.publishedAt,
     dateModified: p.updatedAt,
-    inLanguage: 'vi',
+    inLanguage: p.locale ?? DEFAULT_LOCALE,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     url,
     ...(p.section ? { articleSection: p.section } : {}),
     ...(p.wordCount ? { wordCount: p.wordCount } : {}),
     author: p.author
       ? {
-          '@type': 'Person',
+          '@type': p.author.kind === 'organization' ? 'Organization' : 'Person',
           name: p.author.name,
           ...(p.author.path ? { url: absoluteUrl(p.author.path) } : {}),
           ...(p.author.sameAs?.length ? { sameAs: p.author.sameAs } : {}),
@@ -80,26 +83,34 @@ export function faqJsonLd(items: { question: string; answer: string }[]): WithCo
   }
 }
 
-export function collectionPageJsonLd(args: { name: string; description: string; path: string }): WithContext<CollectionPage> {
+export function collectionPageJsonLd(args: { name: string; description: string; path: string; locale?: Locale }): WithContext<CollectionPage> {
+  const locale = args.locale ?? DEFAULT_LOCALE
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: args.name,
     description: args.description,
     url: absoluteUrl(args.path),
-    inLanguage: 'vi',
-    isPartOf: { '@type': 'Blog', name: BLOG_NAME, url: absoluteUrl('/blog/') },
+    inLanguage: locale,
+    isPartOf: { '@type': 'Blog', name: DICT[locale].blogName, url: absoluteUrl(pathsFor(locale).blog) },
     publisher: organization(),
   }
 }
 
-export function profilePageJsonLd(args: { name: string; description?: string; path: string; image?: string; sameAs?: string[] }): WithContext<ProfilePage> {
+export function profilePageJsonLd(args: {
+  name: string
+  kind?: 'person' | 'organization'
+  description?: string
+  path: string
+  image?: string
+  sameAs?: string[]
+}): WithContext<ProfilePage> {
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
     url: absoluteUrl(args.path),
     mainEntity: {
-      '@type': 'Person',
+      '@type': args.kind === 'organization' ? 'Organization' : 'Person',
       name: args.name,
       ...(args.description ? { description: args.description } : {}),
       ...(args.image ? { image: absoluteUrl(args.image) } : {}),

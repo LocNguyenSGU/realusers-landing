@@ -157,3 +157,39 @@ describe('slug và chuyển hướng', () => {
     expect(typeof target === 'object' && target?.slug).toBe('tang-tuong-tac-threads')
   })
 })
+
+describe('đa ngôn ngữ', () => {
+  it('bài có bản tiếng Anh: mỗi ngôn ngữ một slug, chưa dịch thì không lấy chữ tiếng Việt đắp vào', async () => {
+    const { docs } = await payload.find({ collection: 'posts', locale: 'vi', where: { slug: { equals: 'threads-la-gi-thuong-hieu-co-nen-lam' } } })
+    const id = docs[0].id
+
+    const before = await payload.findByID({ collection: 'posts', id, locale: 'en', fallbackLocale: false, overrideAccess: false })
+    expect(before.title ?? null).toBeNull()
+
+    await payload.update({
+      collection: 'posts',
+      id,
+      locale: 'en',
+      context: ctx,
+      data: { title: 'What is Threads?', slug: 'what-is-threads', generateSlug: false, excerpt: 'Intro', content: emptyContent('Hello'), _status: 'published' },
+    })
+    const en = await payload.findByID({ collection: 'posts', id, locale: 'en', fallbackLocale: false })
+    const vi = await payload.findByID({ collection: 'posts', id, locale: 'vi', fallbackLocale: false })
+    expect(en.slug).toBe('what-is-threads')
+    expect(vi.slug).toBe('threads-la-gi-thuong-hieu-co-nen-lam')
+    expect(vi.title).toContain('Threads là gì')
+  })
+
+  it('đổi slug bản tiếng Anh thì chuyển hướng từ link /en/ cũ', async () => {
+    const { docs } = await payload.find({ collection: 'posts', locale: 'en', where: { slug: { equals: 'what-is-threads' } } })
+    await payload.update({
+      collection: 'posts',
+      id: docs[0].id,
+      locale: 'en',
+      context: ctx,
+      data: { slug: 'what-is-threads-app', generateSlug: false, _status: 'published' },
+    })
+    const r = await payload.find({ collection: 'redirects', where: { from: { equals: '/en/blog/what-is-threads/' } } })
+    expect(r.docs).toHaveLength(1)
+  })
+})

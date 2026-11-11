@@ -8,7 +8,7 @@ import type { TocItem } from '@/lib/lexical'
 const OFFSET = 120
 
 /** Mục lục: sáng mục đang đọc khi lướt bài. HTML vẫn render sẵn từ server, JS chỉ thêm phần sáng. */
-export function Toc({ items, variant }: { items: TocItem[]; variant: 'side' | 'mobile' }) {
+export function Toc({ items, variant, title }: { items: TocItem[]; variant: 'side' | 'mobile'; title: string }) {
   const [active, setActive] = useState<string | null>(null)
 
   useEffect(() => {
@@ -55,14 +55,14 @@ export function Toc({ items, variant }: { items: TocItem[]; variant: 'side' | 'm
   if (variant === 'mobile') {
     return (
       <details className="toc-mobile">
-        <summary>Mục lục</summary>
+        <summary>{title}</summary>
         {list}
       </details>
     )
   }
   return (
-    <nav className="toc" aria-label="Mục lục">
-      <h2>Mục lục</h2>
+    <nav className="toc" aria-label={title}>
+      <h2>{title}</h2>
       {list}
     </nav>
   )
