@@ -1,0 +1,222 @@
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { draftMode } from 'next/headers'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
+
+import { Breadcrumb } from '@/components/Breadcrumb'
+import { JsonLd } from '@/components/JsonLd'
+import { PostCard } from '@/components/PostCard'
+import { RichText } from '@/components/RichText'
+import { Icon } from '@/components/Icon'
+import { ShareButtons } from '@/components/ShareButtons'
+import { Toc } from '@/components/Toc'
+import { DICT, isLocale, pathsFor } from '@/i18n'
+import { localeOf } from '@/i18n/server'
+import {
+  asAuthor,
+  asCategory,
+  asMedia,
+  getAllPublishedSlugs,
+  getBlogSettings,
+  getPostAlternates,
+  getPostBySlug,
+  getRedirectFor,
+  getRelatedPosts,
+} from '@/lib/data'
+import { dayKey, formatDate } from '@/lib/format'
+import { blogPostingJsonLd, faqJsonLd } from '@/lib/jsonld'
+import { countWords, plainText, tableOfContents, type RichTextValue } from '@/lib/lexical'
+import { mediaUrl, postImage } from '@/lib/media'
+import { postDescription, postMetadata, postOgImage } from '@/lib/seo'
+import { absoluteUrl } from '@/lib/site'
+
+type Args = { params: Promise<{ lang: string; slug: string }> }
+
+export async function generateStaticParams({ params }: { params: { lang: string } }) {
+  if (!isLocale(params.lang)) return []
+  const slugs = await getAllPublishedSlugs(params.lang)
+  return slugs.map(({ slug }) => ({ slug }))
+}
+
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+  const locale = await localeOf(params)
+  const { slug } = await params
+  const post = await getPostBySlug(locale, decodeURIComponent(slug))
+  if (!post) return {}
+  const { isEnabled: draft } = await draftMode()
+  return postMetadata(post, { locale, draft, alternates: await getPostAlternates(post.id) })
+}
+
+export default async function PostPage({ params }: Args) {
+  const locale = await localeOf(params)
+  const d = DICT[locale]
+  const paths = pathsFor(locale)
+  const { slug: raw } = await params
+  const slug = decodeURIComponent(raw)
+  const post = await getPostBySlug(locale, slug)
+
+  if (!post) {
+    const r = await getRedirectFor(locale, paths.post(slug))
+    if (r) (r.permanent ? permanentRedirect : redirect)(r.to)
+    notFound()
+  }
+
+  const [settings, related] = await Promise.all([getBlogSettings(locale), getRelatedPosts(locale, post)])
+  const category = asCategory(post.category)
+  const author = asAuthor(post.author)
+  const cover = asMedia(post.coverImage)
+  const coverImg = postImage(cover, 'hero', paths.postOgImage(post.slug as string))
+  const toc = tableOfContents(post.content as RichTextValue)
+  const url = absoluteUrl(paths.post(post.slug as string))
+  const updated = post.publishedAt && dayKey(post.updatedAt) > dayKey(post.publishedAt) ? post.updatedAt : null
+  const faq = (post.faq ?? []).filter((f) => f.question && f.answer)
+  const cta = settings.cta
+
+  const crumbs = [
+    { name: d.home, path: paths.home },
+    { name: d.blog, path: paths.blog },
+    ...(category?.name ? [{ name: category.name, path: paths.category(category.slug as string) }] : []),
+    { name: post.title, path: paths.post(post.slug as string) },
+  ]
+
+  return (
+    <main className="wrap">
+      <Breadcrumb items={crumbs} label={d.breadcrumb} />
+      <JsonLd
+        data={blogPostingJsonLd({
+          title: post.title,
+          description: postDescription(post),
+          path: paths.post(post.slug as string),
+          image: postOgImage(post, locale),
+          publishedAt: post.publishedAt || post.createdAt,
+          updatedAt: post.updatedAt,
+          section: category?.name,
+          wordCount: countWords(plainText(post.content as RichTextValue)),
+          locale,
+          author: author
+            ? {
+                name: author.name,
+                kind: author.kind === 'organization' ? 'organization' : 'person',
+                path: paths.author(author.slug as string),
+                sameAs: (author.sameAs ?? []).map((s) => s.url),
+              }
+            : null,
+        })}
+      />
+      {faq.length ? <JsonLd data={faqJsonLd(faq.map((f) => ({ question: f.question, answer: f.answer })))} /> : null}
+
+      <article>
+        <header className="post-head">
+          {category?.name ? (
+            <Link className="tag" href={paths.category(category.slug as string)}>
+              {category.name}
+            </Link>
+          ) : null}
+          <h1>{post.title}</h1>
+          {post.excerpt ? <p className="sapo">{post.excerpt}</p> : null}
+          <p className="byline">
+            {author ? <Link href={paths.author(author.slug as string)}>{author.name}</Link> : <span>{d.teamName}</span>}
+            {post.publishedAt ? (
+              <span>
+                <Icon name="calendar" size={14} />
+                {d.published} <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
+              </span>
+            ) : null}
+            {updated ? (
+              <span>
+                <Icon name="refresh" size={14} />
+                {d.updated} <time dateTime={updated}>{formatDate(updated, locale)}</time>
+              </span>
+            ) : null}
+            {post.readingMinutes ? (
+              <span>
+                <Icon name="clock" size={14} />
+                {d.minRead(post.readingMinutes)}
+              </span>
+            ) : null}
+          </p>
+        </header>
+
+        <figure className="cover">
+          <Image
+            src={coverImg.src}
+            alt={cover?.alt || post.title}
+            width={1600}
+            height={840}
+            sizes="(max-width:1200px) 100vw, 1152px"
+            priority
+            unoptimized={coverImg.generated}
+          />
+        </figure>
+
+        <div className="post-layout">
+          <div className="post-main">
+            {toc.length >= 3 ? <Toc items={toc} variant="mobile" title={d.toc} /> : null}
+
+            <RichText data={post.content} locale={locale} />
+
+            {faq.length ? (
+              <section className="faq" aria-labelledby="cau-hoi">
+                <h2 id="cau-hoi">{d.faq}</h2>
+                {faq.map((f) => (
+                  <details key={f.id ?? f.question}>
+                    <summary>{f.question}</summary>
+                    <p>{f.answer}</p>
+                  </details>
+                ))}
+              </section>
+            ) : null}
+
+            <ShareButtons url={url} title={post.title} labels={{ share: d.share, copy: d.copyLink, copied: d.copied }} />
+
+            {cta?.title ? (
+              <aside className="chot">
+                <h2>{cta.title}</h2>
+                {cta.text ? <p>{cta.text}</p> : null}
+                {cta.url ? (
+                  <a className="btn btn-primary" href={cta.url}>
+                    {cta.buttonLabel || d.signup}
+                    <Icon name="arrowRight" />
+                  </a>
+                ) : null}
+              </aside>
+            ) : null}
+
+            {author ? (
+              <aside className="author-box" aria-label={d.aboutAuthor}>
+                <div className="avatar">
+                  {mediaUrl(asMedia(author.avatar), 'thumb') ? (
+                    <Image src={mediaUrl(asMedia(author.avatar), 'thumb') as string} alt={author.name} width={64} height={64} />
+                  ) : (
+                    author.name.replace(/^(Đội|Team)\s+/i, '').charAt(0)
+                  )}
+                </div>
+                <div>
+                  <span className="label">{d.aboutAuthor}</span>
+                  <h2>
+                    <Link href={paths.author(author.slug as string)}>{author.name}</Link>
+                  </h2>
+                  {author.bio ? <p>{author.bio}</p> : null}
+                </div>
+              </aside>
+            ) : null}
+          </div>
+
+          {toc.length >= 3 ? <Toc items={toc} variant="side" title={d.toc} /> : null}
+        </div>
+      </article>
+
+      {related.length ? (
+        <section className="lien-quan" aria-labelledby="doc-them">
+          <h2 id="doc-them">{d.related}</h2>
+          <div className="posts">
+            {related.map((p) => (
+              <PostCard key={p.id} post={p} locale={locale} headingLevel="h3" />
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </main>
+  )
+}
