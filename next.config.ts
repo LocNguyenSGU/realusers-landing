@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },
+  async headers() {
+    // Domain tạm: chặn index mọi trang, kể cả landing tĩnh (xem SITE_NOINDEX trong src/lib/site.ts).
+    if (process.env.SITE_NOINDEX !== 'true') return []
+    return [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }]
+  },
   async rewrites() {
     return {
       // Landing là file HTML tĩnh (public/landing.html), phục vụ ở "/".

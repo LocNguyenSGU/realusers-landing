@@ -1,84 +1,88 @@
-# Deploy www.realusers.net (landing + blog) — việc bàn giao
+# Deploy www.realusers.net (landing + blog)
 
-Viết cho người (và AI) sẽ dựng hạ tầng production. Code đã xong, phần còn lại là tài khoản, DB, ảnh và tên miền.
-Người viết code (anh Lộc) không có quyền Cloudflare, tên miền hay project Vercel đang chạy www.realusers.net.
+Site đã chạy trên Vercel ở domain tạm. **Việc còn lại duy nhất là gắn tên miền www.realusers.net.**
+Người làm việc đó cần quyền ở project Vercel cũ và ở Cloudflare (DNS của realusers.net).
 
-## Tình trạng hiện tại
+## Đang chạy ở đâu
 
-- **www.realusers.net đang chạy trên một project Vercel cũ**: file tĩnh từ thư mục `app/landing/` của repo `kietsocola/thread-secret`
-  (commit `207cffb`, 19/10/2026). realusers.net (không www) chuyển 30x sang www.
-- **DNS của realusers.net nằm ở Cloudflare** (nameserver `nora` / `kareem.ns.cloudflare.com`).
-- **app.realusers.net là app thread-secret trên VPS. Không đụng tới.** Site này tách hẳn, không dùng chung DB hay tài khoản.
-- **Repo này** (`LocNguyenSGU/realusers-landing`, nhánh `feat/blog-payload-cms`, PR #1) thay thế project cũ:
-  landing ở `/` (file `public/landing.html`), blog ở `/blog/`, bản tiếng Anh ở `/en/blog/`, trang quản trị ở `/admin`.
-  Stack: Next.js 16 + Payload CMS 3.92 + Postgres. Cách chạy ở máy, test, đổi schema: xem `README.md`.
-
-## Cần dựng
-
-| # | Việc | Ghi chú |
-|---|---|---|
-| 1 | **Postgres mới, trống** | Chỉ cho blog. Gợi ý: Neon (Vercel Marketplace) hoặc Supabase. Dùng chuỗi kết nối có pooling nếu chạy serverless. Không cần tạo bảng tay: deploy tự chạy migration. |
-| 2 | **Cloudflare R2 bucket** cho ảnh blog | Bật truy cập công khai qua custom domain, ví dụ `media.realusers.net`. Tạo API token R2 quyền Object Read & Write cho đúng bucket đó. Ảnh lưu dưới tiền tố `blog/`. |
-| 3 | **Project Vercel mới** import repo này | Framework Next.js, Node 24 (`.nvmrc`). `vercel.json` đã đặt build command `npm run ci` (= `db:migrate` rồi `next build`), nên DB phải gọi được lúc build. |
-| 4 | **Biến môi trường** (Production + Preview) | Bảng dưới. |
-| 5 | Deploy lên domain tạm `*.vercel.app`, kiểm thử | Mục "Kiểm sau deploy". |
-| 6 | **Nạp 3 bài blog cũ** | Chạy một lần từ máy có repo: `DATABASE_URL=... R2_...=... npm run seed:old-posts`. Lệnh chạy lại an toàn (bài đã có thì bỏ qua). Ảnh lấy từ `public/anh/` và đẩy lên R2. |
-| 7 | **Tạo tài khoản admin** | Mở `/admin` lần đầu, tài khoản tạo đầu tiên tự là `admin`. Gửi anh Lộc. Sau đó tạo tài khoản `editor` cho MKT. |
-| 8 | **Chuyển www.realusers.net sang project mới** | Gỡ domain khỏi project cũ, gắn vào project mới. Giữ project cũ ~1 tuần để quay lại nếu lỗi. |
-| 9 | Search Console: nộp lại `https://www.realusers.net/sitemap.xml` | Không bắt buộc ngay. |
-
-## Biến môi trường
-
-Mẫu đầy đủ ở `.env.example`.
-
-| Biến | Giá trị |
+| Thứ | Ở đâu |
 |---|---|
-| `DATABASE_URL` | Chuỗi Postgres ở bước 1 |
-| `PAYLOAD_SECRET` | `openssl rand -hex 32` |
-| `NEXT_PUBLIC_SERVER_URL` | `https://www.realusers.net` (lúc thử trên domain tạm thì để URL `*.vercel.app`, đổi lại khi gắn domain rồi deploy lại — biến này vào canonical, sitemap, og:url) |
-| `PREVIEW_SECRET` | `openssl rand -hex 16` |
-| `CRON_SECRET` | `openssl rand -hex 16`. Vercel Cron tự gửi `Authorization: Bearer <CRON_SECRET>` tới `/api/payload-jobs/run` (lịch 1 lần/ngày trong `vercel.json`, dùng cho hẹn giờ đăng bài) |
-| `R2_ACCOUNT_ID` | Account ID Cloudflare |
-| `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Token R2 ở bước 2 |
-| `R2_BUCKET` | Tên bucket |
-| `R2_PUBLIC_BASE_URL` | Link công khai của bucket, ví dụ `https://media.realusers.net`, **không có `/` cuối** |
+| Site (landing `/`, blog `/blog/`, `/en/blog/`, quản trị `/admin`) | https://realusers-landing.vercel.app — Vercel, tài khoản `locnguyensgu`, project `realusers-landing`, server Singapore |
+| Code | Repo `LocNguyenSGU/realusers-landing`. Đã nối Git: push `main` là Vercel tự deploy production |
+| DB | Neon Postgres `realusers-blog-db` (gói Free, Singapore), cài qua Vercel Marketplace. Vercel tự điền `DATABASE_URL` |
+| Ảnh blog | Vercel Blob `realusers-blog-media` (công khai, Singapore). Vercel tự điền `BLOB_READ_WRITE_TOKEN`. Ảnh nằm dưới `blog/` |
+| Hẹn giờ đăng bài | Vercel Cron 1 lần/ngày gọi `/api/payload-jobs/run` (`vercel.json`) |
+| Bảng trong DB | Tạo bằng migration, tự chạy mỗi lần deploy (`npm run ci` = `db:migrate` rồi `next build`) |
 
-Thiếu `R2_BUCKET` hoặc `R2_ACCOUNT_ID` thì ảnh ghi ra đĩa. Trên Vercel đĩa không giữ lại, ảnh sẽ mất. Nên trên Vercel bắt buộc có R2.
+Trên site hiện có:
+- 3 bài cũ đã nạp sẵn, giữ đúng URL cũ.
+- Domain tạm đang chặn Google index (biến `SITE_NOINDEX=true`), để Google không gặp bản trùng với www.
+
+## Bối cảnh tên miền
+
+- www.realusers.net hiện vẫn chạy **project Vercel cũ** (của Kiệt): file tĩnh từ thư mục `app/landing/` trong repo `kietsocola/thread-secret`.
+- realusers.net (không www) chuyển sang www.
+- DNS nằm ở Cloudflare (nameserver `nora` / `kareem.ns.cloudflare.com`).
+- **app.realusers.net là app thread-secret trên VPS. Không đụng tới.**
+
+## Gắn www.realusers.net (việc của người có quyền)
+
+Làm theo thứ tự. Site sẽ chết vài phút giữa bước 2 và bước 4.
+
+1. Anh Lộc thêm domain vào project mới. Vercel → `realusers-landing` → Settings → Domains → Add `www.realusers.net`, rồi Add `realusers.net` chuyển sang www.
+   Vercel sẽ báo domain đang thuộc project khác.
+2. **Kiệt gỡ** `www.realusers.net` và `realusers.net` khỏi project Vercel cũ. Giữ project cũ thêm ~1 tuần để quay lại nếu lỗi.
+3. Nếu Vercel đòi xác minh, Kiệt thêm bản ghi TXT `_vercel` mà Vercel đưa vào Cloudflare.
+   - Bản ghi DNS cũ đang trỏ Vercel thì giữ nguyên, vì cùng là Vercel.
+   - Bản ghi trên Cloudflare phải để **DNS only** (mây xám), không bật proxy.
+4. Anh Lộc đổi biến trên Vercel (Production):
+   - `NEXT_PUBLIC_SERVER_URL` = `https://www.realusers.net`
+   - Xoá `SITE_NOINDEX`
+   - Rồi **Redeploy**. Biến `NEXT_PUBLIC_*` được đóng vào lúc build, không đổi khi chưa build lại.
+5. Kiểm (mục dưới), rồi nộp `https://www.realusers.net/sitemap.xml` ở Google Search Console.
 
 ## Kiểm sau deploy
 
-Phải ra 200 (hoặc đúng như ghi):
-
 ```bash
-BASE=https://<domain>
-curl -sI $BASE/ | head -1
-curl -sI $BASE/blog/ | head -1
-curl -sI $BASE/en/blog/ | head -1
-curl -sI $BASE/sitemap.xml | head -1
-curl -sI $BASE/robots.txt | head -1
-curl -sI $BASE/blog/rss.xml | head -1
+BASE=https://www.realusers.net   # hoặc https://realusers-landing.vercel.app
+for p in / /blog/ /en/blog/ /sitemap.xml /robots.txt /blog/rss.xml \
+  /blog/threads-la-gi-thuong-hieu-co-nen-lam/ /blog/cach-tang-tuong-tac-tren-threads/ \
+  /blog/cach-viet-bai-threads-de-nguoi-doc-tra-loi/; do
+  echo "$(curl -s -o /dev/null -w '%{http_code}' $BASE$p) $p"; done   # đều 200
 curl -sI $BASE/blog | head -1          # 308 sang /blog/
-# 3 bài cũ đã được Google index, URL phải giữ y hệt (sau bước 6):
-curl -s $BASE/sitemap.xml | grep -o '<loc>[^<]*/blog/[^<]*</loc>'
+curl -s $BASE/robots.txt               # domain thật: có Sitemap và "Allow: /". Domain tạm: "Disallow: /"
+curl -sI $BASE/ | grep -i x-robots     # domain thật: không có dòng nào
 ```
 
-Trong `/admin`: tạo một bài nháp có ảnh, tải ảnh lên, kiểm link ảnh trỏ về `R2_PUBLIC_BASE_URL`. Bấm Publish, trang bài hiện trong vài giây (không cần deploy lại).
+Trong `/admin`: tải một ảnh lên, link ảnh phải là `https://<store>.public.blob.vercel-storage.com/blog/...`. Bấm Publish một bài, vài giây sau trang bài phải hiện, không cần deploy lại.
 
-## Hướng khác (tuỳ người dựng)
+## Biến môi trường (Production)
 
-Code không khoá vào Vercel hay R2. Nếu thấy hợp hơn:
+| Biến | Nguồn |
+|---|---|
+| `DATABASE_URL` (+ các `PG*`, `POSTGRES_*`) | Neon tự điền |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob tự điền |
+| `PAYLOAD_SECRET`, `PREVIEW_SECRET`, `CRON_SECRET` | Chuỗi ngẫu nhiên (`openssl rand -hex 32`), đặt kiểu Sensitive. Đổi `PAYLOAD_SECRET` thì mọi người phải đăng nhập lại |
+| `NEXT_PUBLIC_SERVER_URL` | URL gốc của site, dùng cho canonical, sitemap, og:url |
+| `SITE_NOINDEX` | `true` khi còn ở domain tạm |
 
-- **Chạy trên VPS** (Docker / pm2): `npm ci && npm run ci && npm start`, Node ≥ 24.22.1.
-  Khi đó có thể bỏ R2: để trống `R2_*`, ảnh ghi vào thư mục `MEDIA_DIR` (mặc định `./media`), nhớ giữ thư mục này qua các lần deploy và sao lưu.
-  Hẹn giờ đăng bài thì thay Vercel Cron bằng cron gọi `curl -H "Authorization: Bearer $CRON_SECRET" https://www.realusers.net/api/payload-jobs/run`.
-  Nếu đặt chung VPS với thread-secret thì dùng DB riêng, cổng riêng, không đụng service `threads-bot`.
-- **Ảnh trên kho S3 khác** (AWS S3, Backblaze...): `src/payload.config.ts` đang ghép endpoint theo dạng R2 (`https://<account>.r2.cloudflarestorage.com`). Đổi dòng `endpoint` là xong.
-- **DB**: bất kỳ Postgres nào. Không dùng chung Postgres prod của thread-secret (chỉ nghe ở 127.0.0.1, và nên tách).
+Thay Blob bằng Cloudflare R2: điền `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`. Có R2 thì code ưu tiên R2. Ảnh đã tải lên Blob không tự chuyển sang.
 
-## Việc dọn sau khi chuyển domain (bên thread-secret, không gấp)
+## Việc khác
 
-- `app/landing/` trong thread-secret thôi dùng. Đừng sửa landing ở đó nữa, sửa `public/landing.html` ở repo này.
-- `scripts/build_blog.py` thôi dùng. Bài cũ đã nằm ở `seed/old-posts.json`.
-- `/gioi-thieu` trên app thread-secret nên chuyển 301 sang https://www.realusers.net.
+- **Preview deploy** (push nhánh khác `main`) dùng chung DB với production. Vì vậy nhánh có migration mới sẽ đổi bảng production ngay lúc build preview. Đổi schema thì merge cẩn thận, hoặc tách DB cho Preview trên Vercel.
+- **Nạp lại 3 bài cũ** (chạy lại an toàn):
+  ```bash
+  vercel env pull /tmp/prod.env --environment production
+  set -a; . /tmp/prod.env; set +a
+  npm run seed:old-posts
+  ```
+- **Gói Vercel Hobby** theo điều khoản không dành cho site thương mại. Có thể phải lên Pro.
 
-Plan gốc và lý do chọn stack: `hub_docs/plans/2026-11-10-blog-cms-seo.md`.
+## Dọn bên thread-secret sau khi gắn domain (không gấp)
+
+- `app/landing/` thôi dùng. Sửa landing ở `public/landing.html` của repo này.
+- `scripts/build_blog.py` thôi dùng. Bài cũ đã ở `seed/old-posts.json`.
+- `/gioi-thieu` trên app nên chuyển 301 sang https://www.realusers.net.
+
+Plan gốc: `hub_docs/plans/2026-11-10-blog-cms-seo.md`.
