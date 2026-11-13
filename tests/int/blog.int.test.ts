@@ -210,7 +210,14 @@ describe('bản tiếng Anh cho 3 bài cũ', () => {
     const again = await seedEnPosts(payload, enFile, { imagesDir })
     expect(again.translated).toEqual([])
     expect(again.imagesAdded).toEqual([])
+    expect(again.imagesRepaired).toEqual([])
     expect(again.skipped).toHaveLength(3)
+
+    // Ảnh có bản ghi nhưng file không mở được (vd. tải lên kho hỏng): chạy lại thì gỡ ảnh hỏng và tải lại.
+    const broken = enFile.posts[1].image!.en.file.replace('.png', '')
+    const repaired = await seedEnPosts(payload, enFile, { imagesDir, checkFile: async (url) => !url.includes(broken) })
+    expect(repaired.imagesRepaired).toEqual([`${enFile.posts[1].en.slug} (en)`])
+    expect(repaired.imagesAdded).toEqual([])
 
     for (const p of enFile.posts) {
       const { docs } = await payload.find({
