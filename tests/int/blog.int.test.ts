@@ -5,6 +5,7 @@ import { getPayload, type Payload } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import config from '@payload-config'
+import { seedEnPosts, type EnPostsFile } from '@/seed/enPosts'
 import { seedOldPosts, type OldPostsFile } from '@/seed/oldPosts'
 
 let payload: Payload
@@ -191,5 +192,54 @@ describe('đa ngôn ngữ', () => {
     })
     const r = await payload.find({ collection: 'redirects', where: { from: { equals: '/en/blog/what-is-threads/' } } })
     expect(r.docs).toHaveLength(1)
+  })
+})
+
+describe('bản tiếng Anh cho 3 bài cũ', () => {
+  it('thêm bản tiếng Anh đã đăng và ảnh minh hoạ cho cả hai ngôn ngữ; chạy lại không đổi gì', async () => {
+    // Làm trên bộ 3 bài cũ sạch (các test trước đã sửa bản tiếng Anh của bài đầu).
+    await wipe()
+    await seedOldPosts(payload, oldPosts, { imagesDir: path.join(root, 'public/anh') })
+    const enFile = JSON.parse(fs.readFileSync(path.join(root, 'seed/en-posts.json'), 'utf8')) as EnPostsFile
+    const imagesDir = path.join(root, 'seed/illustrations')
+    const first = await seedEnPosts(payload, enFile, { imagesDir })
+    expect(first.translated).toEqual(enFile.posts.map((p) => p.en.slug))
+    expect(first.imagesAdded).toHaveLength(6)
+    expect(first.missing).toEqual([])
+
+    const again = await seedEnPosts(payload, enFile, { imagesDir })
+    expect(again.translated).toEqual([])
+    expect(again.imagesAdded).toEqual([])
+    expect(again.skipped).toHaveLength(3)
+
+    for (const p of enFile.posts) {
+      const { docs } = await payload.find({
+        collection: 'posts',
+        locale: 'en',
+        fallbackLocale: false,
+        overrideAccess: false,
+        where: { slug: { equals: p.en.slug } },
+        depth: 1,
+      })
+      expect(docs).toHaveLength(1)
+      const en = docs[0]
+      expect(en.title).toBe(p.en.title)
+      expect(en.meta?.title).toBe(`${p.en.seoTitle} | RealUsers`)
+      const enUploads = en.content.root.children.filter((n) => n.type === 'upload')
+      expect(enUploads).toHaveLength(1)
+      const enMedia = (enUploads[0] as unknown as { value: { alt: string; filename: string } }).value
+      expect(enMedia.alt).toBe(p.image?.en.alt)
+
+      const vi = await payload.findByID({ collection: 'posts', id: en.id, locale: 'vi', depth: 1 })
+      expect(vi.slug).toBe(p.viSlug)
+      const viUploads = vi.content.root.children.filter((n) => n.type === 'upload')
+      expect(viUploads).toHaveLength(1)
+      // Ảnh nằm ngay trước H2 đã chọn
+      const viChildren = vi.content.root.children
+      const idx = viChildren.findIndex((n) => n.type === 'upload')
+      const h2Before = viChildren.slice(0, idx).filter((n) => n.type === 'heading' && (n as { tag?: string }).tag === 'h2').length
+      expect(h2Before).toBe(p.image?.beforeHeading)
+      expect(viChildren[idx + 1]?.type).toBe('heading')
+    }
   })
 })
