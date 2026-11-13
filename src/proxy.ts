@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { DEFAULT_LOCALE, toInternalPath } from '@/i18n'
+import { DEFAULT_LOCALE, isLocale, toInternalPath } from '@/i18n'
 
 /**
  * 1. Trang công khai luôn có "/" cuối: /blog/abc → 308 → /blog/abc/. Một URL duy nhất cho mỗi trang,
@@ -22,6 +22,12 @@ export function proxy(req: NextRequest) {
 
   if (pathname === `/${DEFAULT_LOCALE}` || pathname.startsWith(`/${DEFAULT_LOCALE}/`)) {
     return NextResponse.redirect(new URL(`${pathname.slice(DEFAULT_LOCALE.length + 1) || '/'}${search}`, req.url), 308)
+  }
+
+  // Landing ngôn ngữ khác: /en/ → file tĩnh public/landing-en.html (landing tiếng Việt ở "/" do next.config.ts lo).
+  const home = pathname.match(/^\/([a-z]{2})\/$/)
+  if (home && isLocale(home[1]) && home[1] !== DEFAULT_LOCALE) {
+    return NextResponse.rewrite(new URL(`/landing-${home[1]}.html${search}`, req.url))
   }
 
   const internal = toInternalPath(pathname)

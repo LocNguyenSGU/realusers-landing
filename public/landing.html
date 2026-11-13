@@ -1,5 +1,6 @@
 <!doctype html>
-<!-- Landing RealUsers (www.realusers.net/). Next.js phuc vu file nay tai "/" (rewrite trong next.config.ts). Chep tu kietsocola/thread-secret app/landing/index.html @ bf7842c ngay 10/11/2026; tu nay sua o day. -->
+<!-- Landing RealUsers (www.realusers.net/). Next.js phuc vu file nay tai "/" (rewrite trong next.config.ts). Chep tu kietsocola/thread-secret app/landing/index.html @ bf7842c ngay 10/11/2026; tu nay sua o day.
+     Ban tieng Anh: public/landing-en.html, phuc vu tai /en/ (src/proxy.ts). Sua chu o file nay thi sua ca file kia. -->
 <html lang="vi">
 <head>
 <meta charset="utf-8">
@@ -19,6 +20,9 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://www.realusers.net/">
+<link rel="alternate" hreflang="vi" href="https://www.realusers.net/">
+<link rel="alternate" hreflang="en" href="https://www.realusers.net/en/">
+<link rel="alternate" hreflang="x-default" href="https://www.realusers.net/">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "RealUsers", "url": "https://www.realusers.net/", "logo": "https://www.realusers.net/anh/og-realusers.jpg"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "RealUsers", "url": "https://www.realusers.net/", "inLanguage": "vi"}</script>
 <meta name="theme-color" content="#0866FF">
@@ -101,6 +105,11 @@ header.main .wrap{display:flex;align-items:center;gap:32px;height:72px}
 .hdr-cta{margin-left:auto;display:flex;gap:12px;align-items:center}
 .hdr-login{text-decoration:none;color:var(--ink);font-weight:600;font-size:16px}
 .hdr-login:hover{color:var(--blue)}
+.lang{display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:600}
+.lang a,.lang span{padding:3px 9px;border-radius:999px;text-decoration:none;color:var(--ink-2);line-height:1.4}
+.lang a:hover{color:var(--blue)}
+.lang [aria-current]{background:var(--ink);color:#fff}
+.mnav-lang{display:none}
 .menu-btn{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;width:44px;height:44px;cursor:pointer;color:var(--ink);position:relative}
 .menu-btn i{position:absolute;left:12px;right:12px;height:2px;border-radius:2px;background:currentColor;transition:transform .25s var(--ease),opacity .2s}
 .menu-btn i:nth-child(1){top:15px}.menu-btn i:nth-child(2){top:21px}.menu-btn i:nth-child(3){top:27px}
@@ -358,10 +367,14 @@ footer .logo{color:#fff}
   .menu-btn{display:block}
   .hdr-cta{margin-left:auto}
   .mnav{display:grid;gap:4px;max-height:0;overflow:hidden;transition:max-height .35s var(--ease),padding .35s var(--ease);padding:0 clamp(16px,4vw,24px);border-top:1px solid transparent}
-  .nav-open .mnav{max-height:460px;padding-block:12px 20px;border-top-color:var(--line)}
+  .nav-open .mnav{max-height:560px;padding-block:12px 20px;border-top-color:var(--line)}
   .mnav a{text-decoration:none;font-weight:600;font-size:18px;padding:12px 4px;border-bottom:1px solid var(--surface-2)}
   .mnav a.active{color:var(--blue)}
   .mnav .btn{margin-top:12px;border-bottom:0}
+  .hdr-cta .lang{display:none}
+  .mnav-lang{display:block;padding:12px 4px;border-bottom:1px solid var(--surface-2)}
+  .mnav-lang .lang{display:inline-flex;font-size:15px}
+  .mnav .lang a,.mnav .lang span{padding:4px 12px;border:0;font-size:15px}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:40px}
   .track{display:none}
   .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -437,6 +450,7 @@ footer .logo{color:#fff}
       <a id="link-blog" href="https://www.realusers.net/blog/">Blog</a>
     </nav>
     <div class="hdr-cta">
+      <nav class="lang" aria-label="Ngôn ngữ"><span aria-current="true" title="Tiếng Việt">VI</span><a href="/en/" hreflang="en" lang="en" title="English">EN</a></nav>
       <a id="link-login" class="hdr-login" href="https://app.realusers.net/login">Đăng nhập</a>
       <a id="link-signup" class="btn btn-primary btn-sm" href="https://app.realusers.net/dang-ky">Bắt đầu ngay</a>
     </div>
@@ -448,6 +462,7 @@ footer .logo{color:#fff}
     <a id="link-m-price" href="#bang-gia">Bảng giá</a>
     <a id="link-m-faq" href="#cau-hoi">Câu hỏi</a>
     <a id="link-m-blog" href="https://www.realusers.net/blog/">Blog</a>
+    <div class="mnav-lang"><nav class="lang" aria-label="Ngôn ngữ"><span aria-current="true" title="Tiếng Việt">VI</span><a href="/en/" hreflang="en" lang="en" title="English">EN</a></nav></div>
     <a id="link-m-login" href="https://app.realusers.net/login">Đăng nhập</a>
     <a id="link-m-signup" class="btn btn-primary" href="https://app.realusers.net/dang-ky">Bắt đầu ngay</a>
   </nav>
@@ -588,7 +603,7 @@ footer .logo{color:#fff}
     </div>
     <div class="frame" data-reveal="scale">
       <div class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url" id="tour-url">app.realusers.vn/tong-quan</span></div>
-      <img id="tour-img" src="anh/app-tong-quan.jpg" width="1200" height="733" alt="Màn hình Tổng quan của RealUsers: số bài chờ duyệt, tiến độ đăng bài trong tháng và các bài gần đây" loading="lazy">
+      <img id="tour-img" src="/anh/app-tong-quan.jpg" width="1200" height="733" alt="Màn hình Tổng quan của RealUsers: số bài chờ duyệt, tiến độ đăng bài trong tháng và các bài gần đây" loading="lazy">
     </div>
     <div class="tour-cap" data-reveal><span id="tour-cap">Biết ngay hôm nay cần làm gì: <b>3 bài chờ duyệt</b>, tiến độ tháng và ai vừa trả lời.</span><a id="link-tour-demo" class="link-arrow" href="https://app.realusers.net/dang-ky">Tạo tài khoản, xem bên trong <span class="arr" aria-hidden="true">→</span></a></div>
   </div>
@@ -920,9 +935,9 @@ footer .logo{color:#fff}
 
   /* Product tour tabs */
   var shots = [
-    { src: 'anh/app-tong-quan.jpg', url: 'app.realusers.vn/tong-quan', alt: 'Màn hình Tổng quan của RealUsers: số bài chờ duyệt, tiến độ đăng bài trong tháng và các bài gần đây', cap: 'Biết ngay hôm nay cần làm gì: <b>3 bài chờ duyệt</b>, tiến độ tháng và ai vừa trả lời.' },
-    { src: 'anh/app-duyet-bai.jpg', url: 'app.realusers.vn/duyet-bai', alt: 'Màn hình Duyệt bài: từng bài hiện như bài Threads thật, có nút Duyệt, Sửa, Bỏ', cap: 'Mỗi bài hiện đúng như khi lên Threads. <b>Duyệt, sửa hoặc bỏ</b> bằng một chạm.' },
-    { src: 'anh/app-bao-cao.jpg', url: 'app.realusers.vn/bao-cao', alt: 'Màn hình Báo cáo: số bài đã đăng, người ngoài trả lời theo ngày và link từng bài', cap: 'Cuối tháng có báo cáo: <b>ai đã trả lời</b>, bài nào được quan tâm, link từng bài.' }
+    { src: '/anh/app-tong-quan.jpg', url: 'app.realusers.vn/tong-quan', alt: 'Màn hình Tổng quan của RealUsers: số bài chờ duyệt, tiến độ đăng bài trong tháng và các bài gần đây', cap: 'Biết ngay hôm nay cần làm gì: <b>3 bài chờ duyệt</b>, tiến độ tháng và ai vừa trả lời.' },
+    { src: '/anh/app-duyet-bai.jpg', url: 'app.realusers.vn/duyet-bai', alt: 'Màn hình Duyệt bài: từng bài hiện như bài Threads thật, có nút Duyệt, Sửa, Bỏ', cap: 'Mỗi bài hiện đúng như khi lên Threads. <b>Duyệt, sửa hoặc bỏ</b> bằng một chạm.' },
+    { src: '/anh/app-bao-cao.jpg', url: 'app.realusers.vn/bao-cao', alt: 'Màn hình Báo cáo: số bài đã đăng, người ngoài trả lời theo ngày và link từng bài', cap: 'Cuối tháng có báo cáo: <b>ai đã trả lời</b>, bài nào được quan tâm, link từng bài.' }
   ];
   var ttabs = $$('.ttab'), timg = $('#tour-img'), turl = $('#tour-url'), tcap = $('#tour-cap');
   shots.slice(1).forEach(function(s){ var i = new Image(); i.src = s.src; });
