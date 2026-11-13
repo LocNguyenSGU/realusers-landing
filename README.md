@@ -1,7 +1,7 @@
 # www.realusers.net — landing + blog RealUsers
 
 Site công khai của RealUsers: landing ở `/`, blog ở `/blog/`.
-Blog có trang quản trị và API riêng, dựng bằng **Next.js 16 + Payload CMS 3**, dữ liệu trong Postgres, ảnh trên Cloudflare R2.
+Blog có trang quản trị và API riêng, dựng bằng **Next.js 16 + Payload CMS 3**, dữ liệu trong Postgres, ảnh trên Vercel Blob (hoặc Cloudflare R2).
 
 Plan và audit: `hub_docs/plans/2026-11-10-blog-cms-seo.md`.
 
@@ -88,5 +88,5 @@ npm run build && PW_CHANNEL=chrome E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... np
 
 Việc dựng production (DB, R2, Vercel, đổi tên miền) và cách kiểm: xem `DEPLOY.md`.
 
-Biến môi trường production: xem `.env.example`. Bắt buộc có `R2_*`, vì Vercel không giữ file ghi ra đĩa.
+Biến môi trường production: xem `.env.example`. Bắt buộc có Vercel Blob (`BLOB_READ_WRITE_TOKEN`) hoặc `R2_*`, vì Vercel không giữ file ghi ra đĩa.
 Hẹn giờ đăng bài chạy qua Vercel Cron (`vercel.json`) gọi `/api/payload-jobs/run`, kèm `CRON_SECRET`.

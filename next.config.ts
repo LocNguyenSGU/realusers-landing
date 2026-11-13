@@ -21,7 +21,11 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/anh/**' }],
-    remotePatterns: r2Host ? [{ protocol: 'https', hostname: r2Host }] : [],
+    remotePatterns: [
+      ...(r2Host ? [{ protocol: 'https' as const, hostname: r2Host }] : []),
+      // Ảnh lưu trên Vercel Blob (khi không dùng R2).
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+    ],
   },
   async rewrites() {
     return {
