@@ -28,9 +28,18 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
+    // File tĩnh trong public/ không có mã băm trong tên, nên chỉ cache 1 ngày (không dùng immutable).
+    const day = 'public, max-age=86400, stale-while-revalidate=604800'
+    const list = [
+      { source: '/anh/:path*', headers: [{ key: 'Cache-Control', value: day }] },
+      { source: '/fonts/:path*', headers: [{ key: 'Cache-Control', value: day }] },
+      { source: '/:icon(favicon.ico|favicon.svg|icon-192.png|apple-touch-icon.png)', headers: [{ key: 'Cache-Control', value: day }] },
+    ]
     // Domain tạm: chặn index mọi trang, kể cả landing tĩnh (xem SITE_NOINDEX trong src/lib/site.ts).
-    if (process.env.SITE_NOINDEX !== 'true') return []
-    return [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }]
+    if (process.env.SITE_NOINDEX === 'true') {
+      list.push({ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] })
+    }
+    return list
   },
   async rewrites() {
     return {
@@ -55,4 +64,20 @@ const nextConfig: NextConfig = {
   turbopack: { root: path.resolve(dirname) },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+const withPayloadConfig = withPayload(nextConfig, { devBundleServerPackages: false })
+
+// Payload gắn Accept-CH / Critical-CH (Sec-CH-Prefers-Color-Scheme) cho mọi đường dẫn, chỉ để trang
+// /admin biết chế độ sáng/tối. Critical-CH bắt trình duyệt tải lại HTML ở lần vào đầu tiên (thêm một lượt
+// gửi-nhận cho mọi khách từ Google). Giới hạn khối header đó về /admin.
+const payloadHeaders = withPayloadConfig.headers
+export default {
+  ...withPayloadConfig,
+  headers: async () => {
+    const list = payloadHeaders ? await payloadHeaders() : []
+    return list.map((h) =>
+      h.source === '/:path*' && h.headers.some((x) => x.key === 'Critical-CH')
+        ? { ...h, source: '/admin/:path*', headers: h.headers }
+        : h,
+    )
+  },
+} satisfies NextConfig

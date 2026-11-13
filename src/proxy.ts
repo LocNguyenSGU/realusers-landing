@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { DEFAULT_LOCALE, isLocale, toInternalPath } from '@/i18n'
+import { SITE_URL } from '@/lib/site'
 
 /**
  * 1. Trang công khai luôn có "/" cuối: /blog/abc → 308 → /blog/abc/. Một URL duy nhất cho mỗi trang,
@@ -11,6 +12,19 @@ import { DEFAULT_LOCALE, isLocale, toInternalPath } from '@/i18n'
  */
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
+  // Production chỉ có một địa chỉ: domain *.vercel.app chuyển hẳn sang www (tránh trùng nội dung).
+  const host = req.headers.get('host') ?? ''
+  if (process.env.VERCEL_ENV === 'production' && host.endsWith('.vercel.app') && !/^https?:\/\/[^/]*\.vercel\.app/.test(SITE_URL)) {
+    return NextResponse.redirect(new URL(`${pathname}${search}`, SITE_URL), 308)
+  }
+  // File landing tĩnh mở thẳng (/landing.html, /landing-en.html) thì về đúng URL công khai.
+  const landing = pathname.match(/^\/landing(?:-([a-z]{2}))?\.html$/)
+  if (landing) {
+    const l = landing[1]
+    const to = l && isLocale(l) && l !== DEFAULT_LOCALE ? `/${l}/` : '/'
+    return NextResponse.redirect(new URL(`${to}${search}`, req.url), 308)
+  }
+
   if (/^\/(admin|api|next|_next)(\/|$)/.test(pathname)) return NextResponse.next()
   const last = pathname.split('/').pop() ?? ''
   const isFile = /\.[a-z0-9]+$/i.test(last)
