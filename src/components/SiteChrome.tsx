@@ -7,15 +7,16 @@ import { Icon } from './Icon'
 import { LangSwitch } from './LangSwitch'
 import { MobileMenu } from './MobileMenu'
 
-// Cùng menu với landing (public/landing.html), để khách đi qua lại không thấy mất mục.
-// Landing hiện chỉ có tiếng Việt nên các mục "/#..." trỏ về landing tiếng Việt ở mọi ngôn ngữ.
+// Cùng menu với landing (public/landing.html, bản tiếng Anh public/landing-en.html ở /en/),
+// để khách đi qua lại không thấy mất mục. Mỗi ngôn ngữ trỏ về landing cùng ngôn ngữ.
 const navItems = (locale: Locale) => {
   const d = DICT[locale]
+  const home = pathsFor(locale).home
   return [
-    { href: '/#cach-hoat-dong', label: d.nav.how },
-    { href: '/#tinh-nang', label: d.nav.features },
-    { href: '/#bang-gia', label: d.nav.pricing },
-    { href: '/#cau-hoi', label: d.nav.faq },
+    { href: `${home}#cach-hoat-dong`, label: d.nav.how },
+    { href: `${home}#tinh-nang`, label: d.nav.features },
+    { href: `${home}#bang-gia`, label: d.nav.pricing },
+    { href: `${home}#cau-hoi`, label: d.nav.faq },
     { href: pathsFor(locale).blog, label: d.blog, current: true },
   ]
 }
@@ -35,7 +36,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   return (
     <header className="main">
       <div className="wrap">
-        <a className="logo" href="/" aria-label={`RealUsers, ${d.home}`}>
+        <a className="logo" href={pathsFor(locale).home} aria-label={`RealUsers, ${d.home}`}>
           <Logo />
         </a>
         <nav className="mainnav" aria-label={d.mainNav}>
@@ -80,7 +81,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
       <div className="wrap">
         <div className="fcols">
           <div>
-            <a className="logo" href="/">
+            <a className="logo" href={p.home}>
               <Logo />
             </a>
             <p>{d.footerTagline}</p>
@@ -88,9 +89,9 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <div>
             <p className="fh">{d.footer.product}</p>
             <ul>
-              <li><a href="/#cach-hoat-dong">{d.footer.how}</a></li>
-              <li><a href="/#tinh-nang">{d.footer.features}</a></li>
-              <li><a href="/#bang-gia">{d.footer.pricing}</a></li>
+              <li><a href={`${p.home}#cach-hoat-dong`}>{d.footer.how}</a></li>
+              <li><a href={`${p.home}#tinh-nang`}>{d.footer.features}</a></li>
+              <li><a href={`${p.home}#bang-gia`}>{d.footer.pricing}</a></li>
             </ul>
           </div>
           <div>
@@ -98,7 +99,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             <ul>
               <li><Link href={p.blog}>{d.blog}</Link></li>
               <li><a className="with-ic" href={p.rss}><Icon name="rss" size={14} />RSS</a></li>
-              <li><a href="/#cau-hoi">{d.footer.faq}</a></li>
+              <li><a href={`${p.home}#cau-hoi`}>{d.footer.faq}</a></li>
             </ul>
           </div>
           <div>

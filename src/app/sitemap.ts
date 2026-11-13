@@ -13,7 +13,14 @@ const langs = (alts: Partial<Record<Locale, string>>) => {
 // Đọc thẳng từ DB: bài mới đăng/sửa thì hook revalidate làm mới file này, lastmod là giờ sửa thật.
 // Mỗi ngôn ngữ một dòng, kèm link sang bản dịch (hreflang) khi bài đã được dịch.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const out: MetadataRoute.Sitemap = [{ url: absoluteUrl('/'), changeFrequency: 'weekly', priority: 1 }]
+  // Landing có đủ mọi ngôn ngữ (file tĩnh public/landing*.html), nên luôn khai đủ và trỏ chéo nhau.
+  const homeAlts = Object.fromEntries(LOCALES.map((l) => [l, pathsFor(l).home]))
+  const out: MetadataRoute.Sitemap = LOCALES.map((l) => ({
+    url: absoluteUrl(pathsFor(l).home),
+    changeFrequency: 'weekly' as const,
+    priority: l === DEFAULT_LOCALE ? 1 : 0.9,
+    alternates: langs(homeAlts),
+  }))
   const blogAlts = Object.fromEntries(LOCALES.map((l) => [l, pathsFor(l).blog]))
 
   for (const locale of LOCALES) {
