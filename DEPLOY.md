@@ -20,7 +20,7 @@ Trên site hiện có:
 
 ## Bối cảnh tên miền
 
-- www.realusers.net hiện vẫn chạy **project Vercel cũ** (của Kiệt): file tĩnh từ thư mục `app/landing/` trong repo `kietsocola/thread-secret`.
+- www.realusers.net hiện vẫn chạy **project Vercel cũ** `thread-secret-landing` (team "Tuan Kiet's projects" của Kiệt): file tĩnh từ thư mục `app/landing/` trong repo `kietsocola/thread-secret`.
 - realusers.net (không www) chuyển sang www.
 - DNS nằm ở Cloudflare (nameserver `nora` / `kareem.ns.cloudflare.com`).
 - **app.realusers.net là app thread-secret trên VPS. Không đụng tới.**
