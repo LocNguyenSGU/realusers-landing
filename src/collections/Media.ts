@@ -4,7 +4,7 @@ import { anyone, isAdminOrEditor, loggedIn } from '@/access'
 
 /**
  * Ảnh dùng trong blog. Alt bắt buộc: Google đọc alt để hiểu ảnh (like3s bỏ trống, mình không).
- * Production lưu file trên Cloudflare R2 (cấu hình ở payload.config.ts), máy local lưu ở ./media.
+ * Production lưu file trên Vercel Blob hoặc Cloudflare R2 (cấu hình ở payload.config.ts), máy local lưu ở ./media.
  */
 export const Media: CollectionConfig = {
   slug: 'media',

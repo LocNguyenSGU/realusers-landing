@@ -21,7 +21,16 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/anh/**' }],
-    remotePatterns: r2Host ? [{ protocol: 'https', hostname: r2Host }] : [],
+    remotePatterns: [
+      ...(r2Host ? [{ protocol: 'https' as const, hostname: r2Host }] : []),
+      // Ảnh lưu trên Vercel Blob (khi không dùng R2).
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+    ],
+  },
+  async headers() {
+    // Domain tạm: chặn index mọi trang, kể cả landing tĩnh (xem SITE_NOINDEX trong src/lib/site.ts).
+    if (process.env.SITE_NOINDEX !== 'true') return []
+    return [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }]
   },
   async rewrites() {
     return {

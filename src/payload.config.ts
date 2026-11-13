@@ -3,6 +3,7 @@ import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { en } from '@payloadcms/translations/languages/en'
 import { vi } from '@payloadcms/translations/languages/vi'
 import path from 'path'
@@ -23,9 +24,13 @@ import { absoluteUrl, paths, SITE_NAME, SITE_URL } from './lib/site'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// Ảnh production nằm trên Cloudflare R2 (cùng tài khoản R2 của thread-secret, bucket/prefix riêng).
-// Thiếu biến R2_* thì lưu ở ổ đĩa (./media), chỉ dùng cho máy local: Vercel không giữ file ghi ra đĩa.
+// Ảnh production: có R2_* thì lưu Cloudflare R2; không có mà có BLOB_READ_WRITE_TOKEN (Vercel tự gắn khi
+// nối Blob store vào project) thì lưu Vercel Blob. Không có cả hai thì lưu ổ đĩa (./media), chỉ dùng
+// cho máy local hoặc VPS: Vercel không giữ file ghi ra đĩa.
+// Cả hai plugin bật alwaysInsertFields để cột media.prefix luôn có trong schema, dù chọn nơi lưu nào
+// (schema đi qua migration, không được đổi theo biến môi trường).
 const r2Enabled = Boolean(process.env.R2_BUCKET && process.env.R2_ACCOUNT_ID)
+const blobEnabled = !r2Enabled && Boolean(process.env.BLOB_READ_WRITE_TOKEN)
 const r2PublicBase = (process.env.R2_PUBLIC_BASE_URL || '').replace(/\/$/, '')
 
 export default buildConfig({
@@ -92,6 +97,7 @@ export default buildConfig({
     }),
     s3Storage({
       enabled: r2Enabled,
+      alwaysInsertFields: true,
       bucket: process.env.R2_BUCKET || '',
       collections: {
         media: {
@@ -113,6 +119,13 @@ export default buildConfig({
           secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
         },
       },
+    }),
+    vercelBlobStorage({
+      enabled: blobEnabled,
+      alwaysInsertFields: true,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      // Link ảnh trỏ thẳng về Blob (https://<store>.public.blob.vercel-storage.com/blog/...), không đi vòng qua server.
+      collections: { media: { prefix: 'blog', disablePayloadAccessControl: true } },
     }),
   ],
 })
