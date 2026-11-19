@@ -11,7 +11,7 @@ import { buildConfig, type PayloadRequest } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
 
-import { isAdminOrEditor } from './access'
+import { isAdminOrEditor, isStaff } from './access'
 import { Authors } from './collections/Authors'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
@@ -19,6 +19,7 @@ import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { BlogSettings } from './globals/BlogSettings'
 import { revalidateBlog } from './hooks/revalidate'
+import { blogMcpPlugin } from './mcp'
 import { absoluteUrl, paths, SITE_NAME, SITE_URL } from './lib/site'
 
 const filename = fileURLToPath(import.meta.url)
@@ -69,10 +70,12 @@ export default buildConfig({
   sharp,
   graphQL: { disable: false },
   jobs: {
-    // Hẹn giờ đăng bài: Vercel Cron gọi /api/payload-jobs/run kèm "Authorization: Bearer $CRON_SECRET".
+    // Hẹn giờ đăng bài (nút "Lên lịch" trong /admin, hoặc công cụ MCP schedulePost) tạo job schedulePublish.
+    // Job chạy khi có người gọi /api/payload-jobs/run kèm "Authorization: Bearer $CRON_SECRET":
+    // GitHub Actions gọi 15 phút một lần (.github/workflows/scheduled-publish.yml), Vercel Cron gọi 1 lần/ngày làm dự phòng.
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
-        if (req.user) return true
+        if (isStaff(req)) return true
         const secret = process.env.CRON_SECRET
         return Boolean(secret) && req.headers.get('authorization') === `Bearer ${secret}`
       },
@@ -80,6 +83,8 @@ export default buildConfig({
     tasks: [],
   },
   plugins: [
+    // AI viết và đăng bài qua MCP: /api/mcp (xem src/mcp/index.ts).
+    blogMcpPlugin,
     seoPlugin({
       generateTitle: ({ doc }) => (doc?.title ? `${doc.title} | ${SITE_NAME}` : SITE_NAME),
       generateDescription: ({ doc }) => (typeof doc?.excerpt === 'string' ? doc.excerpt.slice(0, 160) : ''),

@@ -1,0 +1,30 @@
+# Chạy hàng đợi việc của Payload 15 phút một lần, để bài hẹn giờ lên đúng giờ.
+# Vercel gói Hobby chỉ cho cron 1 lần/ngày (vercel.json giữ lại làm dự phòng), nên dùng GitHub Actions.
+# Cần secret CRON_SECRET của repo = biến CRON_SECRET của project Vercel.
+# GitHub có thể chạy trễ vài phút so với lịch khi máy chủ bận.
+name: Scheduled publish
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: scheduled-publish
+  cancel-in-progress: false
+
+jobs:
+  run-jobs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Gọi /api/payload-jobs/run
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://www.realusers.net' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then echo "Thiếu secret CRON_SECRET" >&2; exit 1; fi
+          code=$(curl -sS -o body.txt -w '%{http_code}' --max-time 120 \
+            -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/payload-jobs/run?limit=50")
+          cat body.txt; echo
+          test "$code" = 200

@@ -54,6 +54,12 @@ Trong `/admin`: tải một ảnh lên, link ảnh phải là `https://<store>.p
 
 Thay Blob bằng Cloudflare R2: điền `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`. Có R2 thì code ưu tiên R2. Ảnh đã tải lên Blob không tự chuyển sang.
 
+## Hẹn giờ đăng và MCP (sau khi deploy bản có /api/mcp)
+
+1. GitHub repo → Settings → Secrets and variables → Actions → New repository secret `CRON_SECRET` = giá trị `CRON_SECRET` trên Vercel.
+2. Tab Actions → **Scheduled publish** → Run workflow. Log phải in `{"message":...}` và bước xanh. Sau đó workflow tự chạy 15 phút một lần.
+3. `/admin` → tạo tài khoản AI (editor) → **API key cho AI (MCP)** → tạo key gắn tài khoản đó. Cách nối Claude Code: README, mục AI viết bài qua MCP.
+
 ## Việc khác
 
 - **Preview deploy** (push nhánh khác `main`) dùng chung DB với production. Vì vậy nhánh có migration mới sẽ đổi bảng production ngay lúc build preview. Đổi schema thì merge cẩn thận, hoặc tách DB cho Preview trên Vercel.

@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -73,6 +74,7 @@ export interface Config {
     media: Media;
     users: User;
     redirects: Redirect;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -87,6 +89,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -107,7 +110,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User;
+  user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -120,6 +123,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -359,6 +380,70 @@ export interface Redirect {
   createdAt: string;
 }
 /**
+ * Key để AI viết và đăng bài qua MCP. Key mang quyền của tài khoản chọn ở ô User. Bỏ tick công cụ nào thì AI không dùng được công cụ đó.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: number;
+  /**
+   * Key chạy dưới quyền tài khoản này. Nên tạo tài khoản riêng cho AI, vai trò editor.
+   */
+  user: number | User;
+  /**
+   * A useful label for the API key.
+   */
+  label?: string | null;
+  /**
+   * The purpose of the API key.
+   */
+  description?: string | null;
+  'payload-mcp-tool'?: {
+    /**
+     * Xem toàn cảnh blog: chuyên mục, tác giả, mọi bài (nháp + đã đăng, có bản tiếng Anh chưa) và lịch hẹn đăng. Gọi đầu tiên.
+     */
+    blogOverview?: boolean | null;
+    /**
+     * Đọc một bài (bản mới nhất, kể cả nháp) kèm thân bài dạng markdown để sửa.
+     */
+    getPost?: boolean | null;
+    /**
+     * Tạo bài mới bằng tiếng Việt. Mặc định lưu nháp; action "publish" đăng ngay; "schedule" + publishAt để hẹn giờ.
+     */
+    createPost?: boolean | null;
+    /**
+     * Sửa bài hoặc thêm bản dịch (locale "en"). Chỉ gửi ô cần đổi. Mặc định lưu thành nháp (bản đang đăng giữ nguyên tới khi publish).
+     */
+    updatePost?: boolean | null;
+    /**
+     * Hẹn giờ đăng một bài đã có (thay lịch cũ nếu có). Bài lên trong vòng ~15 phút sau giờ hẹn.
+     */
+    schedulePost?: boolean | null;
+    /**
+     * Huỷ lịch hẹn đăng của một bài.
+     */
+    cancelSchedule?: boolean | null;
+    /**
+     * Tải ảnh từ một link công khai vào thư viện ảnh, trả về id để làm ảnh đầu bài (coverImageId).
+     */
+    uploadImage?: boolean | null;
+  };
+  'payload-mcp-prompt'?: {
+    /**
+     * Luật viết bài blog RealUsers và các bước dùng công cụ để tạo bài.
+     */
+    writeBlogPost?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  hasAPIKey?: boolean | null;
+  collection: 'payload-mcp-api-keys';
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -497,12 +582,21 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'redirects';
         value: number | Redirect;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -512,10 +606,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'payload-mcp-api-keys';
+        value: number | PayloadMcpApiKey;
+      };
   key?: string | null;
   value?:
     | {
@@ -719,6 +818,37 @@ export interface RedirectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  user?: T;
+  label?: T;
+  description?: T;
+  'payload-mcp-tool'?:
+    | T
+    | {
+        blogOverview?: T;
+        getPost?: T;
+        createPost?: T;
+        updatePost?: T;
+        schedulePost?: T;
+        cancelSchedule?: T;
+        uploadImage?: T;
+      };
+  'payload-mcp-prompt'?:
+    | T
+    | {
+        writeBlogPost?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  hasAPIKey?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -853,10 +983,15 @@ export interface TaskSchedulePublish {
       value: number | Post;
     } | null;
     global?: string | null;
-    user?: {
-      relationTo: 'users';
-      value: number | User;
-    } | null;
+    user?:
+      | ({
+          relationTo: 'users';
+          value: number | User;
+        } | null)
+      | ({
+          relationTo: 'payload-mcp-api-keys';
+          value: number | PayloadMcpApiKey;
+        } | null);
   };
   output?: unknown;
 }
