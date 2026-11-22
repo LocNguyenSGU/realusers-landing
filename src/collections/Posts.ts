@@ -237,11 +237,11 @@ export const Posts: CollectionConfig<'posts'> = {
             })
           }
         }
-        if (doc._status === 'published' || previousDoc?._status === 'published') revalidateBlog(req)
+        if (doc._status === 'published' || previousDoc?._status === 'published') await revalidateBlog(req)
         return doc
       },
     ],
-    afterDelete: [({ doc, req }) => (revalidateBlog(req), doc)],
+    afterDelete: [async ({ doc, req }) => (await revalidateBlog(req), doc)],
   },
   versions: {
     drafts: { autosave: { interval: 2000 }, schedulePublish: true },
