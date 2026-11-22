@@ -57,5 +57,5 @@ export const BlogSettings: GlobalConfig = {
       ],
     },
   ],
-  hooks: { afterChange: [({ doc, req }) => (revalidateBlog(req), doc)] },
+  hooks: { afterChange: [async ({ doc, req }) => (await revalidateBlog(req), doc)] },
 }

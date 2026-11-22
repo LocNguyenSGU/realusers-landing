@@ -97,7 +97,7 @@ export default buildConfig({
         labels: { singular: 'Chuyển hướng', plural: 'Chuyển hướng (301)' },
         admin: { group: 'Hệ thống' },
         access: { read: () => true, create: isAdminOrEditor, update: isAdminOrEditor, delete: isAdminOrEditor },
-        hooks: { afterChange: [({ doc, req }) => (revalidateBlog(req), doc)] },
+        hooks: { afterChange: [async ({ doc, req }) => (await revalidateBlog(req), doc)] },
       },
     }),
     s3Storage({
