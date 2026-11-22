@@ -8,7 +8,7 @@ import { absoluteUrl, SITE_NAME } from '@/lib/site'
 import { slugify } from '@/lib/slugify'
 import type { Post } from '@/payload-types'
 
-import { markdownToPostContent, postContentToMarkdown } from './markdown'
+import { hasMarkdownTable, markdownToPostContent, postContentToMarkdown } from './markdown'
 
 /** Lỗi trả nguyên văn cho AI đọc và tự sửa. */
 export class ToolError extends Error {}
@@ -114,6 +114,9 @@ async function buildData(req: PayloadRequest, input: PostInput, existing?: Post)
   if (input.excerpt !== undefined) data.excerpt = input.excerpt.trim()
   if (input.markdown !== undefined) {
     if (!input.markdown.trim()) throw new ToolError('markdown đang trống.')
+    if (hasMarkdownTable(input.markdown)) {
+      throw new ToolError('Blog chưa hỗ trợ bảng markdown (sẽ hiện thành chữ có dấu "|"). Viết lại bảng thành danh sách gạch đầu dòng.')
+    }
     data.content = await markdownToPostContent(req.payload, input.markdown)
   }
   if (input.faq !== undefined) data.faq = input.faq.map(({ question, answer }) => ({ question: question.trim(), answer: answer.trim() }))
@@ -368,4 +371,32 @@ export async function uploadImage(req: PayloadRequest, args: { url: string; alt:
     await req.payload.update({ collection: 'media', id: media.id, locale: 'en', data: { alt: args.altEn.trim() }, depth: 0, ...ops(req) })
   }
   return { id: media.id, url: media.url, alt: media.alt }
+}
+
+/** Tạo chuyên mục mới, hoặc sửa chuyên mục đã có (tìm theo slug tiếng Việt). Cần editor/admin. */
+export async function saveCategory(
+  req: PayloadRequest,
+  args: { name: string; slug?: string; description?: string; nameEn?: string; slugEn?: string; descriptionEn?: string; order?: number },
+) {
+  requirePublisher(req)
+  const { payload } = req
+  const slug = slugify(args.slug || args.name)
+  if (!slug) throw new ToolError('Không tạo được slug từ tên chuyên mục, hãy truyền slug.')
+  const found = await payload.find({ collection: 'categories', locale: 'vi', where: { slug: { equals: slug } }, limit: 1, depth: 0, ...ops(req) })
+  const vi = { name: args.name.trim(), slug, generateSlug: false, ...(args.description !== undefined ? { description: args.description.trim() } : {}), ...(args.order !== undefined ? { order: args.order } : {}) }
+  const doc = found.docs[0]
+    ? await payload.update({ collection: 'categories', id: found.docs[0].id, locale: 'vi', data: vi, depth: 0, ...ops(req) })
+    : await payload.create({ collection: 'categories', locale: 'vi', data: vi, depth: 0, ...ops(req) })
+  if (args.nameEn?.trim()) {
+    await payload.update({
+      collection: 'categories',
+      id: doc.id,
+      locale: 'en',
+      data: { name: args.nameEn.trim(), slug: slugify(args.slugEn || args.nameEn), generateSlug: false, ...(args.descriptionEn !== undefined ? { description: args.descriptionEn.trim() } : {}) },
+      depth: 0,
+      ...ops(req),
+    })
+  }
+  const en = await payload.findByID({ collection: 'categories', id: doc.id, locale: 'en', fallbackLocale: false, depth: 0, ...ops(req) })
+  return { id: doc.id, created: !found.docs[0], slug, name: vi.name, slugEn: en.slug ?? null, nameEn: en.name ?? null }
 }

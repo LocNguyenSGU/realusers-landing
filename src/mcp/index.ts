@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { isAdmin, isAdminField, roleOf } from '@/access'
 
 import { SERVER_INSTRUCTIONS, writeBlogPostPrompt } from './guide'
-import { blogOverview, cancelSchedule, createPost, getPost, schedulePost, ToolError, updatePost, uploadImage } from './tools'
+import { blogOverview, cancelSchedule, createPost, getPost, saveCategory, schedulePost, ToolError, updatePost, uploadImage } from './tools'
 
 type Text = { content: { type: 'text'; text: string }[] }
 const adminOr =
@@ -130,6 +130,20 @@ export const blogMcpPlugin = mcpPlugin({
         schedulePost,
       ),
       tool('cancelSchedule', 'Huỷ lịch hẹn đăng của một bài.', { id: z.number().int() }, cancelSchedule),
+      tool(
+        'saveCategory',
+        'Tạo chuyên mục mới (hoặc sửa chuyên mục cùng slug), kèm tên tiếng Anh. Chỉ tạo khi chưa có chuyên mục hợp (xem blogOverview).',
+        {
+          name: z.string().describe('Tên tiếng Việt, vd "Seeding"'),
+          slug: z.string().optional().describe('Slug tiếng Việt, bỏ trống thì sinh từ tên'),
+          description: z.string().optional().describe('Mô tả trang chuyên mục, 120–160 ký tự'),
+          nameEn: z.string().optional(),
+          slugEn: z.string().optional(),
+          descriptionEn: z.string().optional(),
+          order: z.number().int().optional().describe('Thứ tự trên tab, số nhỏ đứng trước'),
+        },
+        saveCategory,
+      ),
       tool(
         'uploadImage',
         'Tải ảnh từ một link công khai vào thư viện ảnh, trả về id để làm ảnh đầu bài (coverImageId).',

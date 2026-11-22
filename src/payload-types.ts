@@ -425,6 +425,10 @@ export interface PayloadMcpApiKey {
      */
     cancelSchedule?: boolean | null;
     /**
+     * Tạo chuyên mục mới (hoặc sửa chuyên mục cùng slug), kèm tên tiếng Anh. Chỉ tạo khi chưa có chuyên mục hợp (xem blogOverview).
+     */
+    saveCategory?: boolean | null;
+    /**
      * Tải ảnh từ một link công khai vào thư viện ảnh, trả về id để làm ảnh đầu bài (coverImageId).
      */
     uploadImage?: boolean | null;
@@ -833,6 +837,7 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         updatePost?: T;
         schedulePost?: T;
         cancelSchedule?: T;
+        saveCategory?: T;
         uploadImage?: T;
       };
   'payload-mcp-prompt'?:

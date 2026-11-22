@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { normalizePostMarkdown } from '@/mcp/markdown'
+import { hasMarkdownTable, normalizePostMarkdown } from '@/mcp/markdown'
 import { fullMetaTitle, parsePublishAt, ToolError } from '@/mcp/tools'
 
 describe('normalizePostMarkdown', () => {
@@ -39,5 +39,13 @@ describe('fullMetaTitle', () => {
   it('thêm " | RealUsers" khi thiếu, không thêm hai lần', () => {
     expect(fullMetaTitle('Seeding Threads là gì')).toBe('Seeding Threads là gì | RealUsers')
     expect(fullMetaTitle('Seeding Threads là gì | RealUsers')).toBe('Seeding Threads là gì | RealUsers')
+  })
+})
+
+describe('hasMarkdownTable', () => {
+  it('nhận ra bảng markdown, không bắt nhầm dòng có dấu |', () => {
+    expect(hasMarkdownTable('Mở bài\n\n| A | B |\n|---|---|\n| 1 | 2 |\n')).toBe(true)
+    expect(hasMarkdownTable('| A | B |\n| :--- | ---: |\n')).toBe(true)
+    expect(hasMarkdownTable('Giá 100k | ship 20k\n\n---\n')).toBe(false)
   })
 })

@@ -19,7 +19,7 @@ export const WRITING_GUIDE = `# Luật viết bài blog RealUsers
 - excerpt (sapo): 1–2 câu, 120–160 ký tự. Dùng làm mô tả trên Google khi không có metaDescription.
 - markdown: thân bài. KHÔNG có H1. Mục lớn dùng "##", mục con "###". Mục lục tự dựng từ H2/H3.
 - Mở bài 2–3 câu vào thẳng vấn đề người đọc đang gặp. Mỗi H2 trả lời một câu hỏi cụ thể.
-- Danh sách, bảng markdown, **in đậm** dùng được. Link trong bài dùng đường dẫn tương đối có "/" cuối, ví dụ [tên bài](/blog/cach-tang-tuong-tac-tren-threads/).
+- Danh sách, **in đậm**, *in nghiêng* dùng được. KHÔNG dùng bảng markdown (blog chưa hỗ trợ): so sánh thì viết thành danh sách. Link trong bài dùng đường dẫn tương đối có "/" cuối, ví dụ [tên bài](/blog/cach-tang-tuong-tac-tren-threads/).
 - Gắn 1–3 link sang bài liên quan đã có (xem blogOverview).
 - Khối đặc biệt (mỗi loại tối đa 1–2 lần một bài):
   <Callout tone="tip" title="Mẹo nhỏ">Nội dung ô ghi chú</Callout>   (tone: tip | warning | example)
@@ -34,7 +34,7 @@ export const WRITING_GUIDE = `# Luật viết bài blog RealUsers
 - Dịch lại cho người đọc tiếng Anh, không dịch từng chữ. Link nội bộ trỏ sang /en/blog/<slug-en>/ nếu bài đó có bản tiếng Anh.
 
 ## Quy trình
-1. blogOverview: xem bài đã có (tránh trùng chủ đề, chọn bài để link), chọn category và author.
+1. blogOverview: xem bài đã có (tránh trùng chủ đề, chọn bài để link), chọn category và author. Chưa có chuyên mục hợp thì saveCategory.
 2. createPost với action "draft". Đọc lại bằng getPost nếu cần sửa (updatePost).
 3. Đăng: action "publish" (đăng ngay) hoặc "schedule" kèm publishAt, ví dụ "2026-11-23T08:00:00+07:00".
    Lịch được kiểm khoảng 15 phút một lần, nên bài lên trong vòng ~15 phút sau giờ hẹn.

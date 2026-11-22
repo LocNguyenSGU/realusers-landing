@@ -30,6 +30,12 @@ export function normalizePostMarkdown(markdown: string): string {
   return out.join('\n').trim() + '\n'
 }
 
+/** Trình soạn thảo của blog chưa có bảng: bảng markdown sẽ hiện thành chữ có dấu "|". */
+export function hasMarkdownTable(markdown: string): boolean {
+  const lines = markdown.replace(/\r\n?/g, '\n').split('\n')
+  return lines.some((line, i) => /^\s*\|.*\|\s*$/.test(line) && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/.test(lines[i + 1] ?? ''))
+}
+
 let editorConfig: Promise<SanitizedServerEditorConfig> | null = null
 
 function postEditorConfig(payload: Payload): Promise<SanitizedServerEditorConfig> {

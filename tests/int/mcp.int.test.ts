@@ -3,7 +3,7 @@ import { createLocalReq, getPayload, type Payload, type PayloadRequest } from 'p
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import config from '@payload-config'
-import { blogOverview, cancelSchedule, createPost, getPost, schedulePost, updatePost } from '@/mcp/tools'
+import { blogOverview, cancelSchedule, createPost, getPost, saveCategory, schedulePost, updatePost } from '@/mcp/tools'
 import type { User } from '@/payload-types'
 
 let payload: Payload
@@ -135,6 +135,18 @@ describe('createPost', () => {
   })
 })
 
+describe('saveCategory', () => {
+  it('tạo chuyên mục kèm tên tiếng Anh; gọi lại cùng slug thì sửa, không tạo trùng; writer bị chặn', async () => {
+    const a = await saveCategory(editorReq, { name: 'Đo lường', nameEn: 'Measurement', description: 'Đo hiệu quả' })
+    expect(a).toMatchObject({ created: true, slug: 'do-luong', nameEn: 'Measurement', slugEn: 'measurement' })
+    const b = await saveCategory(editorReq, { name: 'Đo lường', description: 'Đo hiệu quả trên Threads' })
+    expect(b).toMatchObject({ created: false, id: a.id })
+    await expect(saveCategory(writerReq, { name: 'Khác' })).rejects.toThrow(/writer/)
+    const post = await createPost(editorReq, { title: 'Bài đo lường', excerpt: 'x', markdown: '## A\n\nB', category: 'do-luong' })
+    expect(post.status).toBe('draft')
+  })
+})
+
 describe('bản tiếng Anh', () => {
   it('updatePost locale en thêm bản dịch với slug tiếng Anh, bản tiếng Việt giữ nguyên', async () => {
     const vi = await payload.find({ collection: 'posts', draft: true, where: { slug: { equals: 'seeding-threads-la-gi-huong-dan-cho-nguoi-moi' } }, locale: 'vi' })
@@ -158,7 +170,7 @@ describe('bản tiếng Anh', () => {
     expect(post?.title).toBe('Seeding Threads là gì? Hướng dẫn cho người mới')
     expect(post?.titleEn).toBe('What is Threads seeding? A beginner guide')
     expect(o.posts.every((p) => p.title)).toBe(true)
-    expect(o.categories[0]).toMatchObject({ slug: 'seeding', name: 'Seeding' })
+    expect(o.categories.find((c) => c.slug === 'seeding')).toMatchObject({ name: 'Seeding' })
   })
 })
 
