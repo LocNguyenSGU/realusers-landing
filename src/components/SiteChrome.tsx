@@ -106,7 +106,7 @@ export function SiteFooter({ locale }: { locale: Locale }) {
             <p className="fh">{d.footer.account}</p>
             <ul>
               <li><a href={`${APP_URL}/`}>{d.login}</a></li>
-              <li><a href={`${APP_URL}/dang-ky`}>{d.footer.signup}</a></li>
+              <li><a href={`${APP_URL}/`}>{d.footer.signup}</a></li>
             </ul>
           </div>
         </div>
