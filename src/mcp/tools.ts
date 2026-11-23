@@ -6,7 +6,8 @@ import { roleOf } from '@/access'
 import { DEFAULT_LOCALE, pathsFor, type Locale } from '@/i18n'
 import { absoluteUrl, SITE_NAME } from '@/lib/site'
 import { slugify } from '@/lib/slugify'
-import type { Post } from '@/payload-types'
+import type { Post, Topic } from '@/payload-types'
+import { TOPIC_STATUSES, type TopicStatus } from '@/collections/Topics'
 
 import { hasMarkdownTable, markdownToPostContent, postContentToMarkdown } from './markdown'
 
@@ -52,6 +53,11 @@ export function parsePublishAt(value: string, now: Date = new Date()): Date {
 export function fullMetaTitle(title: string): string {
   const t = title.trim()
   return new RegExp(`\\|\\s*${SITE_NAME}$`, 'i').test(t) ? t : `${t} | ${SITE_NAME}`
+}
+
+/** Ngày theo giờ Việt Nam, dạng YYYY-MM-DD. */
+export function vnDate(d: Date | string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(d))
 }
 
 export function vnTime(d: Date | string): string {
@@ -233,6 +239,7 @@ export async function blogOverview(req: PayloadRequest) {
       }
     }),
     scheduled: await upcomingJobs(payload),
+    topics: (await listTopics(req, { status: 'cho-viet', limit: 10 })).topics,
   }
 }
 
@@ -264,9 +271,10 @@ export async function getPost(req: PayloadRequest, args: { id?: number; slug?: s
 
 export async function createPost(
   req: PayloadRequest,
-  args: PostInput & { title: string; excerpt: string; markdown: string; category: string; action?: PublishAction; publishAt?: string },
+  args: PostInput & { title: string; excerpt: string; markdown: string; category: string; action?: PublishAction; publishAt?: string; topicId?: number },
 ) {
   requireUser(req)
+  if (args.topicId !== undefined) await req.payload.findByID({ collection: 'topics', id: args.topicId, depth: 0, ...ops(req) })
   const action = args.action ?? 'draft'
   if (action !== 'draft') requirePublisher(req)
   const publishAt = action === 'schedule' ? parsePublishAt(args.publishAt ?? '') : null
@@ -282,10 +290,14 @@ export async function createPost(
 
   const doc = await req.payload.create({ collection: 'posts', locale: 'vi', data: data as never, draft: action !== 'publish', depth: 0, ...ops(req) })
   if (publishAt) await queueSchedule(req, doc.id, publishAt)
+  if (args.topicId !== undefined) await markTopicWritten(req, args.topicId, doc.id)
   return summary(req, doc.id, 'vi')
 }
 
-export async function updatePost(req: PayloadRequest, args: PostInput & { id: number; locale?: Locale; action?: PublishAction; publishAt?: string }) {
+export async function updatePost(
+  req: PayloadRequest,
+  args: PostInput & { id: number; locale?: Locale; action?: PublishAction; publishAt?: string; topicId?: number },
+) {
   requireUser(req)
   const locale = args.locale ?? DEFAULT_LOCALE
   const action = args.action ?? 'draft'
@@ -308,6 +320,9 @@ export async function updatePost(req: PayloadRequest, args: PostInput & { id: nu
 
   await req.payload.update({ collection: 'posts', id: args.id, locale, data: data as never, draft: action !== 'publish', depth: 0, ...ops(req) })
   if (publishAt) await queueSchedule(req, args.id, publishAt)
+  // Đăng ngay thì bỏ lịch hẹn cũ: để lại, tới giờ job sẽ tự đăng bản nháp mới nhất dù chưa ai duyệt.
+  if (action === 'publish') await cancelJobs(req, args.id)
+  if (args.topicId !== undefined) await markTopicWritten(req, args.topicId, args.id)
   return summary(req, args.id, locale)
 }
 
@@ -399,4 +414,81 @@ export async function saveCategory(
   }
   const en = await payload.findByID({ collection: 'categories', id: doc.id, locale: 'en', fallbackLocale: false, depth: 0, ...ops(req) })
   return { id: doc.id, created: !found.docs[0], slug, name: vi.name, slugEn: en.slug ?? null, nameEn: en.name ?? null }
+}
+
+
+// ---------- chủ đề chờ viết ----------
+
+const topicView = (t: Topic) => ({
+  id: t.id,
+  keyword: t.keyword,
+  title: t.title ?? null,
+  supportingKeywords: t.supportingKeywords ?? null,
+  notes: t.notes ?? null,
+  keywordEn: t.keywordEn ?? null,
+  titleEn: t.titleEn ?? null,
+  publishOn: t.publishOn ? vnDate(t.publishOn) : null,
+  status: t.status,
+  category: typeof t.category === 'object' && t.category ? (t.category.slug ?? t.category.id) : (t.category ?? null),
+  postId: typeof t.post === 'object' && t.post ? t.post.id : (t.post ?? null),
+})
+
+/** Chủ đề theo trạng thái, ngày muốn đăng sớm nhất trước (chưa có ngày thì xếp cuối). */
+export async function listTopics(req: PayloadRequest, args: { status?: TopicStatus | 'all'; limit?: number }) {
+  requireUser(req)
+  const status = args.status ?? 'cho-viet'
+  const res = await req.payload.find({
+    collection: 'topics',
+    where: status === 'all' ? {} : { status: { equals: status } },
+    sort: ['publishOn', 'createdAt'],
+    limit: Math.min(Math.max(args.limit ?? 20, 1), 200),
+    depth: 1,
+    ...ops(req),
+  })
+  // Postgres xếp NULL cuối khi tăng dần, đúng ý "chưa có ngày thì để sau".
+  return { total: res.totalDocs, topics: res.docs.map((t) => topicView(t as Topic)) }
+}
+
+export type TopicInput = {
+  id?: number
+  keyword?: string
+  title?: string
+  supportingKeywords?: string
+  notes?: string
+  keywordEn?: string
+  titleEn?: string
+  publishOn?: string | null
+  status?: TopicStatus
+  category?: string | null
+}
+
+/** Ngày muốn đăng dạng YYYY-MM-DD (giờ Việt Nam), lưu 00:00 giờ Việt Nam. */
+export function parsePublishOn(value: string): string {
+  const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!m) throw new ToolError(`publishOn phải dạng YYYY-MM-DD, nhận được "${value}".`)
+  const d = new Date(`${m[1]}-${m[2]}-${m[3]}T00:00:00+07:00`)
+  if (Number.isNaN(d.getTime())) throw new ToolError(`publishOn không hợp lệ: "${value}".`)
+  return d.toISOString()
+}
+
+export async function saveTopic(req: PayloadRequest, args: TopicInput) {
+  requireUser(req)
+  if (args.id === undefined && !args.keyword?.trim()) throw new ToolError('Chủ đề mới cần keyword.')
+  if (args.status !== undefined && !TOPIC_STATUSES.includes(args.status)) throw new ToolError(`status phải là một trong: ${TOPIC_STATUSES.join(', ')}.`)
+  const data: Record<string, unknown> = {}
+  for (const k of ['keyword', 'title', 'supportingKeywords', 'notes', 'keywordEn', 'titleEn'] as const) {
+    if (args[k] !== undefined) data[k] = args[k]!.trim()
+  }
+  if (args.publishOn !== undefined) data.publishOn = args.publishOn ? parsePublishOn(args.publishOn) : null
+  if (args.status !== undefined) data.status = args.status
+  if (args.category !== undefined) data.category = args.category ? await resolveCategory(req, args.category) : null
+  const doc =
+    args.id !== undefined
+      ? await req.payload.update({ collection: 'topics', id: args.id, data, depth: 1, ...ops(req) })
+      : await req.payload.create({ collection: 'topics', data: data as never, depth: 1, ...ops(req) })
+  return topicView(doc as Topic)
+}
+
+async function markTopicWritten(req: PayloadRequest, topicId: number, postId: number) {
+  await req.payload.update({ collection: 'topics', id: topicId, data: { status: 'da-viet', post: postId }, depth: 0, ...ops(req) })
 }

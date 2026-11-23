@@ -35,6 +35,8 @@ export const WRITING_GUIDE = `# Luật viết bài blog RealUsers
 
 ## Quy trình
 1. blogOverview: xem bài đã có (tránh trùng chủ đề, chọn bài để link), chọn category và author. Chưa có chuyên mục hợp thì saveCategory.
+   Không được giao chủ đề cụ thể thì listTopics, lấy chủ đề đầu tiên (ngày muốn đăng sớm nhất), viết theo từ khoá và góc viết của chủ đề đó,
+   rồi truyền topicId khi createPost để chủ đề tự chuyển sang "Đã viết". Hẹn giờ đăng theo "ngày muốn đăng" của chủ đề, 08:00 giờ Việt Nam.
 2. createPost với action "draft". Đọc lại bằng getPost nếu cần sửa (updatePost).
 3. Đăng: action "publish" (đăng ngay) hoặc "schedule" kèm publishAt, ví dụ "2026-11-23T08:00:00+07:00".
    Lịch được kiểm khoảng 15 phút một lần, nên bài lên trong vòng ~15 phút sau giờ hẹn.

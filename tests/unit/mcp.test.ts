@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { hasMarkdownTable, normalizePostMarkdown } from '@/mcp/markdown'
-import { fullMetaTitle, parsePublishAt, ToolError } from '@/mcp/tools'
+import { fullMetaTitle, parsePublishAt, parsePublishOn, ToolError, vnDate } from '@/mcp/tools'
 
 describe('normalizePostMarkdown', () => {
   it('bỏ H1 đầu bài (thường là tiêu đề chép lại), hạ các H1 khác xuống H2', () => {
@@ -47,5 +47,14 @@ describe('hasMarkdownTable', () => {
     expect(hasMarkdownTable('Mở bài\n\n| A | B |\n|---|---|\n| 1 | 2 |\n')).toBe(true)
     expect(hasMarkdownTable('| A | B |\n| :--- | ---: |\n')).toBe(true)
     expect(hasMarkdownTable('Giá 100k | ship 20k\n\n---\n')).toBe(false)
+  })
+})
+
+describe('ngày muốn đăng', () => {
+  it('lưu 00:00 giờ Việt Nam, đọc lại đúng ngày Việt Nam', () => {
+    const iso = parsePublishOn('2026-12-01')
+    expect(iso).toBe('2026-11-30T17:00:00.000Z')
+    expect(vnDate(iso)).toBe('2026-12-01')
+    expect(() => parsePublishOn('01/12/2026')).toThrow(ToolError)
   })
 })

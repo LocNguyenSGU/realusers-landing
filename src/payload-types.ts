@@ -69,6 +69,7 @@ export interface Config {
   blocks: {};
   collections: {
     posts: Post;
+    topics: Topic;
     categories: Category;
     authors: Author;
     media: Media;
@@ -84,6 +85,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    topics: TopicsSelect<false> | TopicsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     authors: AuthorsSelect<false> | AuthorsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -333,6 +335,39 @@ export interface Author {
   createdAt: string;
 }
 /**
+ * Nhập từ khoá và góc viết. AI lấy chủ đề theo "Ngày muốn đăng" sớm nhất, viết xong tự chuyển sang "Đã viết" và gắn bài.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics".
+ */
+export interface Topic {
+  id: number;
+  /**
+   * Cụm người đọc gõ trên Google, vd "seeding threads là gì".
+   */
+  keyword: string;
+  title?: string | null;
+  /**
+   * Cách nhau bằng dấu phẩy.
+   */
+  supportingKeywords?: string | null;
+  /**
+   * Đối tượng đọc, ý chính cần có, điều không được nói, link nên gắn…
+   */
+  notes?: string | null;
+  keywordEn?: string | null;
+  titleEn?: string | null;
+  publishOn?: string | null;
+  status: 'cho-viet' | 'dang-viet' | 'da-viet' | 'bo';
+  category?: (number | null) | Category;
+  /**
+   * Tự gắn khi AI tạo bài từ chủ đề này.
+   */
+  post?: (number | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -424,6 +459,14 @@ export interface PayloadMcpApiKey {
      * Huỷ lịch hẹn đăng của một bài.
      */
     cancelSchedule?: boolean | null;
+    /**
+     * Danh sách "Chủ đề chờ viết" do MKT nhập ở /admin: từ khoá, tiêu đề gợi ý, góc viết, ngày muốn đăng. Mặc định các chủ đề chờ viết, ngày sớm nhất trước. Viết bài thì lấy chủ đề đầu tiên.
+     */
+    listTopics?: boolean | null;
+    /**
+     * Thêm chủ đề chờ viết, hoặc sửa chủ đề có sẵn (truyền id): từ khoá, ngày muốn đăng, trạng thái. Dùng khi lên kế hoạch nội dung hoặc khi bỏ một chủ đề.
+     */
+    saveTopic?: boolean | null;
     /**
      * Tạo chuyên mục mới (hoặc sửa chuyên mục cùng slug), kèm tên tiếng Anh. Chỉ tạo khi chưa có chuyên mục hợp (xem blogOverview).
      */
@@ -568,6 +611,10 @@ export interface PayloadLockedDocument {
         value: number | Post;
       } | null)
     | ({
+        relationTo: 'topics';
+        value: number | Topic;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -678,6 +725,24 @@ export interface PostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "topics_select".
+ */
+export interface TopicsSelect<T extends boolean = true> {
+  keyword?: T;
+  title?: T;
+  supportingKeywords?: T;
+  notes?: T;
+  keywordEn?: T;
+  titleEn?: T;
+  publishOn?: T;
+  status?: T;
+  category?: T;
+  post?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -837,6 +902,8 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         updatePost?: T;
         schedulePost?: T;
         cancelSchedule?: T;
+        listTopics?: T;
+        saveTopic?: T;
         saveCategory?: T;
         uploadImage?: T;
       };
