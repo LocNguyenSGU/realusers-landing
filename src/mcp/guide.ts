@@ -23,7 +23,7 @@ export const WRITING_GUIDE = `# Luật viết bài blog RealUsers
 - Gắn 1–3 link sang bài liên quan đã có (xem blogOverview).
 - Khối đặc biệt (mỗi loại tối đa 1–2 lần một bài):
   <Callout tone="tip" title="Mẹo nhỏ">Nội dung ô ghi chú</Callout>   (tone: tip | warning | example)
-  <Cta title="Thử RealUsers miễn phí" buttonLabel="Tạo tài khoản miễn phí" url="https://app.realusers.net/dang-ky">Một câu mời</Cta>
+  <Cta title="Thử RealUsers miễn phí" buttonLabel="Tạo tài khoản miễn phí" url="https://app.realusers.net/">Một câu mời</Cta>
 - faq: 3–5 câu hỏi người đọc hay hỏi thật, trả lời 1–3 câu. Hiện cuối bài và khai báo FAQ cho Google.
 - slug: chữ thường không dấu, gạch ngang, ngắn, chứa từ khoá (vd "cach-seeding-threads"). Bỏ trống thì tự sinh từ tiêu đề.
 - metaTitle (tuỳ chọn, ≤ 60 ký tự): tiêu đề hiện trên Google nếu muốn khác title. Site tự thêm " | RealUsers".

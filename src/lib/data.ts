@@ -251,7 +251,7 @@ export const getBlogSettings = cache(async (locale: Locale): Promise<BlogSetting
       title: s.cta?.title ?? null,
       text: s.cta?.text ?? null,
       buttonLabel: s.cta?.buttonLabel || d.signupLong,
-      url: s.cta?.url || 'https://app.realusers.net/dang-ky',
+      url: s.cta?.url || 'https://app.realusers.net/',
     },
   }
 })

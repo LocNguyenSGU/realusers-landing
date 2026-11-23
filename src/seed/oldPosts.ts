@@ -52,7 +52,7 @@ const SETTINGS_EN = {
     title: 'Want to post consistently without losing half your day?',
     text: 'RealUsers drafts conversation starters in your brand voice and finds Threads discussions about exactly what you sell. You just approve before anything goes out.',
     buttonLabel: 'Create a free account',
-    url: 'https://app.realusers.net/dang-ky',
+    url: 'https://app.realusers.net/',
   },
 }
 
