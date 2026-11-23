@@ -3,7 +3,7 @@ import { createLocalReq, getPayload, type Payload, type PayloadRequest } from 'p
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import config from '@payload-config'
-import { blogOverview, cancelSchedule, createPost, getPost, saveCategory, schedulePost, updatePost } from '@/mcp/tools'
+import { blogOverview, cancelSchedule, createPost, getPost, listTopics, saveCategory, saveTopic, schedulePost, updatePost } from '@/mcp/tools'
 import type { User } from '@/payload-types'
 
 let payload: Payload
@@ -31,7 +31,7 @@ Vì khách tin người dùng khác hơn quảng cáo. Xem thêm [cách tăng t�
 `
 
 async function wipe() {
-  for (const collection of ['payload-jobs', 'redirects', 'posts', 'categories', 'authors', 'media', 'users'] as const) {
+  for (const collection of ['payload-jobs', 'topics', 'redirects', 'posts', 'categories', 'authors', 'media', 'users'] as const) {
     await payload.delete({ collection, where: { id: { exists: true } }, context: ctx, overrideAccess: true })
   }
 }
@@ -226,5 +226,44 @@ describe('hẹn giờ đăng', () => {
     const { docs } = await payload.find({ collection: 'posts', draft: true, limit: 1 })
     await expect(schedulePost(editorReq, { id: docs[0].id, publishAt: '2026-11-23T08:00:00' })).rejects.toThrow(/múi giờ/)
     await expect(schedulePost(editorReq, { id: docs[0].id, publishAt: '2020-01-01T08:00:00+07:00' })).rejects.toThrow(/tương lai/)
+  })
+})
+
+describe('chủ đề chờ viết', () => {
+  it('thêm chủ đề, xếp theo ngày muốn đăng; viết bài kèm topicId thì chủ đề sang "Đã viết" và gắn bài', async () => {
+    const late = await saveTopic(writerReq, { keyword: 'bảng giá seeding threads', publishOn: '2026-12-02', category: 'seeding' })
+    const early = await saveTopic(writerReq, { keyword: 'seeding threads cho shop mỹ phẩm', title: 'Seeding Threads cho shop mỹ phẩm', publishOn: '2026-12-01' })
+    const noDate = await saveTopic(editorReq, { keyword: 'social listening là gì' })
+    expect(early).toMatchObject({ status: 'cho-viet', publishOn: '2026-12-01' })
+    expect(late.category).toBe('seeding')
+
+    const list = await listTopics(editorReq, {})
+    expect(list.topics.map((t) => t.id)).toEqual([early.id, late.id, noDate.id])
+    expect((await blogOverview(editorReq)).topics[0].id).toBe(early.id)
+
+    const post = await createPost(editorReq, { title: 'Seeding Threads cho shop mỹ phẩm', excerpt: 'x', markdown: '## A\n\nB', category: 'seeding', topicId: early.id })
+    const done = await listTopics(editorReq, { status: 'da-viet' })
+    expect(done.topics).toEqual([expect.objectContaining({ id: early.id, postId: post.id })])
+    expect((await listTopics(editorReq, {})).topics.map((t) => t.id)).toEqual([late.id, noDate.id])
+
+    await saveTopic(editorReq, { id: noDate.id, status: 'bo' })
+    expect((await listTopics(editorReq, {})).topics.map((t) => t.id)).toEqual([late.id])
+  })
+
+  it('ngày muốn đăng sai định dạng thì báo lỗi rõ; chủ đề mới phải có keyword', async () => {
+    await expect(saveTopic(editorReq, { keyword: 'x', publishOn: '01/12/2026' })).rejects.toThrow(/YYYY-MM-DD/)
+    await expect(saveTopic(editorReq, { title: 'không có từ khoá' })).rejects.toThrow(/keyword/)
+  })
+
+  it('khách (chưa đăng nhập) không đọc được chủ đề', async () => {
+    await expect(payload.find({ collection: 'topics', overrideAccess: false })).rejects.toThrow()
+  })
+
+  it('đăng ngay một bài đang có lịch hẹn thì lịch hẹn cũ bị huỷ', async () => {
+    const p = await createPost(editorReq, { title: 'Bài có lịch rồi đăng sớm', excerpt: 'x', markdown: '## A\n\nB', category: 'seeding', action: 'schedule', publishAt: inOneDay() })
+    expect(p.scheduled).toHaveLength(1)
+    const res = await updatePost(editorReq, { id: p.id, action: 'publish' })
+    expect(res.status).toBe('published')
+    expect(res.scheduled).toHaveLength(0)
   })
 })

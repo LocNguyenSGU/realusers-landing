@@ -64,13 +64,21 @@ claude mcp add --transport http realusers-blog https://www.realusers.net/api/mcp
 # máy local: http://localhost:3100/api/mcp
 ```
 
-**Công cụ:** `blogOverview` (chuyên mục, tác giả, mọi bài, lịch đăng), `getPost` (đọc bài ra markdown), `createPost`, `updatePost` (sửa hoặc thêm bản `en`), `schedulePost`, `cancelSchedule`, `saveCategory` (tạo/sửa chuyên mục), `uploadImage` (ảnh từ link).
+**Công cụ:** `blogOverview` (chuyên mục, tác giả, mọi bài, lịch đăng), `getPost` (đọc bài ra markdown), `createPost`, `updatePost` (sửa hoặc thêm bản `en`), `schedulePost`, `cancelSchedule`, `saveCategory` (tạo/sửa chuyên mục), `listTopics` / `saveTopic` (chủ đề chờ viết), `uploadImage` (ảnh từ link).
 Prompt `writeBlogPost` chứa luật viết (giọng văn, cấu trúc, SEO). Sửa luật ở `src/mcp/guide.ts`.
 
 - Markdown: không có H1 (tự bỏ/hạ cấp), mục lớn `##`. Khối đặc biệt: `<Callout tone="tip" title="...">...</Callout>`, `<Cta title="..." buttonLabel="..." url="...">...</Cta>`.
 - `action`: `draft` (mặc định; sửa bài đang đăng thì bản đang đăng giữ nguyên), `publish` (đăng ngay), `schedule` + `publishAt` có múi giờ (`2026-11-23T08:00:00+07:00`).
 - Key mang quyền tài khoản của nó: `writer` gọi publish/schedule sẽ bị từ chối.
 - Chưa hỗ trợ bảng markdown: công cụ báo lỗi để viết lại thành danh sách.
+
+**Chủ đề chờ viết** (`/admin` → Nội dung → Chủ đề chờ viết): MKT nhập từ khoá chính, tiêu đề gợi ý, góc viết, ngày muốn đăng. AI gọi `listTopics` lấy chủ đề có ngày sớm nhất, viết bài, truyền `topicId` khi `createPost` thì chủ đề tự chuyển "Đã viết" và gắn bài. Bỏ chủ đề: đổi trạng thái sang "Bỏ". Chỉ người đăng nhập mới xem được.
+
+Nạp cả kế hoạch nội dung (CSV) vào mục này, 1 ngày 1 bài từ ngày bắt đầu (chạy lại an toàn, trùng từ khoá thì bỏ qua; thêm `--dry-run` để xem trước):
+
+```bash
+BLOG_MCP_KEY=<key> npm run topics:import -- ke-hoach-song-ngu.csv --start 2026-11-25 --url https://www.realusers.net
+```
 
 **Đẩy bài viết sẵn bằng file** (không cần mở Claude): mỗi bài là `<tên>.vi.md` + `<tên>.en.md`, đầu file có khối `---json {...} ---` (title, slug, excerpt, category, faq, metaTitle, metaDescription; file `.vi.md` có thể kèm `categoryDef` để tạo chuyên mục). Chạy lại an toàn: trùng slug thì sửa bài cũ.
 

@@ -16,6 +16,7 @@ import { Authors } from './collections/Authors'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
+import { Topics } from './collections/Topics'
 import { Users } from './collections/Users'
 import { BlogSettings } from './globals/BlogSettings'
 import { revalidateBlog } from './hooks/revalidate'
@@ -55,7 +56,7 @@ export default buildConfig({
     defaultLocale: 'vi',
     fallback: true,
   },
-  collections: [Posts, Categories, Authors, Media, Users],
+  collections: [Posts, Topics, Categories, Authors, Media, Users],
   globals: [BlogSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

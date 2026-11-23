@@ -16,6 +16,7 @@
     "seed:old-posts": "cross-env NODE_OPTIONS=--no-deprecation payload run src/scripts/seedOldPosts.ts",
     "seed:en-posts": "cross-env NODE_OPTIONS=--no-deprecation payload run src/scripts/seedEnPosts.ts",
     "blog:push": "node scripts/push-post.mjs",
+    "topics:import": "node scripts/import-topics.mjs",
     "illustrations": "node scripts/illustrations/render.mjs",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",

@@ -66,7 +66,7 @@ async function call(name, argsObj) {
 }
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o[k] !== undefined).map((k) => [k, o[k]]))
-const FIELDS = ['title', 'excerpt', 'markdown', 'category', 'author', 'slug', 'faq', 'metaTitle', 'metaDescription', 'coverImageId', 'featured']
+const FIELDS = ['title', 'excerpt', 'markdown', 'category', 'author', 'slug', 'faq', 'metaTitle', 'metaDescription', 'coverImageId', 'featured', 'topicId']
 
 const vi = readPost(`${stem}.vi.md`)
 const en = readPost(`${stem}.en.md`)
@@ -89,7 +89,7 @@ id = saved.id
 console.log(`#${id} (vi) ${saved.slug}: đã lưu nháp`)
 
 if (en) {
-  const e = await call('updatePost', { id, locale: 'en', ...pick(en, FIELDS.filter((k) => k !== 'category')) })
+  const e = await call('updatePost', { id, locale: 'en', ...pick(en, FIELDS.filter((k) => !['category', 'topicId'].includes(k))) })
   console.log(`#${id} (en) ${e.slug}: đã lưu nháp`)
 }
 

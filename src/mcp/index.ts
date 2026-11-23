@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { isAdmin, isAdminField, roleOf } from '@/access'
 
 import { SERVER_INSTRUCTIONS, writeBlogPostPrompt } from './guide'
-import { blogOverview, cancelSchedule, createPost, getPost, saveCategory, schedulePost, ToolError, updatePost, uploadImage } from './tools'
+import { blogOverview, cancelSchedule, createPost, getPost, listTopics, saveCategory, saveTopic, schedulePost, ToolError, updatePost, uploadImage } from './tools'
 
 type Text = { content: { type: 'text'; text: string }[] }
 const adminOr =
@@ -44,6 +44,8 @@ const action = z
   .enum(['draft', 'publish', 'schedule'])
   .optional()
   .describe('draft = lưu nháp (mặc định, bản đang đăng không đổi); publish = đăng ngay; schedule = hẹn giờ, cần publishAt')
+const topicId = z.number().int().optional().describe('Id chủ đề trong "Chủ đề chờ viết" (listTopics) mà bài này viết cho. Chủ đề tự chuyển sang "Đã viết" và gắn bài.')
+const topicStatus = z.enum(['cho-viet', 'dang-viet', 'da-viet', 'bo'])
 const publishAt = z.string().optional().describe('Giờ hẹn đăng, ISO có múi giờ, ví dụ "2026-11-23T08:00:00+07:00". Chỉ dùng với action "schedule".')
 
 const postFields = {
@@ -103,7 +105,7 @@ export const blogMcpPlugin = mcpPlugin({
       tool(
         'createPost',
         'Tạo bài mới bằng tiếng Việt. Mặc định lưu nháp; action "publish" đăng ngay; "schedule" + publishAt để hẹn giờ.',
-        { title: z.string().describe('Tiêu đề bài (H1), 50–65 ký tự'), ...postFields, action, publishAt },
+        { title: z.string().describe('Tiêu đề bài (H1), 50–65 ký tự'), ...postFields, action, publishAt, topicId },
         createPost,
       ),
       tool(
@@ -116,6 +118,7 @@ export const blogMcpPlugin = mcpPlugin({
           ...Object.fromEntries(Object.entries(postFields).map(([k, v]) => [k, v.optional()])),
           action,
           publishAt,
+          topicId,
         },
         updatePost,
       ),
@@ -130,6 +133,32 @@ export const blogMcpPlugin = mcpPlugin({
         schedulePost,
       ),
       tool('cancelSchedule', 'Huỷ lịch hẹn đăng của một bài.', { id: z.number().int() }, cancelSchedule),
+      tool(
+        'listTopics',
+        'Danh sách "Chủ đề chờ viết" do MKT nhập ở /admin: từ khoá, tiêu đề gợi ý, góc viết, ngày muốn đăng. Mặc định các chủ đề chờ viết, ngày sớm nhất trước. Viết bài thì lấy chủ đề đầu tiên.',
+        {
+          status: z.union([topicStatus, z.literal('all')]).optional().describe('Mặc định "cho-viet"'),
+          limit: z.number().int().optional().describe('Mặc định 20, tối đa 200'),
+        },
+        listTopics,
+      ),
+      tool(
+        'saveTopic',
+        'Thêm chủ đề chờ viết, hoặc sửa chủ đề có sẵn (truyền id): từ khoá, ngày muốn đăng, trạng thái. Dùng khi lên kế hoạch nội dung hoặc khi bỏ một chủ đề.',
+        {
+          id: z.number().int().optional().describe('Bỏ trống để thêm mới'),
+          keyword: z.string().optional().describe('Từ khoá chính (bắt buộc khi thêm mới)'),
+          title: z.string().optional(),
+          supportingKeywords: z.string().optional(),
+          notes: z.string().optional().describe('Góc viết, ghi chú cho người viết'),
+          keywordEn: z.string().optional(),
+          titleEn: z.string().optional(),
+          publishOn: z.string().nullable().optional().describe('Ngày muốn đăng YYYY-MM-DD (giờ Việt Nam)'),
+          status: topicStatus.optional(),
+          category: z.string().nullable().optional().describe('Slug hoặc id chuyên mục'),
+        },
+        saveTopic,
+      ),
       tool(
         'saveCategory',
         'Tạo chuyên mục mới (hoặc sửa chuyên mục cùng slug), kèm tên tiếng Anh. Chỉ tạo khi chưa có chuyên mục hợp (xem blogOverview).',
