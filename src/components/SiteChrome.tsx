@@ -57,14 +57,14 @@ export function SiteHeader({ locale }: { locale: Locale }) {
           <a className="hdr-login" href={`${APP_URL}/`}>
             {d.login}
           </a>
-          <a className="btn btn-primary btn-sm" href={`${APP_URL}/dang-ky`}>
+          <a className="btn btn-primary btn-sm" href={`${APP_URL}/`}>
             {d.signup}
           </a>
         </div>
         <MobileMenu
           items={nav}
           loginUrl={`${APP_URL}/`}
-          signupUrl={`${APP_URL}/dang-ky`}
+          signupUrl={`${APP_URL}/`}
           locale={locale}
           labels={{ open: d.menuOpen, close: d.menuClose, menu: d.mobileMenu, login: d.login, signup: d.signup, language: d.language }}
         />
