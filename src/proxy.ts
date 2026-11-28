@@ -14,7 +14,9 @@ export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl
   // Production chỉ có một địa chỉ: domain *.vercel.app chuyển hẳn sang www (tránh trùng nội dung).
   const host = req.headers.get('host') ?? ''
-  if (process.env.VERCEL_ENV === 'production' && host.endsWith('.vercel.app') && !/^https?:\/\/[^/]*\.vercel\.app/.test(SITE_URL)) {
+  // /api và /next để nguyên: cron của Vercel và route làm mới trang có thể gọi bằng địa chỉ *.vercel.app, chuyển hướng sẽ làm hỏng chúng.
+  const isInternal = /^\/(api|next)(\/|$)/.test(pathname)
+  if (process.env.VERCEL_ENV === 'production' && !isInternal && host.endsWith('.vercel.app') && !/^https?:\/\/[^/]*\.vercel\.app/.test(SITE_URL)) {
     return NextResponse.redirect(new URL(`${pathname}${search}`, SITE_URL), 308)
   }
   // File landing tĩnh mở thẳng (/landing.html, /landing-en.html) thì về đúng URL công khai.

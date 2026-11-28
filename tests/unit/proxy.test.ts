@@ -36,5 +36,10 @@ describe('proxy', () => {
     // Bản preview (không phải production) thì không chuyển.
     const p = await run('https://realusers-landing-abc.vercel.app/blog/', { ...env, VERCEL_ENV: 'preview' }, 'realusers-landing-abc.vercel.app')
     expect(p.status).not.toBe(308)
+    // /api (cron của Vercel) và /next (làm mới trang) không bị chuyển hướng.
+    const cron = await run('https://realusers-landing.vercel.app/api/payload-jobs/run', env, 'realusers-landing.vercel.app')
+    expect(cron.status).not.toBe(308)
+    const rv = await run('https://realusers-landing.vercel.app/next/revalidate', env, 'realusers-landing.vercel.app')
+    expect(rv.status).not.toBe(308)
   })
 })
