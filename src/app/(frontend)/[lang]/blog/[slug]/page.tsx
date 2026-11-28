@@ -146,6 +146,7 @@ export default async function PostPage({ params }: Args) {
             height={840}
             sizes="(max-width:1200px) 100vw, 1152px"
             priority
+            fetchPriority="high"
             unoptimized={coverImg.generated}
           />
         </figure>

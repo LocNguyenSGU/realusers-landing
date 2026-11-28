@@ -30,7 +30,15 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     title: { default: DICT[locale].blogName, template: `%s | ${SITE_NAME}` },
     applicationName: SITE_NAME,
     // File thật (không dùng data URI) để Google lấy được logo hiện trên kết quả tìm kiếm.
-    icons: { icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }] },
+    // Google Search không đọc favicon SVG: có thêm ICO 48px và PNG 192px. apple-touch-icon cho màn hình chính iPhone.
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '48x48' },
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+      ],
+      apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+    },
     formatDetection: { telephone: false },
   }
 }

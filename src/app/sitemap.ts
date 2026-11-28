@@ -47,7 +47,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     }
     for (const a of authors) {
-      out.push({ url: absoluteUrl(p.author(a.slug as string)), changeFrequency: 'monthly', priority: 0.3 })
+      // Slug tác giả giống nhau ở mọi ngôn ngữ, nên bản dịch luôn có.
+      const authorAlts = Object.fromEntries(LOCALES.map((l) => [l, pathsFor(l).author(a.slug as string)]))
+      out.push({ url: absoluteUrl(p.author(a.slug as string)), changeFrequency: 'monthly', priority: 0.3, alternates: langs(authorAlts) })
     }
   }
   return out

@@ -10,7 +10,8 @@ export const organization = (): Organization => ({
   '@id': `${SITE_URL}/#organization`,
   name: SITE_NAME,
   url: `${SITE_URL}/`,
-  logo: { '@type': 'ImageObject', url: absoluteUrl('/anh/og-realusers.jpg') },
+  // Logo vuông (Google cần tối thiểu 112x112, nhìn rõ trên nền trắng). Ảnh og-realusers.jpg là banner, không dùng làm logo.
+  logo: { '@type': 'ImageObject', url: absoluteUrl('/anh/logo-512.png'), width: '512', height: '512' },
 })
 
 export type Crumb = { name: string; path: string }
