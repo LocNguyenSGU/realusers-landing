@@ -5,6 +5,16 @@ import { revalidatePath } from 'next/cache'
 
 import { SITE_URL } from '@/lib/site'
 
+/**
+ * Làm mới mọi trang công khai. Trang dưới layout (blog, chuyên mục, tác giả, RSS) làm mới qua
+ * revalidatePath('/', 'layout'). /sitemap.xml nằm ở src/app/sitemap.ts, ngoài mọi layout, nên phải gọi riêng:
+ * thiếu dòng này thì sitemap đứng yên từ lần deploy trước và Google không thấy bài mới (lỗi gặp 28/11).
+ */
+export function revalidatePublicPages(): void {
+  revalidatePath('/', 'layout')
+  revalidatePath('/sitemap.xml')
+}
+
 /** Khoá cho route /next/revalidate, suy từ PAYLOAD_SECRET (không cần thêm biến môi trường). */
 export function revalidateToken(): string {
   return createHmac('sha256', process.env.PAYLOAD_SECRET || '').update('revalidate-blog').digest('hex')
@@ -28,7 +38,7 @@ export async function revalidateBlog(req: PayloadRequest): Promise<void> {
     // Làm mới mọi trang dưới layout gốc (blog, chuyên mục, tác giả, sitemap, RSS). Site nhỏ nên làm mới hết
     // là đơn giản và chắc nhất. Không dùng revalidatePath('/blog', 'layout'): trang nằm trong nhóm (frontend)
     // nên tag layout của chúng có cả tên nhóm, gọi '/blog' không khớp và trang không đổi (lỗi đã gặp 10/11).
-    revalidatePath('/', 'layout')
+    revalidatePublicPages()
   } catch (err) {
     req.payload.logger.warn({ err }, 'revalidateBlog: không làm mới được trang (chạy ngoài Next?)')
   }
