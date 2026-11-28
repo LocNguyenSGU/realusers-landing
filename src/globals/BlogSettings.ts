@@ -53,9 +53,9 @@ export const BlogSettings: GlobalConfig = {
           defaultValue: byLocale('RealUsers soạn sẵn bài mở chủ đề theo giọng thương hiệu của bạn và tìm những thảo luận trên Threads đang nói đúng thứ bạn bán. Bạn chỉ cần duyệt trước khi đăng.', 'RealUsers drafts conversation starters in your brand voice and finds Threads discussions about exactly what you sell. You just approve before anything goes out.'),
         },
         { name: 'buttonLabel', label: 'Chữ trên nút', type: 'text', localized: true, defaultValue: byLocale('Tạo tài khoản miễn phí', 'Create a free account') },
-        { name: 'url', label: 'Link nút', type: 'text', localized: true, defaultValue: byLocale('https://app.realusers.net/dang-ky', 'https://app.realusers.net/dang-ky') },
+        { name: 'url', label: 'Link nút', type: 'text', localized: true, defaultValue: byLocale('https://app.realusers.net/', 'https://app.realusers.net/') },
       ],
     },
   ],
-  hooks: { afterChange: [({ doc, req }) => (revalidateBlog(req), doc)] },
+  hooks: { afterChange: [async ({ doc, req }) => (await revalidateBlog(req), doc)] },
 }

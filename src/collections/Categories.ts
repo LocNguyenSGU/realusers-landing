@@ -28,7 +28,7 @@ export const Categories: CollectionConfig = {
     slugField({ localized: true, useAsSlug: 'name', slugify: ({ valueToSlugify }) => slugify(String(valueToSlugify ?? '')) }),
   ],
   hooks: {
-    afterChange: [({ doc, req }) => (revalidateBlog(req), doc)],
-    afterDelete: [({ doc, req }) => (revalidateBlog(req), doc)],
+    afterChange: [async ({ doc, req }) => (await revalidateBlog(req), doc)],
+    afterDelete: [async ({ doc, req }) => (await revalidateBlog(req), doc)],
   },
 }

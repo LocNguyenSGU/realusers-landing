@@ -16,5 +16,6 @@ const res = await seedEnPosts(payload, file, { imagesDir: path.join(root, 'seed/
 payload.logger.info(`Đã dịch ${res.translated.length} bài: ${res.translated.join(', ') || '(không)'}`)
 payload.logger.info(`Bỏ qua ${res.skipped.length} bài đã có tiếng Anh: ${res.skipped.join(', ') || '(không)'}`)
 payload.logger.info(`Ảnh đã chèn: ${res.imagesAdded.join(', ') || '(không)'}`)
+payload.logger.info(`Ảnh hỏng đã tải lại: ${res.imagesRepaired.join(', ') || '(không)'}`)
 if (res.missing.length) payload.logger.warn(`Không thấy bài tiếng Việt: ${res.missing.join(', ')}`)
 process.exit(0)

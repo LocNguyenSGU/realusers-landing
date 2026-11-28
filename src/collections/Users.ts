@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminOrSelf, isAdmin, isAdminField, loggedIn } from '@/access'
+import { adminOrSelf, isAdmin, isAdminField, isStaff, loggedIn } from '@/access'
 
 /**
  * Tài khoản trang quản trị blog. Không dùng chung với app.realusers.net.
@@ -14,7 +14,7 @@ export const Users: CollectionConfig = {
   auth: true,
   admin: { useAsTitle: 'name', defaultColumns: ['name', 'email', 'role'], group: 'Hệ thống' },
   access: {
-    admin: ({ req }) => Boolean(req.user),
+    admin: ({ req }) => isStaff(req),
     read: loggedIn,
     create: isAdmin,
     update: adminOrSelf,

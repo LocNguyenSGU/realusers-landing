@@ -19,6 +19,7 @@ Plan và audit: `hub_docs/plans/2026-11-10-blog-cms-seo.md`.
 | `/blog/rss.xml`, `/sitemap.xml`, `/robots.txt` | RSS, sitemap (lastmod thật), robots |
 | `/admin` | Trang quản trị (viết bài, ảnh, chuyên mục, tác giả, chuyển hướng 301, cài đặt blog) |
 | `/api/...`, `/api/graphql` | API REST + GraphQL do Payload sinh. Khách chỉ đọc được bài đã đăng |
+| `/api/mcp` | Máy chủ MCP cho AI viết, sửa, dịch, đăng, hẹn giờ bài (xem mục AI viết bài qua MCP) |
 
 Vai trò tài khoản quản trị: `admin` (toàn quyền), `editor` (viết + đăng), `writer` (chỉ lưu nháp).
 Tài khoản đầu tiên tạo ở `/admin` tự thành `admin`.
@@ -46,7 +47,62 @@ Tài khoản đầu tiên tạo ở `/admin` tự thành `admin`.
 - Đổi slug bài đã đăng thì tự thêm chuyển hướng 301 từ link cũ.
 - Bản nháp, xem trước, trang 404 có `noindex`.
 
+## AI viết bài qua MCP
+
+AI (Claude Code, Claude Desktop…) nối vào `/api/mcp` và viết bài bằng markdown. Code ở `src/mcp/`.
+
+**Cấp key (một lần, ở `/admin`):**
+1. **Tài khoản** → tạo tài khoản riêng cho AI, ví dụ "RealUsers AI", vai trò `editor` (được đăng). Muốn AI chỉ viết nháp thì để `writer`.
+2. **API key cho AI (MCP)** → Create New → ô User chọn tài khoản AI → bấm tạo API key → Save. Chép key.
+3. Bỏ tick công cụ nào thì key đó không dùng được công cụ đó. Lộ key thì bấm Revoke.
+
+**Nối Claude Code:**
+
+```bash
+claude mcp add --transport http realusers-blog https://www.realusers.net/api/mcp \
+  --header "Authorization: Bearer <API key>"
+# máy local: http://localhost:3100/api/mcp
+```
+
+**Công cụ:** `blogOverview` (chuyên mục, tác giả, mọi bài, lịch đăng), `getPost` (đọc bài ra markdown), `createPost`, `updatePost` (sửa hoặc thêm bản `en`), `schedulePost`, `cancelSchedule`, `saveCategory` (tạo/sửa chuyên mục), `listTopics` / `saveTopic` (chủ đề chờ viết), `uploadImage` (ảnh từ link).
+Prompt `writeBlogPost` chứa luật viết (giọng văn, cấu trúc, SEO). Sửa luật ở `src/mcp/guide.ts`.
+
+- Markdown: không có H1 (tự bỏ/hạ cấp), mục lớn `##`. Khối đặc biệt: `<Callout tone="tip" title="...">...</Callout>`, `<Cta title="..." buttonLabel="..." url="...">...</Cta>`.
+- `action`: `draft` (mặc định; sửa bài đang đăng thì bản đang đăng giữ nguyên), `publish` (đăng ngay), `schedule` + `publishAt` có múi giờ (`2026-11-23T08:00:00+07:00`).
+- Key mang quyền tài khoản của nó: `writer` gọi publish/schedule sẽ bị từ chối.
+- Chưa hỗ trợ bảng markdown: công cụ báo lỗi để viết lại thành danh sách.
+
+**Chủ đề chờ viết** (`/admin` → Nội dung → Chủ đề chờ viết): MKT nhập từ khoá chính, tiêu đề gợi ý, góc viết, ngày muốn đăng. AI gọi `listTopics` lấy chủ đề có ngày sớm nhất, viết bài, truyền `topicId` khi `createPost` thì chủ đề tự chuyển "Đã viết" và gắn bài. Bỏ chủ đề: đổi trạng thái sang "Bỏ". Chỉ người đăng nhập mới xem được.
+
+Nạp cả kế hoạch nội dung (CSV) vào mục này, 1 ngày 1 bài từ ngày bắt đầu (chạy lại an toàn, trùng từ khoá thì bỏ qua; thêm `--dry-run` để xem trước):
+
+```bash
+BLOG_MCP_KEY=<key> npm run topics:import -- ke-hoach-song-ngu.csv --start 2026-11-25 --url https://www.realusers.net
+```
+
+**Đẩy bài viết sẵn bằng file** (không cần mở Claude): mỗi bài là `<tên>.vi.md` + `<tên>.en.md`, đầu file có khối `---json {...} ---` (title, slug, excerpt, category, faq, metaTitle, metaDescription; file `.vi.md` có thể kèm `categoryDef` để tạo chuyên mục). Chạy lại an toàn: trùng slug thì sửa bài cũ.
+
+```bash
+BLOG_MCP_KEY=<key> npm run blog:push -- bai/01-ten-bai.vi.md --url https://www.realusers.net             # lưu nháp
+BLOG_MCP_KEY=<key> npm run blog:push -- bai/01-ten-bai.vi.md --publish --url https://www.realusers.net   # đăng ngay
+BLOG_MCP_KEY=<key> npm run blog:push -- bai/01-ten-bai.vi.md --schedule 2026-11-25T08:00:00+07:00 --url https://www.realusers.net
+```
+
+## Hẹn giờ đăng
+
+Hẹn giờ bằng nút **Lên lịch** trong `/admin` hoặc `schedulePost` qua MCP. Cả hai tạo job `schedulePublish` trong hàng đợi của Payload.
+Job chỉ chạy khi có ai gọi `/api/payload-jobs/run` kèm `Authorization: Bearer $CRON_SECRET`:
+
+- GitHub Actions gọi **15 phút một lần** (`.github/workflows/scheduled-publish.yml`). Bài lên trong khoảng 15 phút sau giờ hẹn, GitHub bận thì trễ thêm vài phút.
+- Vercel Cron gọi 1 lần/ngày lúc 8:00 sáng giờ Việt Nam (`vercel.json`) làm dự phòng. Gói Hobby không cho gọi dày hơn.
+- Cần secret `CRON_SECRET` trong repo GitHub (Settings → Secrets → Actions) bằng đúng `CRON_SECRET` của Vercel.
+- GitHub tự tắt lịch chạy nếu repo 60 ngày không có commit. Khi đó vào tab Actions bật lại.
+
 ## Chạy ở máy
+
+Nhanh nhất (máy có Homebrew Postgres 18): `npm run dev:local`. Script tự bật Postgres riêng ở cổng 5434, tạo DB và nạp bài mẫu lần đầu, chạy migration, mở site ở http://localhost:3100. Ảnh tải lên nằm trong `./media`, không đẩy lên kho ảnh production. Xem đầu file `scripts/dev-local.sh`.
+
+Tự dựng:
 
 Cần Node `^22.23.4` hoặc `>=24.22.1` và một Postgres trống.
 

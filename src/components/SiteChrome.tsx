@@ -54,17 +54,17 @@ export function SiteHeader({ locale }: { locale: Locale }) {
         </nav>
         <div className="hdr-cta">
           <LangSwitch locale={locale} label={d.language} />
-          <a className="hdr-login" href={`${APP_URL}/login`}>
+          <a className="hdr-login" href={`${APP_URL}/`}>
             {d.login}
           </a>
-          <a className="btn btn-primary btn-sm" href={`${APP_URL}/dang-ky`}>
+          <a className="btn btn-primary btn-sm" href={`${APP_URL}/`}>
             {d.signup}
           </a>
         </div>
         <MobileMenu
           items={nav}
-          loginUrl={`${APP_URL}/login`}
-          signupUrl={`${APP_URL}/dang-ky`}
+          loginUrl={`${APP_URL}/`}
+          signupUrl={`${APP_URL}/`}
           locale={locale}
           labels={{ open: d.menuOpen, close: d.menuClose, menu: d.mobileMenu, login: d.login, signup: d.signup, language: d.language }}
         />
@@ -105,8 +105,8 @@ export function SiteFooter({ locale }: { locale: Locale }) {
           <div>
             <p className="fh">{d.footer.account}</p>
             <ul>
-              <li><a href={`${APP_URL}/login`}>{d.login}</a></li>
-              <li><a href={`${APP_URL}/dang-ky`}>{d.footer.signup}</a></li>
+              <li><a href={`${APP_URL}/`}>{d.login}</a></li>
+              <li><a href={`${APP_URL}/`}>{d.footer.signup}</a></li>
             </ul>
           </div>
         </div>
